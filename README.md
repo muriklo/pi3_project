@@ -1,8 +1,8 @@
 # Nome do projeto
 
-**(Adicionar abaixo UM parágrafo com visão geral do projeto.)**
+Desenvolvimento de um dispositivo portátil, pequeno e de baixo consumo, semelhante a um relógio ou pulseira, capaz de identificar quedas e acidentes de uma pessoa e que tenha a capacidade de enviar um alerta para familiares ou responsáveis.
 
-Esse projeto é um sistema de controle de motor de passo... O desenvolvimento foi divido em quatro etapas:
+O desenvolvimento foi divido em quatro etapas:
 
 - Etapa 1 (data da entrega): (breve descrição da etapa)
 - Etapa 2 (data da entrega): (breve descrição da etapa)
