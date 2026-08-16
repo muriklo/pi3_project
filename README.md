@@ -1,4 +1,4 @@
-# Nome do projeto
+# SysCarry - Sistema Portátil de Detecção de Quedas e Emergências de Pessoas
 
 Desenvolvimento de um dispositivo portátil, pequeno e de baixo consumo, semelhante a um relógio ou pulseira, capaz de identificar quedas e acidentes de uma pessoa e que tenha a capacidade de enviar um alerta para familiares ou responsáveis.
 
