@@ -12,7 +12,7 @@ O desenvolvimento de um dispositivo vestível (*wearable*) voltado ao uso cotidi
 A definição das dimensões mecânicas e dos mecanismos de fixação do dispositivo fundamenta-se em parâmetros antropométricos e padrões da indústria de relojoaria, que pode ser vista na Figura 1 [1].
 
 <div align="center">
-  <img src="../img/esquema_dimensoes_relogio.png" alt="Figura 1 - Guia de medidas e dimensões padrão da caixa de relógio" width="75%">
+  <img src="../img/esquema_dimensoes_relogio.png" alt="Figura 1 - Guia de medidas e dimensões padrão da caixa de relógio" width="60%">
   <p>Figura 1 - Diagrama de referência para cotas de caixas (Largura da caixa vs. Comprimento de caixa)</p>
 </div>
 
@@ -27,7 +27,7 @@ $$A = \pi \cdot r^2 = \pi \cdot (32\text{ mm}/2)^2 \approx 804,25\text{ mm}^2$$
 Esse espaço fornece o volume necessário para acomodar a Placa de Circuito Impresso (PCB), o acelerômetro, a antena BLE e a bateria. Portanto a largura de 42 mm mantém o corpo do dispositivo centralizado no dorso do pulso, garantindo volume interno suficiente sem gerar desconforto no dorço do pulso.
 
 <div align="center">
-  <img src="../img/cotas_do_dimensionamento_mecanico_do_dispositivo.png" alt="" width="65%">
+  <img src="../img/cotas_do_dimensionamento_mecanico_do_dispositivo.png" alt="" width="50%">
   <p>Figura 2 - Esboço geométrico cotado (sketch 2D) com as restrições e dimensões do invólucro</p>
 </div>
 
@@ -37,7 +37,7 @@ Esse espaço fornece o volume necessário para acomodar a Placa de Circuito Impr
 A escolha da largura de encaixe de 18 mm distribui a carga e o peso do dispositivo de forma homogênea, reduzindo a pressão pontual sobre a epiderme. Além disso, trata-se de um valor padronizado de mercado, permitindo a substituição por pulseiras comerciais facilmente encontradas, conforme ilustrado na Figura 3.
 
 <div align="center">
-  <img src="../img/exemplo_de_pulseira_18mm.png" alt="Exemplo de pulseira de 18 mm" width="65%">
+  <img src="../img/exemplo_de_pulseira_18mm.png" alt="Exemplo de pulseira de 18 mm" width="45%">
   <p>Figura 3 - Exemplo de pulseira comercial de 18 mm de largura com mecanismo de fixação por pino de mola</p>
 </div>
 
@@ -53,9 +53,9 @@ O sistema de fixação utiliza furos cegos de 1,5 mm de diâmetro por 1,5 mm de 
 A Figura 4 ilustra a modelagem mecânica parcial do dispositivo, representando a meta de validação mecânica e estética estabelecida para esta primeira etapa do projeto.
 
 <div align="center">
-  <img src="../img/vista_isometrica_do_dispositivo_mecanico.png" alt="Vista Isométrica" width="55%">
-  <img src="../img/vista_superior_do_dispositivo_mecanico.png" alt="Vista Superior" width="40%">
-  <img src="../img/dispositivo_mecanico.png" alt="Vista Superior" width="90%">
+  <img src="../img/vista_isometrica_do_dispositivo_mecanico.png" alt="Vista Isométrica" width="41%">
+  <img src="../img/vista_superior_do_dispositivo_mecanico.png" alt="Vista Superior" width="30%">
+  <img src="../img/dispositivo_mecanico.png" alt="Vista Superior" width="70%">
   <p>Figura 4 - Vista isométrica, vista superior do dispositivo mecânico e integração com a pulseira</p>
 </div>
 
