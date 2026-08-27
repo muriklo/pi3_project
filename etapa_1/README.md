@@ -21,7 +21,7 @@ A Internet das Coisas (IoT) é definida como "uma tecnologia capacitadora que en
 Com a crescente expansão desse conceito, a IoT vem sendo amplamente aplicada em diversos setores estratégicos, incluindo a automação residencial, cidades inteligentes (smart cities), indústria, setor automotivo e a área da saúde, conforme ilustrado no panorama da Figura 1. Paralelamente, o avanço da microeletrônica tem possibilitado a redução contínua das dimensões dos componentes eletrônicos, tornando-os significativamente mais compactos, leves e eficientes. Essa tendência de miniaturização é fundamental para viabilizar o desenvolvimento de soluções portáteis e vestíveis, capazes de se integrar à rotina dos usuários sem comprometer sua mobilidade, conforto ou ergonomia.
 
 <div align="center">
-  <img src="img/IoT_texas_img.png" alt="Figura 1 - Ecossistema da IoT" width="80%">
+  <img src="img/IoT_texas_img.png" alt="Figura 1 - Ecossistema da IoT" width="50%">
   <p>Figura 1 - Ecossistema e aplicações da Internet das Coisas (IoT)</p>
 </div>
 
