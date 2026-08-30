@@ -2,16 +2,9 @@
 
 **(MÍNIMO DE 600 E MÁXIMO DE 1000 PALAVRAS no total do arquivo md.)**
 
-A etapa 1 ...
-
-**(Adicionar aqui UM parágrafo com visão geral da etapa. Resumo dos itens da planilha.)**
-
-**(Não adicione código em nenhum arquivo md. )**
-
-
+Na Etapa 1, foi realizado o planejamento fundamental do projeto, iniciando com a pesquisa de soluções existentes e do estado da arte para embasar as decisões técnicas. Em seguida, foram definidos os requisitos do sistema, fazendo uma representação por um diagrama de blocos com os módulos a serem desenvolvidos (*hardaware*, *Firmware*, BLE, App e API) e o diagrama de casos de uso. Por fim, a equipe estabeleceu a concepção da estrutura mecânica, considerando desde o início as restrições de tamanho e os critérios de conforto essenciais para a usabilidade do produto.
 
 ## Desenvolvimento
-
 
 **(Apresentar o desenvolvimento da etapa contendo detalhes de implementação (se houver) de hardware e software. Use fotos, diagramas, tabelas etc. Adicionar pesqusisas realizadas. Relacionar as fotos, diagramas, etc no texto. Todas as referências devem citadas no texto.)**
 
@@ -31,11 +24,14 @@ Portanto, este projeto propõe desenvolver um dispositivo vestível portátil, p
 
 O sistema será desenvolvido considerando dois cenários distintos de operação: dentro e fora da residência. Em ambos os casos, o dispositivo portátil será responsável pela detecção de quedas e situações de emergência, realizando a comunicação com um dispositivo móvel por meio de uma tecnologia de comunicação de baixo consumo de energia, como o Bluetooth Low Energy (BLE). 
 
-Segundo dados da Pesquisa Nacional por Amostra de Domicílios Contínua (PNAD Contínua TIC) [3], divulgados pelo Instituto Brasileiro de Geografia e Estatística (IBGE), em 2025, 80,3% das pessoas com 60 anos ou mais possuíam telefone móvel celular para uso pessoal, evidenciando a crescente inserção desse grupo no uso de tecnologias digitais. Diante desse cenário, a utilização do smartphone como dispositivo responsável pelo recebimento dos dados e encaminhamento dos alertas aos familiares ou responsáveis apresenta-se como uma alternativa viável para o sistema proposto. 
+Segundo dados da Pesquisa Nacional por Amostra de Domicílios Contínua (PNAD Contínua TIC)[3], divulgados pelo Instituto Brasileiro de Geografia e Estatística (IBGE), em 2025, 80,3% das pessoas com 60 anos ou mais possuíam telefone móvel celular para uso pessoal, evidenciando a crescente inserção desse grupo no uso de tecnologias digitais. Diante desse cenário, a utilização do smartphone como dispositivo responsável pelo recebimento dos dados e encaminhamento dos alertas aos familiares ou responsáveis apresenta-se como uma alternativa viável para o sistema proposto. 
 
+## Diagramas do Sistema
 
-Na seção descrita como mecanica, será aboradado os conceitos mecânicos fundamentais que orientam a construção física do dispositivo, incluindo a arquitetura do invólucro, os limites dimensionais e os requisitos ergonômicos.
-
+<div align="center">
+  <img src="img/diagrama_de_blocos.png" alt="Figura 1 - Ecossistema da IoT" width="85%">
+  <p>Figura 2 - Diagrama de Blocos</p>
+</div>
 
 
 ## Seção Mecânica e Estrutural
@@ -44,17 +40,17 @@ A facilidade de vestir e a ergonomia do invólucro fundamentam-se na prevenção
 
 > Nesta seção, serão abordados os conceitos mecânicos fundamentais que orientam a construção física do dispositivo, incluindo a arquitetura do invólucro, os limites dimensionais e os requisitos ergonômicos.
 > 
-> 📁 **Documentação Mecânica:** Acesse a pasta: [Mecânica](./mechanics/README.MD)
+> 📁 **Documentação Mecânica:** Acesse a pasta: [Mecânica](./mechanics/README.md)
 
 
 
 ## Referências (links/datasheets/livros)
 
 
-- [TEXAS INSTRUMENTS. Building the Industrial Internet of Things](https://www.ti.com/lit/ta/ssztcu2/ssztcu2.pdf)
+- [1] [TEXAS INSTRUMENTS. Building the Industrial Internet of Things](https://www.ti.com/lit/ta/ssztcu2/ssztcu2.pdf)
 
-- [CNN Brasil - AMARAL, Lauryn; COELHO, Thomaz. Um em cada quatro idosos brasileiros sofrem ao menos uma queda anualmente](https://www.cnnbrasil.com.br/saude/um-em-cada-quatro-idosos-brasileiros-sofrem-ao-menos-uma-queda-anualmente/)
+- [2] [CNN Brasil - AMARAL, Lauryn; COELHO, Thomaz. Um em cada quatro idosos brasileiros sofrem ao menos uma queda anualmente](https://www.cnnbrasil.com.br/saude/um-em-cada-quatro-idosos-brasileiros-sofrem-ao-menos-uma-queda-anualmente/)
 
-- [INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA](https://agenciadenoticias.ibge.gov.br/agencia-noticias/2012-agencia-de-noticias/noticias/47408-proporcao-de-usuarios-da-internet-no-pais-ultrapassou-90-da-populacao-de-10-anos-ou-mais-em-2025.)
+- [3] [INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA](https://agenciadenoticias.ibge.gov.br/agencia-noticias/2012-agencia-de-noticias/noticias/47408-proporcao-de-usuarios-da-internet-no-pais-ultrapassou-90-da-populacao-de-10-anos-ou-mais-em-2025.)
 
-- [JMIR mHealth and uHealth. **Older Adults' Experiences With Using Wearable Devices: Qualitative Meta-Synthesis**](https://pmc.ncbi.nlm.nih.gov/articles/PMC8212622/)
+- [4] [JMIR mHealth and uHealth. Older Adults' Experiences With Using Wearable Devices: Qualitative Meta-Synthesis](https://pmc.ncbi.nlm.nih.gov/articles/PMC8212622/)

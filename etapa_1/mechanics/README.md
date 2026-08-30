@@ -2,10 +2,14 @@
 
 Nesta seção, serão discutidos os conceitos mecânicos iniciais que norteiam o desenvolvimento do dispositivo, bem como as justificativas técnicas e antropométricas para as dimensões adotadas no projeto.
 
-## ...
-
+### Restrições de tamanho e conforto do dispositivo
 
 O desenvolvimento de um dispositivo vestível (*wearable*) voltado ao uso cotidiano, exige rigor na definição de suas especificações físicas e ergonômicas. A adesão ao uso contínuo do sistema depende diretamente do nível de conforto do equipamento, evitando que a estrutura cause incômodo, lesões ou rejeição por parte do usuário.
+
+Portanto, abaixo serão apresentados os levantamentos e restrições iniciais do dispositivo:
+- Restrições Dimensionais e de Massa
+- Materiais e Biocompatibilidade 
+ (MELGORAR TUDO ISSO AQUI PQ NAO TA LEGAL)
 
 ### Medidas Físicas 
 
