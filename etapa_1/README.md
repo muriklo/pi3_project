@@ -18,7 +18,7 @@ Com a crescente expansão desse conceito, a IoT vem sendo amplamente aplicada em
   <p>Figura 1 - Ecossistema e aplicações da Internet das Coisas (IoT)</p>
 </div>
 
-Inserido nesse cenário, o monitoramento contínuo da população idosa surge como uma aplicação crítica dos ecossistemas de saúde assistiva, sobretudo em razão da elevada vulnerabilidade a quedas. Segundo Amaral e Coelho (2026)[2], 25,1% dos idosos brasileiros residentes em áreas urbanas sofreram ao menos uma queda durante um período de um ano, correspondendo a aproximadamente um em cada quatro idosos. Para além da possibilidade de lesões físicas, as quedas estão associadas à perda de autonomia, hospitalizações e redução da qualidade de vida. Dessa forma, a identificação rápida de um episódio de queda, alinhada a comunicação imediata com familiares ou responsáveis podem contribuir para que o indivíduo receba assistência em um menor intervalo de tempo, especialmente quando não possui condições de solicitar ajuda por conta própria.
+Inserido nesse cenário, o monitoramento contínuo da população, principalmente idosos, surge como uma aplicação crítica dos ecossistemas de saúde assistiva, sobretudo em razão da elevada vulnerabilidade a quedas. Segundo Amaral e Coelho (2026)[2], 25,1% dos idosos brasileiros residentes em áreas urbanas sofreram ao menos uma queda durante um período de um ano, correspondendo a aproximadamente um em cada quatro idosos. Para além da possibilidade de lesões físicas, as quedas estão associadas à perda de autonomia, hospitalizações e redução da qualidade de vida. Dessa forma, a identificação rápida de um episódio de queda, alinhada a comunicação imediata com familiares ou responsáveis podem contribuir para que o indivíduo receba assistência em um menor intervalo de tempo, especialmente quando não possui condições de solicitar ajuda por conta própria.
 
 Portanto, este projeto propõe desenvolver um dispositivo vestível portátil, pequeno e de baixo consumo energético, semelhante a um relógio ou pulseira. O sistema busca detectar quedas e incidentes em tempo real, viabilizando o envio automático e imediato de alertas para familiares ou cuidadores responsáveis.
 
@@ -26,11 +26,17 @@ O sistema será desenvolvido considerando dois cenários distintos de operação
 
 Segundo dados da Pesquisa Nacional por Amostra de Domicílios Contínua (PNAD Contínua TIC)[3], divulgados pelo Instituto Brasileiro de Geografia e Estatística (IBGE), em 2025, 80,3% das pessoas com 60 anos ou mais possuíam telefone móvel celular para uso pessoal, evidenciando a crescente inserção desse grupo no uso de tecnologias digitais. Diante desse cenário, a utilização do smartphone como dispositivo responsável pelo recebimento dos dados e encaminhamento dos alertas aos familiares ou responsáveis apresenta-se como uma alternativa viável para o sistema proposto. 
 
-## Diagramas do Sistema
+Abaixo está o diagrama de casos de uso do projeto. Ele apresenta como o usuário e o Host (quem faz a administração do sistema) podem interagir.
+
+(Imagem do diagrama de caso de uso do projeto) FIGURA 2
+
+## Diagrama de blocos para implementação do projeto
+
+O diagrama de blocos do sistema foi elaborado com o objetivo de proporcionar uma melhor visualização da integração entre os diferentes módulos que compõem o sistema. A Figura 3 apresenta a organização e a interconexão entre esses módulos, permitindo compreender, de forma simplificada, o fluxo de informações e a relação entre os principais elementos do sistema.
 
 <div align="center">
-  <img src="img/diagrama_de_blocos.png" alt="Figura 1 - Ecossistema da IoT" width="85%">
-  <p>Figura 2 - Diagrama de Blocos</p>
+  <img src="img/diagrama_de_blocos.png" alt="Figura 3" width="85%">
+  <p>Figura 3 - Diagrama de blocos do sistema</p>
 </div>
 
 
