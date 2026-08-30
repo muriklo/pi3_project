@@ -1,20 +1,16 @@
 # SysCarry - Sistema Portátil de Detecção de Quedas e Emergências de Pessoas
 
-Desenvolvimento de um dispositivo portátil, pequeno e de baixo consumo, semelhante a um relógio ou pulseira, capaz de identificar quedas e acidentes de uma pessoa e que tenha a capacidade de enviar um alerta para familiares ou responsáveis.
+O projeto consiste em conceber, desenvolver, implementar e operar um dispositivo portátil, pequeno e de baixo consumo, semelhante a um relógio ou pulseira, capaz de identificar quedas e acidentes de uma pessoa e que tenha a capacidade de enviar um alerta para familiares ou responsáveis.
 
-O desenvolvimento foi divido em quatro etapas:
 
-- Etapa 1 (data da entrega): (breve descrição da etapa)
-- Etapa 2 (data da entrega): (breve descrição da etapa)
-- Etapa 3 (data da entrega): (breve descrição da etapa)
-- Etapa 4 (data da entrega): (breve descrição da etapa)
+## Etapas do projeto 
 
-**(Exemplo com os links dos READMEs das etapas:)**
+O projeto foi desenvolvido utilizando a iniciativa CDIO, um framework educacional baseado na aprendizagem ativa com foco na resolução de problemas. Mais informações estão disponíveis no site oficial da iniciativa: http://www.cdio.org/). Baseado nas etapas do CDIO, o projeto está dividido nos seguintes tópicos:
 
-- [Etapa 1](./etapa_1/README.md) (02/04/2026): Pesquisa, planejamento e outline do projeto.
-- [Etapa 2](./etapa_2/README.md) (30/04/2026): Teste dos módulos e desenvolvimento de protótipo.
-- [Etapa 3](./etapa_3/README.md) (28/05/2026): Desenvolvimento do produto.
-- [Etapa 4](./etapa_4/README.md) (09/07/2026): Implementação e análise de desempenho.
+- [Etapa 1](./etapa_1/README.md) (XX/XX/2026): Pesquisa, planejamento e outline do projeto.
+- [Etapa 2](./etapa_2/README.md) (XX/XX/2026): Teste dos módulos e desenvolvimento de protótipo.
+- [Etapa 3](./etapa_3/README.md) (XX/XX/2026): Desenvolvimento do produto.
+- [Etapa 4](./etapa_4/README.md) (XX/XX/2026): Implementação e análise de desempenho.
 
 
 ## Requisitos
@@ -23,7 +19,7 @@ O desenvolvimento foi divido em quatro etapas:
 
 Este projeto foi implementado com os seguintes módulos/softwares/hardwares:
 
-- Sensor de temperatura PT100 com 3 fios.
+- Sensor acelerometro de 3 eixos IIM-42351.
 - Sensor de corrente de efeito Hall LEM LA 205-S.
 - Espressif IoT Development Framework (esp idf).
 - Microcontrolador STM32F401.
