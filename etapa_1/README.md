@@ -26,9 +26,12 @@ O sistema será desenvolvido considerando dois cenários distintos de operação
 
 Segundo dados da Pesquisa Nacional por Amostra de Domicílios Contínua (PNAD Contínua TIC)[3], divulgados pelo Instituto Brasileiro de Geografia e Estatística (IBGE), em 2025, 80,3% das pessoas com 60 anos ou mais possuíam telefone móvel celular para uso pessoal, evidenciando a crescente inserção desse grupo no uso de tecnologias digitais. Diante desse cenário, a utilização do smartphone como dispositivo responsável pelo recebimento dos dados e encaminhamento dos alertas aos familiares ou responsáveis apresenta-se como uma alternativa viável para o sistema proposto. 
 
-Abaixo está o diagrama de casos de uso do projeto. Ele apresenta como o usuário e o Host (quem faz a administração do sistema) podem interagir.
+Abaixo está o diagrama de casos de uso do projeto. Este é utilizado para representar as funcionalidades de um sistema e sua interação com usuários externos, denominados atores (FAKHROUTDINOV, 2026)[4].
 
-(Imagem do diagrama de caso de uso do projeto) FIGURA 2
+<div align="center">
+  <img src="img/diagrama_de_caso_de_uso.png" alt="Figura 2" width="85%">
+  <p>Figura 2 - Diagrama de caso de uso UML</p>
+</div>
 
 ## Diagrama de blocos para implementação do projeto
 
@@ -42,7 +45,7 @@ O diagrama de blocos do sistema foi elaborado com o objetivo de proporcionar uma
 
 ## Seção Mecânica e Estrutural
 
-A facilidade de vestir e a ergonomia do invólucro fundamentam-se na prevenção do abandono da tecnologia pelo usuário final. Segundo a meta-síntese conduzida por JMIR (2021)[4], a facilidade de uso e a motivação do idoso precisam se sobrepor às barreiras técnicas do dispositivo. Soluções de monitoramento excessivamente complexas, com sistemas de fixação incômodos ou rotinas de recarga difíceis tendem a ser rapidamente abandonadas. Por essa razão, as dimensões físicas e o foram especificados para garantir simplicidade no manuseio diário e máximo conforto tátil.
+A facilidade de vestir e a ergonomia do invólucro fundamentam-se na prevenção do abandono da tecnologia pelo usuário final. Segundo a meta-síntese conduzida por JMIR (2021)[5], a facilidade de uso e a motivação do idoso precisam se sobrepor às barreiras técnicas do dispositivo. Soluções de monitoramento excessivamente complexas, com sistemas de fixação incômodos ou rotinas de recarga difíceis tendem a ser rapidamente abandonadas. Por essa razão, as dimensões físicas e o foram especificados para garantir simplicidade no manuseio diário e máximo conforto tátil.
 
 > Nesta seção, serão abordados os conceitos mecânicos fundamentais que orientam a construção física do dispositivo, incluindo a arquitetura do invólucro, os limites dimensionais e os requisitos ergonômicos.
 > 
@@ -59,7 +62,9 @@ A facilidade de vestir e a ergonomia do invólucro fundamentam-se na prevenção
 
 - [3] [INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA](https://agenciadenoticias.ibge.gov.br/agencia-noticias/2012-agencia-de-noticias/noticias/47408-proporcao-de-usuarios-da-internet-no-pais-ultrapassou-90-da-populacao-de-10-anos-ou-mais-em-2025.)
 
-- [4] [JMIR mHealth and uHealth. Older Adults' Experiences With Using Wearable Devices: Qualitative Meta-Synthesis](https://pmc.ncbi.nlm.nih.gov/articles/PMC8212622/)
+- [4] [FAKHROUTDINOV, Kirill. UML use case diagrams](https://www.uml-diagrams.org/use-case-diagrams.html)
+
+- [5] [JMIR mHealth and uHealth. Older Adults' Experiences With Using Wearable Devices: Qualitative Meta-Synthesis](https://pmc.ncbi.nlm.nih.gov/articles/PMC8212622/)
 
 
 
