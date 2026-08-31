@@ -60,3 +60,12 @@ A facilidade de vestir e a ergonomia do invólucro fundamentam-se na prevenção
 - [3] [INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA](https://agenciadenoticias.ibge.gov.br/agencia-noticias/2012-agencia-de-noticias/noticias/47408-proporcao-de-usuarios-da-internet-no-pais-ultrapassou-90-da-populacao-de-10-anos-ou-mais-em-2025.)
 
 - [4] [JMIR mHealth and uHealth. Older Adults' Experiences With Using Wearable Devices: Qualitative Meta-Synthesis](https://pmc.ncbi.nlm.nih.gov/articles/PMC8212622/)
+
+
+
+(Talvez isso aqui fique legal de usar)
+<div align="center">
+
+[⬅️ Introdução](../README.md) | [Etapa 2 ➡️](../etapa_2/)
+
+</div>

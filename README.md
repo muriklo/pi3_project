@@ -22,7 +22,7 @@ Este projeto foi implementado com os seguintes módulos/softwares/hardwares:
 - Sensor acelerometro de 3 eixos IIM-42351.
 - Sensor de corrente de efeito Hall LEM LA 205-S.
 - Espressif IoT Development Framework (esp idf).
-- Microcontrolador STM32F401.
+- Microcontrolador XX.
 
 
 ## Visão geral
