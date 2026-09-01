@@ -4,12 +4,33 @@ Nesta seção, serão discutidos os conceitos mecânicos iniciais que norteiam o
 
 ### Restrições de tamanho e conforto do dispositivo
 
-O desenvolvimento de um dispositivo vestível (*wearable*) voltado ao uso cotidiano, exige rigor na definição de suas especificações físicas e ergonômicas. A adesão ao uso contínuo do sistema depende diretamente do nível de conforto do equipamento, evitando que a estrutura cause incômodo, lesões ou rejeição por parte do usuário.
+O desenvolvimento de um dispositivo vestível (*wearable*) voltado ao uso cotidiano, exige rigor na definição de suas especificações físicas e ergonômicas. A adesão ao uso contínuo do sistema depende diretamente do nível de conforto do equipamento, evitando que a estrutura cause incômodo, lesões ou rejeição por parte do usuário, como já comentado anteriormente.
 
 Portanto, abaixo serão apresentados os levantamentos e restrições iniciais do dispositivo:
 - Restrições Dimensionais e de Massa
 - Materiais e Biocompatibilidade 
  (MELGORAR TUDO ISSO AQUI PQ NAO TA LEGAL)
+
+
+### Restrições de tamanho e conforto do dispositivo
+
+O desenvolvimento de um dispositivo vestível (*wearable*) voltado ao uso cotidiano exige rigor na definição de suas especificações físicas e ergonômicas. A adesão ao uso contínuo do sistema depende diretamente do nível de conforto do equipamento, evitando que a estrutura cause incômodo, lesões ou rejeição por parte do usuário, como já comentado anteriormente.
+
+Portanto, a seguir serão apresentados os levantamentos e restrições iniciais do dispositivo.
+
+#### Restrições dimensionais e de massa
+
+O projeto mecânico do invólucro deve considerar a ampla variação antropométrica dos usuários. A prática padrão de design ergonômico recomenda que o dispositivo seja dimensionado para atender de forma confortável desde o percentil 5 (perfil feminino) até o percentil 95 (perfil masculino) da população-alvo, garantindo ajuste adequado sem folgas excessivas nem compressão do punho do usuário.
+
+Em relação à massa, dispositivos vestíveis comparáveis — como *armbands* e pulseiras de reconhecimento de movimento com sensores embarcados — costumam variar entre aproximadamente 30 g e 100 g, dependendo da quantidade de sensores e da capacidade da bateria. Como referência, sistemas com um conjunto reduzido de sensores conseguem atingir massas próximas de 32,5 g, enquanto dispositivos com módulos de sensoriamento mais robustos ultrapassam os 90 g , como observado em bandas eletrônicas com sensor reduzido em torno de 32,5 g, contra dispositivos comparáveis que chegam a 78 g e 96 g com sensoriamento mais completo. Para a Pulseira SysCarry, isso sugere uma massa-alvo na faixa de 30–50 g, de modo a manter o dispositivo leve o suficiente para uso contínuo (incluindo durante o sono, se esse for um cenário de uso previsto), sem comprometer a autonomia da bateria.
+
+Outro ponto relevante é a interferência com vestimentas: mangas de camisas e punhos de roupas são pontos comuns de atrito para dispositivos vestíveis de pulso, o que reforça a necessidade de um perfil de baixo relevo (*low-profile*) na carcaça , já que roupas são sempre um fator a considerar, havendo conflito entre mangas e punhos de camisa e o dispositivo vestível no pulso.
+
+#### Materiais e biocompatibilidade
+
+Por se tratar de um dispositivo em contato direto e prolongado com a pele, a seleção de materiais deve seguir critérios de biocompatibilidade reconhecidos internacionalmente, como a norma **ISO 10993**, que trata da avaliação biológica de dispositivos médicos e é aplicável também a *wearables* de contato cutâneo. Os ensaios mais relevantes para esse tipo de produto são a citotoxicidade (ISO 10993-5), a sensibilização cutânea (ISO 10993-10) e a irritação (ISO 10993-23), que juntos avaliam se o material provoca reações alérgicas, toxicidade celular ou irritação na pele do usuário , sendo os testes de citotoxicidade, sensibilização/irritação e toxicidade sistêmica os mais comuns exigidos para materiais de contato prolongado com a pele.
+
+Como referência para os materiais da carcaça e da correia, silicone de grau médico e TPU (poliuretano termoplástico) certificados conforme ISO 10993 são amplamente utilizados em dispositivos vestíveis por serem hipoalergênicos e não irritantes em uso contínuo , já que filamentos de TPU flexível certificados garantem que o material não causa reações alérgicas ou irritação de pele, tornando-o seguro para dispositivos vestíveis em contato direto com a pele. Recomenda-se ainda evitar o contato de componentes metálicos (parafusos, contatos de carregamento) com níquel exposto, optando por acabamentos hipoalergênicos, e priorizar materiais resistentes a suor e umidade, já que a resistência à transpiração é um requisito frequente em dispositivos de monitoramento contínuo.
 
 ### Medidas Físicas 
 
