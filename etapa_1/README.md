@@ -22,11 +22,11 @@ Inserido nesse cenário, o monitoramento contínuo da população, principalment
 
 Portanto, este projeto propõe desenvolver um dispositivo vestível portátil, pequeno e de baixo consumo energético, semelhante a um relógio ou pulseira. O sistema busca detectar quedas e incidentes em tempo real, viabilizando o envio automático e imediato de alertas para familiares ou cuidadores responsáveis.
 
-O sistema será desenvolvido considerando dois cenários distintos de operação: dentro e fora da residência. Em ambos os casos, o dispositivo portátil será responsável pela detecção de quedas e situações de emergência, realizando a comunicação com um dispositivo móvel por meio de uma tecnologia de comunicação de baixo consumo de energia, como o Bluetooth Low Energy (BLE). 
+O sistema será desenvolvido considerando dois cenários distintos de operação: dentro e fora da residência. Em ambos os casos, o dispositivo portátil será responsável pela detecção de quedas e situações de emergência, realizando a comunicação com um dispositivo móvel por meio de uma tecnologia de comunicação de baixo consumo de energia, como o Bluetooth Low Energy (BLE). Além desta funcionalidade automática de detecção de queda, ainda tem-se um botão de emergência, com a finalidade de trazer ao usuário uma forma de acionamento manual e imediato, cobrindo cenários em que o algoritmo de detecção automática não identifique a queda ou em que o usuário necessite de auxílio por outro motivo, sem depender exclusivamente do sensoriamento automático.
 
 Segundo dados da Pesquisa Nacional por Amostra de Domicílios Contínua (PNAD Contínua TIC)[3], divulgados pelo Instituto Brasileiro de Geografia e Estatística (IBGE), em 2025, 80,3% das pessoas com 60 anos ou mais possuíam telefone móvel celular para uso pessoal, evidenciando a crescente inserção desse grupo no uso de tecnologias digitais. Diante desse cenário, a utilização do smartphone como dispositivo responsável pelo recebimento dos dados e encaminhamento dos alertas aos familiares ou responsáveis apresenta-se como uma alternativa viável para o sistema proposto. 
 
-Abaixo está o diagrama de casos de uso do projeto. Este é utilizado para representar as funcionalidades de um sistema e sua interação com usuários externos, denominados atores (FAKHROUTDINOV, 2026)[4].
+Abaixo, na Figura 2, está o diagrama de casos de uso do projeto. Este é utilizado para representar as funcionalidades de um sistema e sua interação com usuários externos, denominados atores (FAKHROUTDINOV, 2026)[4].
 
 <div align="center">
   <img src="img/diagrama_de_caso_de_uso.png" alt="Figura 2" width="85%">
