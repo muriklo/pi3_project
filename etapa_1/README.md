@@ -33,41 +33,24 @@ Abaixo, na Figura 2, está o diagrama de casos de uso do projeto. Este é utiliz
   <p>Figura 2 - Diagrama de caso de uso UML</p>
 </div>
 
-## Estado da arte da detecção de queda
-Como ja mencionado anteriormente, a queda é uma das principais causas de lesão e óbito por causas externas entre idosos, e suas consequências se agravam quando o socorro não é acionado rapidamente. Por isso, dispositivos vestíveis capazes de detectar automaticamente uma queda e emitir um alerta em tempo real tornaram-se uma das soluções mais estudadas em saúde digital e sistemas embarcados, com o acelerômetro triaxial ocupando papel central por ser barato, de baixo consumo energético e por dispensar infraestrutura externa, ao contrário de câmeras ou radares. Este texto resume o estado da arte em detecção de queda por acelerômetro, reunindo diferentes artigos e pesquisas e aproveitando das tecnologias mais recentes do mercado.
-### Introdução e fundamentos do sinal de queda
-
-Independentemente da técnica empregada, quase todos os métodos de detecção partem da mesma observação sobre o sinal de magnitude do vetor de aceleração (Signal Vector Magnitude, SVM) de um corpo em queda. Tanto Jia (2009) quanto por Tseng, Huang e Kau (2025) descrevem 4 fases características ao analisar a curva do vetor de aceleração no tempo:
-1. Repouso: SVM estável em torno de 1g;
-2. Perda de equilíbrio: corpo entra em queda parcialmente livre e o SVM cai para perto de 0 g;
-3. Impacto: pico de aceleração tipicamente acima de 1,4 g;
-4. Imobilidade pós-impacto: sinal se estabiliza numa orientação diferente da inicial, evidenciando a mudança de postura.
-
-<div align="center">
-  <img src="img/fall_signals.png" alt="Figura 3 - Sinais de queda" width="75%">
-  <p>Figura 3 - Padrão típico do sinal de queda e as quatro fases do evento.</p>
-</div>
-
-A principal dificuldade prática não é detectar o pico de impacto isoladamente, já que atividades como sentar rapidamente, saltar ou descer escadas também o geram, mas sim diferenciar a queda real dessas atividades “quase-queda”, onde se concentra a maior parte dos falsos positivos (TSENG; HUANG; KAU, 2025; AZIZ et al., 2017). Abaixo podem ser visualizados alguns exemplos de sinais de atividades rotineiras, retirados do artigo da Analog Devices, Jia (2009).
-
-<div align="center">
-  <img src="img/walking_signals.png" alt="Figura 4 - Sinais de caminhada" width="70%">
-  <p>Figura 4 - Sinais de caminhada em acelerometria.</p>
-</div>
-
-<div align="center">
-  <img src="img/sitting_standing_signals.png" alt="Figura 5 - Sinais de sentar e levantar" width="70%">
-  <p>Figura 5 - Sinais de sentar e levantar em acelerometria.</p>
-</div>
 
 ## Diagrama de blocos para implementação do projeto
 
-O diagrama de blocos do sistema foi elaborado com o objetivo de proporcionar uma melhor visualização da integração entre os diferentes módulos que compõem o sistema. A Figura 6 apresenta a organização e a interconexão entre esses módulos, permitindo compreender, de forma simplificada, o fluxo de informações e a relação entre os principais elementos do sistema.
+O diagrama de blocos do sistema foi elaborado com o objetivo de proporcionar uma melhor visualização da integração entre os diferentes módulos que compõem o sistema. A Figura 3 apresenta a organização e a interconexão entre esses módulos, permitindo compreender, de forma simplificada, o fluxo de informações e a relação entre os principais elementos do sistema.
 
 <div align="center">
-  <img src="img/diagrama_de_blocos.png" alt="Figura 6" width="85%">
-  <p>Figura 6 - Diagrama de blocos do sistema</p>
+  <img src="img/diagrama_de_blocos.png" alt="Figura 3" width="85%">
+  <p>Figura 3 - Diagrama de blocos do sistema</p>
 </div>
+
+
+## Seção de Fundamentação para Detecção de Quedas
+
+...
+
+> Nesta seção, serão abordados os conceitos mecânicos ....
+> 
+> 📁 **Documentação da Fundamentação para Detecção de Quedas:** Acesse o Documento: [deteccao_de_quedas.md](./deteccao_de_quedas.md)
 
 
 ## Seção Mecânica e Estrutural
