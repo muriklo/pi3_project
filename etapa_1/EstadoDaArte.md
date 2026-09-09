@@ -1,6 +1,6 @@
 ## Estado da arte da detecção de queda
 
-Como já mencionado, a queda é uma das principais causas de lesão e óbito por causas externas entre idosos, quando o socorro não é acionado rapidamente. Por isso, dispositivos vestíveis com detecção automática de queda tornaram-se uma das soluções mais estudadas em saúde digital, com o acelerômetro triaxial em papel central por ser barato, de baixo consumo e dispensar infraestrutura externa. Este texto resume o estado da arte em detecção de queda.
+Como já mencionado no README.md do projeto, a queda é uma das principais causas de lesão e óbito por causas externas entre idosos, quando o socorro não é acionado rapidamente. Por isso, dispositivos vestíveis com detecção automática de queda tornaram-se uma das soluções mais estudadas em saúde digital, com o acelerômetro triaxial em papel central por ser barato, de baixo consumo e dispensar infraestrutura externa. Este texto resume o estado da arte em detecção de queda.
 
 ### 1. Introdução e fundamentos do sinal de queda
 
@@ -15,17 +15,19 @@ Quase todos os métodos de detecção partem da mesma observação sobre o sinal
   <p>Figura 1 - Padrão típico do sinal de queda e as quatro fases do evento.</p>
 </div>
 
-A principal dificuldade não é detectar o pico de impacto isoladamente — sentar rapidamente, saltar ou descer escadas também o geram —, mas diferenciar a queda real dessas atividades "quase-queda", onde se concentra a maior parte dos falsos positivos [2, 3]. Os exemplos abaixo foram retirados de Jia [1].
+A principal dificuldade não é detectar o pico de impacto isoladamente, pois diferentes atividades como sentar rapidamente, saltar ou descer escadas também o geram, mas diferenciar a queda real dessas atividades "quase-queda", onde se concentra a maior parte dos falsos positivos [2, 3]. Os exemplos abaixo foram retirados de Jia [1].
 
 <div align="center">
   <img src="img/walking_signals.png" alt="Figura 2 - Sinais de caminhada" width="70%">
-  <p>Figura 2 - Sinais de caminhada em acelerometria.</p>
+  <p>Figura 2 - Sinais de caminhada.</p>
 </div>
 
 <div align="center">
   <img src="img/sitting_standing_signals.png" alt="Figura 3 - Sinais de sentar e levantar" width="70%">
-  <p>Figura 3 - Sinais de sentar e levantar em acelerometria.</p>
+  <p>Figura 3 - Sinais de sentar e levantar.</p>
 </div>
+
+Como é possivel verificar nos sinais acima, todos possuem picos de impacto em algum momento, sendo a maioria deles superior a 1.4g e possuem momentos com sinal estável após a ação. Contudo, nenhum deles apresenta todas as caracteristicas do sinal de queda descrito anteriormente na sequencia apresentada, evidenciando a necessidade da classificação correta do sinal seguindo as etapas estudadas.
 
 ### 2. Abordagens de análise
 
@@ -39,13 +41,13 @@ Uma evolução dessa família é a máquina de estados finitos (FSM), que encade
 4. Mudança do ângulo de inclinação do corpo;
 5. Confirmação da queda com envio automático de localização;
 
-Sem aprendizado de máquina, o sistema atingiu sensibilidade de 97,9%, especificidade de 99,9% e acurácia de 99,7%, superando outros algoritmos do estudo — evidência de que uma arquitetura leve pode rivalizar com modelos mais sofisticados a uma fração do custo.
+Sem aprendizado de máquina, o sistema atingiu sensibilidade de 97,9%, especificidade de 99,9% e acurácia de 99,7%, superando outros algoritmos do estudo, evidência de que uma arquitetura leve pode rivalizar com modelos mais sofisticados a uma fração do custo.
 
-Uma segunda família substitui limiares manuais por classificadores estatísticos — KNN, SVM, árvores de decisão — treinados sobre características extraídas do sinal. Aziz et al. [3] compararam algoritmos de limiar e de aprendizado de máquina e concluíram que os classificadores, sobretudo o SVM, superaram os métodos de limiar. Redes neurais profundas (CNN, LSTM e híbridos CNN-LSTM) passaram a ser aplicadas diretamente à série temporal bruta, dispensando extração manual de características: Villa e Casilari [4] mostraram que um CNN-LSTM a apenas 20 Hz obteve o melhor equilíbrio entre desempenho (98,9% de acurácia) e eficiência no conjunto público SisFall [5], transmitindo até 80% menos dados do que a 100 Hz. Como esses ganhos exigem mais memória do que um microcontrolador de wearable oferece, o TinyML busca comprimir esses modelos para hardware ultra-low-power: Tian, Mercier e Paolini [6] implementaram uma CNN rasa numa FPGA de poucos miliampères, obtendo 86,6% de acurácia.
+Uma segunda família substitui limiares manuais por classificadores estatísticos (KNN, SVM, árvores de decisão) treinados sobre características extraídas do sinal. Aziz et al. [3] compararam algoritmos de limiar e de aprendizado de máquina e concluíram que os classificadores, sobretudo o SVM, superaram os métodos de limiar. Redes neurais profundas (CNN, LSTM e híbridos CNN-LSTM) passaram a ser aplicadas diretamente à série temporal bruta, dispensando extração manual de características: Villa e Casilari [4] mostraram que um CNN-LSTM a apenas 20 Hz obteve o melhor equilíbrio entre desempenho (98,9% de acurácia) e eficiência no conjunto público SisFall [5], transmitindo até 80% menos dados do que a 100 Hz. Como esses ganhos exigem mais memória do que um microcontrolador de wearable oferece, o TinyML busca comprimir esses modelos para hardware ultra-low-power: Tian, Mercier e Paolini [6] implementaram uma CNN rasa numa FPGA de poucos miliampères, obtendo 86,6% de acurácia.
 
 ### 3. Hardware e influência da mecânica no sinal
 
-A posição do sensor também importa: Özdemir [7], referência usada por Tseng, Huang e Kau [2], comparou seis posições em 14 participantes e concluiu que a cintura é a mais eficaz (98,42% de acurácia), por ficar próxima do centro de massa, enquanto o pulso — posição-alvo deste projeto, por seu formato de relógio — sofre mais artefatos de movimento, mas favorece a adesão do usuário. A fusão de acelerômetro com giroscópio já é padrão nos sistemas mais recentes [2, 3, 4], e alguns trabalhos somam um barômetro para antecipar o alerta pela variação de altura; o sistema de Tseng, Huang e Kau [2] soma ainda GPS/GNSS e NB-IoT, para que o evento identificado se traduza em socorro efetivo.
+A posição do sensor também importa: Özdemir [7], referência usada por Tseng, Huang e Kau [2], comparou seis posições em 14 participantes e concluiu que a cintura é a mais eficaz (98,42% de acurácia), por ficar próxima do centro de massa, enquanto o pulso, posição-alvo deste projeto por seu formato de relógio, sofre mais artefatos de movimento, mas favorece a adesão do usuário. A fusão de acelerômetro com giroscópio já é padrão nos sistemas mais recentes [2, 3, 4], e alguns trabalhos somam um barômetro para antecipar o alerta pela variação de altura; o sistema de Tseng, Huang e Kau [2] soma ainda GPS/GNSS e NB-IoT, para que o evento identificado se traduza em socorro efetivo.
 
 Bases públicas como o SisFall [5] permitem treinar e comparar algoritmos sem depender de coleta própria: reúne 2.706 atividades diárias e 1.798 quedas simuladas por 23 jovens e 15 idosos, registradas com um ADXL345 (o mesmo componente de Jia [1]). Um achado relevante é que algoritmos treinados só com dados de jovens perdem sensibilidade em sinais de idosos, pois o padrão de queda difere entre faixas etárias. No mercado, a detecção de queda do Apple Watch combina acelerômetro e giroscópio, reconhecendo o padrão rotacional do pulso em vez de um limiar fixo, mas tem desempenho baixo para cadeirantes, cujo padrão foge do perfil ambulatorial para o qual o algoritmo foi ajustado [8].
 
@@ -53,7 +55,7 @@ Bases públicas como o SisFall [5] permitem treinar e comparar algoritmos sem de
 
 Considerando acurácia, consumo e viabilidade de implementação, as tecnologias mais promissoras são: um IMU de 6 eixos como base sensorial, na cintura (maior acurácia na literatura) ou no pulso (alinhado ao formato de relógio); uma FSM sobre limiares de SVM, giroscópio e ângulo de inclinação como algoritmo inicial, por exigir baixo custo computacional e desempenho próximo do estado da arte; um CNN-LSTM leve a taxas reduzidas (cerca de 20 Hz), como evolução para reduzir falsos positivos em "quase-quedas"; TinyML para viabilizar esse modelo em hardware ultra-low-power; e conectividade e localização (GPS/GNSS com NB-IoT ou BLE), pois o valor do dispositivo está em transformar a detecção em socorro efetivo.
 
-Em suma, a detecção de queda por acelerômetro é uma linha de pesquisa madura, com progressão de limiares simples até o aprendizado profundo embarcado — a escolha depende do compromisso entre acurácia, energia e complexidade. Para o protótipo, a estratégia mais eficiente é começar por uma FSM com IMU de 6 eixos, testável tanto na cintura — replicando o estudo de Tseng, Huang e Kau [2] — quanto no pulso, formato final do produto, evoluindo para modelos leves de aprendizado profundo ou TinyML conforme necessário.
+Em suma, a detecção de queda por acelerômetro é uma linha de pesquisa madura, com progressão de limiares simples até o aprendizado profundo embarcado e escolha depende do compromisso entre acurácia, energia e complexidade. Para o protótipo, a estratégia mais eficiente é começar por uma FSM com IMU de 6 eixos, testável tanto na cintura, replicando o estudo de Tseng, Huang e Kau [2], quanto no pulso, formato final do produto, evoluindo para modelos leves de aprendizado profundo ou TinyML conforme necessário.
 
 
 
