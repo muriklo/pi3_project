@@ -10,10 +10,10 @@ As tecnologias e ferramentas de implementação de cada subsistema serão seleci
 
 | Subsistema | Onde executa | Definição adotada e motivo | Responsabilidade principal |
 |---|---|---|---|
-| **FW** — Firmware | Unidade de processamento da própria pulseira | Detecção executada localmente, para que não dependa da presença do celular nem de conexão | Aquisição inercial, algoritmo de detecção de queda, botão de emergência, sinalização local e montagem do anúncio |
-| **BLE** — Enlace | Rádio entre a pulseira e o smartphone | Anúncio (*advertising*) não-conectável, por ser o modo de menor consumo do protocolo e por alcançar simultaneamente todos os celulares ao alcance | Transporte do evento de emergência até o smartphone |
-| **App** — Aplicativo | Smartphone do usuário e dos responsáveis | Alarme emitido no próprio celular antes de qualquer acesso à rede, por ser o único caminho que funciona sem Internet | Escuta do anúncio, alarme local imediato, geolocalização, repasse à API e interface de gestão |
-| **API** — Serviço | Servidor com acesso à Internet | Consolidação e notificação centralizadas, para que um evento gere um único alerta e o reenvio persista até a confirmação | Cadastro, validação e deduplicação dos eventos, histórico e notificação dos responsáveis |
+| **FW** - Firmware | Unidade de processamento da própria pulseira | Detecção executada localmente, para que não dependa da presença do celular nem de conexão | Aquisição inercial, algoritmo de detecção de queda, botão de emergência, sinalização local e montagem do anúncio |
+| **BLE** - Enlace | Rádio entre a pulseira e o smartphone | Anúncio (*advertising*) não-conectável, por ser o modo de menor consumo do protocolo e por alcançar simultaneamente todos os celulares ao alcance | Transporte do evento de emergência até o smartphone |
+| **App** - Aplicativo | Smartphone do usuário e dos responsáveis | Alarme emitido no próprio celular antes de qualquer acesso à rede, por ser o único caminho que funciona sem Internet | Escuta do anúncio, alarme local imediato, geolocalização, repasse à API e interface de gestão |
+| **API** - Serviço | Servidor com acesso à Internet | Consolidação e notificação centralizadas, para que um evento gere um único alerta e o reenvio persista até a confirmação | Cadastro, validação e deduplicação dos eventos, histórico e notificação dos responsáveis |
 
 Os subsistemas correspondem, respectivamente, às Camadas 2, 3 e 4 do diagrama de blocos da Figura 3 da Etapa 1, tendo os responsáveis como Camada 5.
 
@@ -130,22 +130,22 @@ As camadas 1 e 2 são as definidas como obrigatórias para o produto. A camada 3
 ## 7. Fluxo completo do alerta
 
 ```
-  Pulseira                Smartphone                  Servidor            Responsáveis
-     |                         |                          |                     |
-  [queda]                      |                          |                     |
-     |-- pré-alarme local      |                          |                     |
-     |   (janela p/ cancelar)  |                          |                     |
-     |-- anúncio BLE assinado ->|                         |                     |
-     |                         |-- ALARME LOCAL           |                     |
-     |                         |   (som + tela + vibra)   |                     |
-     |                         |-- obtém GPS              |                     |
-     |                         |------ evento + local --->|                     |
-     |                         |                          |-- valida assinatura |
-     |                         |                          |-- deduplica relatos |
-     |                         |                          |------- push ------->|
-     |                         |                          |                [notificação]
-     |                         |<---------- "estou indo" -----------------------|
-     |                         |                          |-- encerra reenvio   |
+  Pulseira                 Smartphone                  Servidor            Responsáveis
+     |                          |                          |                     |
+  [queda]                       |                          |                     |
+     |-- pré-alarme local       |                          |                     |
+     |   (janela p/ cancelar)   |                          |                     |
+     |-- anúncio BLE assinado ->|                          |                     |
+     |                          |-- ALARME LOCAL           |                     |
+     |                          |   (som + tela + vibra)   |                     |
+     |                          |-- obtém GPS              |                     |
+     |                          |------ evento + local --->|                     |
+     |                          |                          |-- valida assinatura |
+     |                          |                          |-- deduplica relatos |
+     |                          |                          |------- push ------->|
+     |                          |                          |                [notificação]
+     |                          |<---------- "estou indo" -----------------------|
+     |                          |                          |-- encerra reenvio   |
 ```
 
 Caso a etapa de envio ao servidor falhe por ausência de conexão, o alarme local já ocorreu, o evento é enfileirado para reenvio e a camada 3 pode ser acionada pelo próprio aparelho.
