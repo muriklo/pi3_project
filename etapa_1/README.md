@@ -28,7 +28,13 @@ Abaixo, na Figura 2, está o diagrama de casos de uso do projeto. Este é utiliz
 
 ## Definições do sistema
 
-A partir destas premissas e diagramas será discutida a definição dos sistemas a serem implementados (FW, BLE, App, API)...
+A partir dessas premissas, o sistema foi dividido em quatro subsistemas de software — firmware embarcado (FW), comunicação sem fio (BLE), aplicativo móvel (App) e serviço de retaguarda (API) —, seguindo o princípio de manter na pulseira apenas as funções que necessariamente precisam estar nela, já que cada função embarcada consome bateria e ocupa espaço em uma carcaça de dimensões restritas. Cabem ao **firmware**, desenvolvido sobre o nRF Connect SDK, o monitoramento inercial, o algoritmo de detecção de queda, o botão de emergência e a sinalização local, incluindo a janela de cancelamento que descarta um falso positivo antes de incomodar qualquer responsável. A **comunicação BLE** foi definida como anúncio (*advertising*) não-conectável de um pacote compacto e assinado: por dispensar pareamento e manutenção de conexão, é o modo mais econômico do protocolo e alcança simultaneamente todos os celulares próximos.
+
+O **aplicativo**, em Flutter, dispara o alarme local no celular — som, tela cheia e vibração — antes de qualquer comunicação com a rede, obtém a localização e encaminha o evento ao servidor, além de concentrar o cadastro da pulseira e dos responsáveis, o histórico e a confirmação de atendimento. A **API**, em Python com o framework FastAPI, valida a origem do evento, consolida em um único alerta os relatos dos vários celulares que ouviram o mesmo anúncio e notifica os responsáveis remotos por mensagens *push*, reenviando o alerta enquanto ninguém confirmar o atendimento. A notificação é organizada em camadas complementares, de modo que a falha de uma não comprometa o alerta: o alarme local, único que funciona sem Internet e por isso definido como primário; o *push* aos demais responsáveis; e uma reserva por SMS ou ligação a partir do próprio aparelho, caso o servidor esteja inacessível.
+
+> Nesta seção, foram detalhadas a alocação de cada requisito entre os subsistemas, a estrutura do pacote transmitido por BLE, os mecanismos de autenticação e de tratamento de eventos duplicados, o fluxo completo do alerta e a comparação entre os canais de notificação avaliados.
+>
+> 📁 **Documentação de Software:** Acesse a pasta: [Software](./software/README.md)
 
 ## Diagrama de blocos para implementação do projeto
 

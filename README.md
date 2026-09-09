@@ -19,10 +19,11 @@ O projeto foi desenvolvido utilizando a iniciativa CDIO, um framework educaciona
 
 Este projeto foi implementado com os seguintes módulos/softwares/hardwares:
 
-- Sensor acelerometro de 3 eixos IIM-42351.
-- Sensor de corrente de efeito Hall LEM LA 205-S.
-- Espressif IoT Development Framework (esp idf).
-- Microcontrolador XX.
+- Microcontrolador (SoC) Nordic nRF52, com rádio Bluetooth Low Energy integrado.
+- Unidade de medição inercial (IMU) de 6 eixos IIM-42351.
+- nRF Connect SDK (Zephyr RTOS), para o desenvolvimento do firmware.
+- Flutter, para o desenvolvimento do aplicativo móvel.
+- Python com o framework FastAPI, para o serviço de retaguarda (API).
 
 
 ## Visão geral
