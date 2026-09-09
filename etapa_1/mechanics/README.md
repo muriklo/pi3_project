@@ -10,13 +10,11 @@ Dessa forma, foram estabelecidas inicialmente restrições relacionadas às dime
 
 #### Restrições dimensionais e de massa
 
-As dimensões externas da carcaça foram definidas de modo a proporcionar espaço suficiente para a acomodação da PCB, bateria, sensores e demais componentes, mantendo, simultaneamente, um formato compacto para utilização no punho.
+As dimensões externas da carcaça devem proporcionar espaço suficiente para a acomodação da PCB, bateria, sensores e demais componentes, mantendo, simultaneamente, um formato compacto para utilização no punho. Nesta etapa são estabelecidos os **critérios** que governam essas dimensões e um esboço geométrico de partida, e não cotas definitivas: os valores só podem ser fechados quando os componentes internos estiverem selecionados.
 
 Em relação à massa, não existe uma classificação universalmente padronizada para o peso de relógios. Entretanto, referências especializadas da indústria relojoeira utilizam faixas aproximadas para caracterizar a percepção de peso. Segundo a Chronos Japan[1], relógios com massa de até aproximadamente 50 g podem ser considerados leves, enquanto aqueles próximos de 100 g são classificados como de peso normal e modelos próximos de 200 g são considerados pesados. A mesma referência destaca que relógios mais leves tendem a proporcionar maior conforto durante períodos prolongados de utilização.
 
-Com base nessa referência e considerando que a Pulseira SysCare será destinada ao uso contínuo, estabeleceu-se inicialmente uma massa-alvo inferior de até 100 g para o conjunto completo do dispositivo, incluindo carcaça, PCB, bateria, sensores e pulseira do protótipo inicial.
-
-Esse intervalo é tratado como meta de projeto, e não como um limite antropométrico rígido. A adequação da massa deverá ser verificada posteriormente por meio da construção do protótipo e avaliação de uso.
+Com base nessa referência, e considerando que a Pulseira SysCare se destina ao uso contínuo, o projeto orienta-se por manter o conjunto completo — carcaça, PCB, bateria, sensores e pulseira — dentro da faixa que essa classificação descreve como leve a normal. Nenhum valor de massa é fixado nesta etapa: a massa só poderá ser estimada de forma realista após a definição da PCB, da bateria e do material da carcaça, e será verificada por medição do protótipo.
 
 Outro ponto relevante é a interferência com vestimentas: mangas de camisas e punhos de roupas são pontos comuns de atrito para dispositivos vestíveis de pulso, o que reforça a necessidade de um perfil de baixo relevo (*low-profile*) na carcaça, já que roupas são sempre um fator a considerar, havendo conflito entre mangas e punhos de camisa e o dispositivo vestível no pulso.
 
@@ -39,23 +37,21 @@ A definição das dimensões mecânicas e dos mecanismos de fixação do disposi
 
 #### Dimensionamento Antropométrico e Geometria da Caixa
 
-O comprimento da caixa de 52 mm (distância total entre as extremidades das garras) foi projetado com base nos dados de largura do pulso (distância transversal do punho). Segundo a norma ABNT NBR ISO 7250-1 (2010)[3], que estabelece as medidas básicas do corpo humano para o projeto técnico, e as diretrizes antropométricas aplicadas à engenharia de Iida e Buarque (2016), a largura do pulso em adultos e idosos apresenta uma variação típica entre 48 mm (percentil 5% feminino) e 65 mm (percentil 95% masculino). A dimensão adotada de 52 mm garante que a caixa permaneça assentada sobre o dorso do pulso sem ultrapassar a largura total do pulso, prevenindo que a estrutura enganche em roupas ou tecidos.
+O comprimento da caixa, medido entre as extremidades das garras, é limitado pela largura do pulso (distância transversal do punho). Segundo a norma ABNT NBR ISO 7250-1 (2010)[3], que estabelece as medidas básicas do corpo humano para o projeto técnico, e as diretrizes antropométricas aplicadas à engenharia de Iida e Buarque (2016), a largura do pulso em adultos e idosos apresenta uma variação típica entre 48 mm (percentil 5% feminino) e 65 mm (percentil 95% masculino). O critério de projeto adotado é que o comprimento da caixa não ultrapasse o limite inferior dessa faixa, de modo que a peça permaneça assentada sobre o dorso do pulso mesmo nos punhos menores, sem enganchar em roupas ou tecidos. O esboço geométrico de partida trabalha próximo desse limite, valor a ser confirmado quando as dimensões da PCB e da bateria estiverem fechadas.
 
-Em conformidade também com a ABNT NBR ISO 7250-1 (2010)[3], a largura da caixa foi estabelecida em 42 mm no eixo horizontal, dimensão que se enquadra no padrão unissex comercial de relógios e *smartwatches*. Essa medida disponibiliza uma área interna circular útil de 32 mm de diâmetro. A área da seção transversal disponível para acomodação dos componentes é calculada por:
+A largura da caixa, no eixo horizontal, é orientada pelo padrão unissex comercial de relógios e *smartwatches*, faixa em que o corpo do dispositivo permanece centralizado no dorso do pulso sem gerar desconforto. A largura final resultará do confronto entre duas exigências opostas: a área interna precisa acomodar a placa de circuito impresso, a bateria, a IMU e a antena, enquanto o conforto e a discrição pedem a menor caixa possível.
 
-$$A = \pi \cdot r^2 = \pi \cdot (32\text{ mm}/2)^2 \approx 804,25\text{ mm}^2$$
-
-Esse espaço fornece o volume necessário para acomodar a Placa de Circuito Impresso (PCB), o acelerômetro, a antena BLE e a bateria. Portanto a largura de 42 mm mantém o corpo do dispositivo centralizado no dorso do pulso, garantindo volume interno suficiente sem gerar desconforto no dorço do pulso.
+O fechamento dessa dimensão depende, portanto, do leiaute da PCB e do formato da bateria, ainda não definidos. Esta etapa registra o critério de decisão e o esboço geométrico de partida, apresentado na Figura 2; o dimensionamento da área interna disponível será feito na etapa de desenvolvimento, quando houver componentes reais a acomodar.
 
 <div align="center">
   <img src="../img/cotas_do_dimensionamento_mecanico_do_dispositivo.png" alt="" width="50%">
-  <p>Figura 2 - Esboço geométrico cotado (sketch 2D) com as restrições e dimensões do invólucro</p>
+  <p>Figura 2 - Esboço geométrico preliminar (sketch 2D) com as restrições dimensionais do invólucro</p>
 </div>
 
 
 #### Interface da Pulseira e Mecanismo de Fixação 
 
-A escolha da largura de encaixe de 18 mm distribui a carga e o peso do dispositivo de forma homogênea, reduzindo a pressão pontual sobre a epiderme. Além disso, trata-se de um valor padronizado de mercado, permitindo a substituição por pulseiras comerciais facilmente encontradas, conforme ilustrado na Figura 3.
+A largura de encaixe da pulseira será tomada entre os valores padronizados pelo mercado relojoeiro, sendo a faixa de 18 mm a 22 mm a de maior disponibilidade comercial. Adotar um valor padronizado distribui a carga do dispositivo de forma homogênea, reduzindo a pressão pontual sobre a epiderme, e permite a substituição por pulseiras comerciais facilmente encontradas, conforme ilustrado na Figura 3. A largura exata acompanhará a dimensão final da caixa.
 
 <div align="center">
   <img src="../img/exemplo_de_pulseira_18mm.png" alt="Exemplo de pulseira de 18 mm" width="40%">
@@ -63,7 +59,7 @@ A escolha da largura de encaixe de 18 mm distribui a carga e o peso do dispositi
   <p>Figura 3 - Exemplo de pulseira comercial de 18 mm de largura com mecanismo de fixação por pino de mola</p>
 </div>
 
-O sistema de fixação utiliza furos cegos de 1,5 mm de diâmetro por 1,5 mm de profundidade posicionados nas garras. O pino de mola convencional consiste em um tubo cilíndrico metálico contendo uma mola interna que projeta duas hastes retráteis de 0,8 mm a 1 mm para fora. A força de expansão contínua da mola mantém o travamento mecânico do conjunto no fundo do furo cego das garras, impedindo o desacoplamento involuntário da pulseira.
+O sistema de fixação previsto utiliza furos cegos nas garras, dimensionados para receber um pino de mola comercial. Esse pino consiste em um tubo cilíndrico metálico contendo uma mola interna que projeta duas hastes retráteis, tipicamente entre 0,8 mm e 1 mm de diâmetro. A força de expansão contínua da mola mantém o travamento mecânico do conjunto no fundo do furo, impedindo o desacoplamento involuntário da pulseira. As cotas dos furos serão definidas a partir do pino efetivamente adquirido.
 
 Esse mecanismo foi escolhido devido à sua simplicidade, baixo volume, facilidade de montagem e ampla disponibilidade comercial.
 
