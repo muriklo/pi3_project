@@ -28,6 +28,11 @@ A comparação entre as principais alternativas consideradas é apresentada na T
 
 Entre as alternativas avaliadas, foi selecionado o **XIAO nRF52840** como plataforma para o desenvolvimento do primeiro protótipo. A escolha está relacionada não somente às características do microcontrolador nRF52840, mas principalmente à integração proporcionada pela placa XIAO, que reúne o microcontrolador, os recursos necessários para programação e interfaces de comunicação em uma plataforma de pequenas dimensões [1].
 
+<div align="center"> 
+  <img src="../img/xiaonrf52840.png" alt="" width="60%"> 
+  <p>Figura 1 - Placa de desenvolvimento da Nordic Semiconductor nRF52840 ARM Cortex-M4F</p> 
+</div>
+
 O XIAO nRF52840 apresenta dimensões reduzidas, conectividade Bluetooth Low Energy (BLE), interfaces de comunicação compatíveis com o acelerômetro e capacidade de processamento suficiente para executar o firmware responsável pelo monitoramento dos sensores e pela detecção de quedas. Essas características são compatíveis com os requisitos estabelecidos para o dispositivo vestível.
 
 Outra vantagem da utilização do XIAO nRF52840 está relacionada ao desenvolvimento do primeiro protótipo. A utilização de uma placa já integrada permite validar a arquitetura eletrônica, o funcionamento do acelerômetro, o algoritmo de detecção de quedas e a comunicação BLE sem que seja necessário desenvolver inicialmente uma placa de circuito impresso dedicada para o microcontrolador.
@@ -62,6 +67,11 @@ A Tabela abaixo apresenta a comparação entre alguns dos acelerômetros avaliad
 *Os valores apresentados são referentes às condições de operação indicadas na documentação de cada componente e devem ser considerados como referência para comparação, uma vez que o consumo depende do modo de operação e das configurações utilizadas.*
 
 Apesar de existirem alternativas com consumo significativamente inferior, como o ADXL362, LIS2DW12 e BMA400, foi selecionado o IIM-42351 [2] para o primeiro protótipo. Essa escolha ocorre principalmente devido à disponibilidade de um módulo do componente já disponível para a equipe, permitindo iniciar o desenvolvimento sem a necessidade de projetar inicialmente uma placa específica para o acelerômetro.
+
+<div align="center"> 
+  <img src="../img/" alt="" width="60%"> 
+  <p>Figura 2 - Adicionar a figura do nosso acelerometro</p> 
+</div>
 
 Outro fator determinante é a familiaridade da equipe com o funcionamento do IIM-42351 e, principalmente, a disponibilidade do recurso de detecção de queda livre (Free-fall Detection). Esse recurso é particularmente relevante para a aplicação, pois a detecção de uma condição de queda pode ser realizada pelo próprio acelerômetro, gerando uma interrupção para que o microcontrolador realize o processamento posterior. Dessa forma, parte do processamento necessário para identificar uma possível queda pode ser realizada pelo próprio sensor, o que aumenta muito a economia de bateria.
 
