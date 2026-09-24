@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     # Dois celulares podem ouvir o MESMO broadcast BLE e postar o mesmo alerta.
     dedup_window_seconds: int = 180
     max_event_skew_seconds: int = 900
+    # Heartbeats de varios celulares na mesma janela contam como uma amostra so.
+    telemetry_bucket_seconds: int = 60
 
     escalation_seconds: int = 60
     escalation_max_rounds: int = 3

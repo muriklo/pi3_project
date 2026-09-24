@@ -38,13 +38,48 @@ advertising* do BLE 5 — o que também mantém a compatibilidade com celulares 
 |---|---|---|---|
 | 0 | 1 | `version` | Versão do protocolo. Hoje `0x01`. |
 | 1–4 | 4 | `ble_id` | Identificador único da pulseira, gravado em fábrica. |
-| 5 | 1 | `event_type` | `0x00` teste · `0x01` queda · `0x02` botão de pânico · `0x03` imobilidade · `0x04` bateria baixa |
-| 6–7 | 2 | `seq` | Contador `uint16` monotônico, incrementado a cada evento. |
+| 5 | 1 | `event_type` | `0x00` teste · `0x01` queda · `0x02` botão de pânico · `0x03` imobilidade · `0x04` bateria baixa · `0x05` heartbeat |
+| 6–7 | 2 | `seq` | Contador `uint16` monotônico, incrementado a cada evento. O heartbeat **repete** o valor atual, sem incrementar. |
 | 8 | 1 | `battery_pct` | Bateria em % (0–100). |
 | 9 | 1 | `impact_dg` | Pico de aceleração em décimos de g (satura em 25,5 g). |
 | 10–13 | 4 | `signature` | HMAC-SHA256 truncado sobre os bytes 0–9. |
 
 Os bytes 0–9 são exatamente o que entra no HMAC — ver `build_signed_payload()`.
+
+### Heartbeat (`event_type = 0x05`)
+
+Revisão de 23/09/2026 (etapa 2). A versão da etapa 1 previa um anúncio de
+presença a cada 2 s, mas não dava a ele um código próprio. Isso deixava dois
+problemas em aberto:
+
+1. **O app não distinguiria presença de emergência.** Se o heartbeat repetisse o
+   último evento, um celular que acabou de abrir o app ouviria "queda, seq 42" e
+   tocaria a sirene por uma queda antiga — e a sirene toca antes de qualquer
+   verificação no servidor, por projeto.
+2. **O `seq` não serve para identificar heartbeats.** Ele só avança em eventos,
+   gravado em flash a cada um. Incrementá-lo a cada 2 s daria a volta no
+   contador de 16 bits em ~36 h e gravaria a flash 43 mil vezes por dia.
+
+A regra adotada:
+
+| Campo | No heartbeat |
+|---|---|
+| `event_type` | `0x05` |
+| `seq` | O valor do **último evento**, sem incrementar. |
+| `battery_pct` | Leitura atual. |
+| `impact_dg` | `0`. |
+| `signature` | HMAC normal sobre os bytes 0–9. |
+
+O app **nunca** trata `0x05` como alerta: agrega os heartbeats e envia em lote
+para `POST /v1/telemetry`. A API recusa `0x05` em `POST /v1/alerts` (`422`) e
+deduplica a telemetria por janela de tempo (`SYSCARE_TELEMETRY_BUCKET_SECONDS`,
+60 s por padrão), não por `seq`.
+
+Efeito colateral útil: se o `seq` de um heartbeat for **maior** que o último
+alerta que a API recebeu, a pulseira emitiu um evento que nenhum celular ouviu.
+
+A versão do protocolo continua `0x01`: nenhum firmware foi gravado com a
+revisão anterior.
 
 ## 3. Autenticação: por que o HMAC é obrigatório
 
@@ -80,7 +115,8 @@ aproveitada.
 
 **O `seq` deve sobreviver ao reset.** Grave-o em flash/NVS a cada evento (são
 poucos por dia, não desgasta a memória). Se o contador zerar num reset, os
-eventos seguintes cairão na regra anti-replay.
+eventos seguintes cairão na regra anti-replay. O heartbeat não incrementa o
+`seq`, então não gera gravação em flash.
 
 ## 5. Intervalos de advertising e orçamento de energia
 
@@ -88,7 +124,7 @@ eventos seguintes cairão na regra anti-replay.
 
 | Estado | Intervalo | Duração | Observação |
 |---|---|---|---|
-| Repouso (heartbeat) | 2000 ms | contínuo | Prova de presença e bateria. |
+| Repouso (heartbeat) | 2000 ms | contínuo | `event_type 0x05`. Prova de presença e bateria. |
 | **Emergência** | **100 ms** | 30 s | Máxima chance de o celular ouvir na primeira varredura. |
 | Emergência (sustentada) | 500 ms | +5 min | Cobre o caso de o cuidador chegar depois. |
 | Pós-confirmação | volta a 2000 ms | — | Ver seção 6. |
@@ -132,6 +168,7 @@ protótipo.
 ```c
 #define SYSCARE_COMPANY_ID   0xFFFF
 #define SYSCARE_PROTO_VER    0x01
+#define SYSCARE_EVT_HEARTBEAT 0x05  /* repete o seq atual; impact_dg = 0 */
 
 static uint8_t adv_payload[14];
 

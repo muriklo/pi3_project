@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="610" viewBox="0 0 1000 610" font-family="Segoe UI, Helvetica, Arial, sans-serif"><defs><marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#374151"/></marker><marker id="seta_v" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#dc2626"/></marker></defs><rect width="1000" height="610" rx="12" fill="#ffffff"/><rect x="30" y="24" width="670" height="86" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+<text x="48" y="52" font-size="16" font-weight="bold" fill="#1f2937" text-anchor="start">Apresentação</text>
+<text x="682" y="52" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="end">go_router</text>
+<text x="48" y="78" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">Entrar · Início · Nova pulseira · Pulseira · Alerta (tela cheia)</text>
+<text x="48" y="98" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">Histórico · Saúde do sistema · Conta</text>
+<path d="M365,110 L365,146" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<rect x="30" y="148" width="670" height="86" rx="10" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="48" y="176" font-size="16" font-weight="bold" fill="#1f2937" text-anchor="start">Aplicação</text>
+<text x="682" y="176" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="end">flutter_riverpod</text>
+<text x="48" y="202" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">Processar anúncio · Alarme local · Envio de alerta</text>
+<text x="48" y="222" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">Telemetria · Sessão · Saúde do sistema</text>
+<path d="M180,234 L180,272" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<path d="M530,234 L530,272" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<rect x="30" y="274" width="300" height="206" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="2.2"/>
+<text x="48" y="302" font-size="16" font-weight="bold" fill="#1f2937" text-anchor="start">Domínio</text>
+<text x="48" y="322" font-size="12" font-weight="bold" fill="#15803d" text-anchor="start">Dart puro · sem dependências</text>
+<text x="48" y="352" font-size="13" font-weight="bold" fill="#1f2937" text-anchor="start">Pacote syscare_protocol</text>
+<text x="60" y="374" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">• decodificação dos 14 bytes</text>
+<text x="60" y="394" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">• classificação do anúncio</text>
+<text x="60" y="414" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">• deduplicação por seq</text>
+<text x="48" y="444" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">Entidades: pulseira, alerta,</text>
+<text x="48" y="462" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">responsável</text>
+<rect x="360" y="274" width="340" height="206" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+<text x="378" y="302" font-size="16" font-weight="bold" fill="#1f2937" text-anchor="start">Dados (adaptadores)</text>
+<text x="378" y="330" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">Varredura BLE — universal_ble</text>
+<text x="378" y="351" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">Cliente HTTP — dio</text>
+<text x="378" y="372" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">Fila de envio — sqflite</text>
+<text x="378" y="393" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">Sessão — flutter_secure_storage</text>
+<text x="378" y="414" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">Localização — geolocator</text>
+<text x="378" y="435" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">Notificações — flutter_local_notifications</text>
+<text x="378" y="456" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">Push — firebase_messaging</text>
+<path d="M530,480 L530,512" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<rect x="360" y="514" width="340" height="74" rx="10" fill="#f5f5f4" stroke="#78716c" stroke-width="1.5"/>
+<text x="378" y="540" font-size="16" font-weight="bold" fill="#1f2937" text-anchor="start">Plataforma Android</text>
+<text x="378" y="561" font-size="12.5" font-weight="normal" fill="#1f2937" text-anchor="start">Canal de alarme · sirene · tela cheia</text>
+<text x="378" y="578" font-size="12.5" font-weight="normal" fill="#1f2937" text-anchor="start">Serviço de varredura em 1º plano (Etapa 3)</text>
+<rect x="30" y="500" width="300" height="88" rx="10" fill="#ffffff" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="46" y="526" font-size="12.5" font-weight="normal" fill="#4b5563" text-anchor="start">O domínio é testado com os mesmos</text>
+<text x="46" y="545" font-size="12.5" font-weight="normal" fill="#4b5563" text-anchor="start">vetores de bytes gerados pela API,</text>
+<text x="46" y="564" font-size="12.5" font-weight="normal" fill="#4b5563" text-anchor="start">sem celular nem pulseira.</text>
+<rect x="760" y="280" width="210" height="50" rx="10" fill="#f8fafc" stroke="#475569" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="865.0" y="301.5" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="middle">Pulseira SysCare</text>
+<text x="865.0" y="318.5" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="middle">anúncio BLE · 0xFFFF</text>
+<rect x="760" y="352" width="210" height="50" rx="10" fill="#f8fafc" stroke="#475569" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="865.0" y="373.5" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="middle">SysCare API</text>
+<text x="865.0" y="390.5" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="middle">HTTPS · OpenAPI</text>
+<rect x="760" y="440" width="210" height="50" rx="10" fill="#f8fafc" stroke="#475569" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="865.0" y="461.5" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="middle">Firebase (FCM)</text>
+<text x="865.0" y="478.5" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="middle">push de alta prioridade</text>
+<path d="M760,305 L702,305" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<text x="731" y="297" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">anúncio</text>
+<path d="M702,377 L758,377" fill="none" stroke="#374151" stroke-width="1.6" marker-start="url(#seta)" marker-end="url(#seta)"/>
+<path d="M760,465 L702,465" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<text x="731" y="457" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">push</text>
+<path d="M865,402 L865,438" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<text x="873" y="425" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">envia o push</text>
+<rect x="760" y="150" width="210" height="94" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="776" y="174" font-size="13" font-weight="bold" fill="#1f2937" text-anchor="start">Legenda</text>
+<text x="776" y="196" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="start">Seta entre camadas: usa</text>
+<text x="776" y="213" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="start">Seta com externos: fluxo</text>
+<text x="776" y="230" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="start">Tracejado: sistema externo</text></svg>

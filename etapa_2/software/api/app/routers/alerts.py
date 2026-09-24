@@ -18,9 +18,9 @@ from datetime import timedelta
 from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import select
 
-from app.ble import PayloadError, decode_payload
+from app.ble import HEARTBEAT, PayloadError, decode_payload
 from app.config import get_settings
-from app.deps import CurrentUser, DbSession
+from app.deps import CurrentUser, DbSession, can_view_device, visible_device_ids
 from app.models import (
     Alert,
     AlertStatus,
@@ -54,6 +54,11 @@ def _merge_payload(body: AlertIngest) -> dict:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="ble_id do corpo diverge do ble_id assinado no payload.",
+            )
+        if decoded["event_type"] == HEARTBEAT:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Heartbeat nao e alerta: envie para /v1/telemetry.",
             )
         return decoded
 
@@ -209,9 +214,8 @@ def list_alerts(
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
 ) -> list[Alert]:
-    # So alertas de pulseiras do proprio usuario.
-    owned = select(Device.id).where(Device.owner_id == user.id)
-    query = select(Alert).where(Alert.device_id.in_(owned))
+    # Alertas das pulseiras do usuario e daquelas de que ele e responsavel.
+    query = select(Alert).where(Alert.device_id.in_(visible_device_ids(user.id)))
     if device_id:
         query = query.where(Alert.device_id == device_id)
     if status_filter:
@@ -220,19 +224,17 @@ def list_alerts(
     return list(db.scalars(query).all())
 
 
-def _get_owned_alert(db: DbSession, user: CurrentUser, alert_id: str) -> Alert:
+def _get_visible_alert(db: DbSession, user: CurrentUser, alert_id: str) -> Alert:
+    """Dono ou responsavel ativo: quem recebe o push precisa poder atender."""
     alert = db.get(Alert, alert_id)
-    if alert is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Alerta nao encontrado.")
-    device = db.get(Device, alert.device_id)
-    if device is None or device.owner_id != user.id:
+    if alert is None or not can_view_device(db, alert.device_id, user.id):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Alerta nao encontrado.")
     return alert
 
 
 @router.get("/{alert_id}", response_model=AlertOut)
 def get_alert(alert_id: str, db: DbSession, user: CurrentUser) -> Alert:
-    return _get_owned_alert(db, user, alert_id)
+    return _get_visible_alert(db, user, alert_id)
 
 
 @router.post(
@@ -241,7 +243,7 @@ def get_alert(alert_id: str, db: DbSession, user: CurrentUser) -> Alert:
     summary="Assumir o atendimento (para o escalonamento)",
 )
 def ack_alert(alert_id: str, db: DbSession, user: CurrentUser) -> Alert:
-    alert = _get_owned_alert(db, user, alert_id)
+    alert = _get_visible_alert(db, user, alert_id)
     if alert.status != AlertStatus.OPEN:
         # Idempotente de proposito: dois cuidadores podem tocar ao mesmo tempo.
         return alert
@@ -262,7 +264,7 @@ def ack_alert(alert_id: str, db: DbSession, user: CurrentUser) -> Alert:
 def resolve_alert(
     alert_id: str, body: AlertResolve, db: DbSession, user: CurrentUser
 ) -> Alert:
-    alert = _get_owned_alert(db, user, alert_id)
+    alert = _get_visible_alert(db, user, alert_id)
     alert.status = body.status
     alert.resolved_at = utcnow()
     if alert.acked_at is None:
