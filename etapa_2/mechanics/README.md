@@ -11,14 +11,14 @@ Para o desenvolvimento do primeiro protótipo, foi definida uma geometria compac
 As dimensões externas adotadas para a estrutura inicial são apresentadas na Figura 1.
 
 <div align="center">
-  <img src="../img/cotas_do_dimensionamento_mecanico_do_dispositivo.png" alt="Cotas da estrutura mecânica inicial" width="65%">
+  <img src="../img/cotas_do_dimensionamento_mecanico_do_dispositivo.png" alt="Cotas da estrutura mecânica inicial" width="55%">
   <p>Figura 1 - Cotas definidas para a estrutura mecânica inicial da Pulseira SysCare.</p>
 </div>
 
 A partir das dimensões estabelecidas, foi desenvolvido o primeiro modelo tridimensional da estrutura mecânica. O resultado da geometria inicial é apresentado na Figura 2.
 
 <div align="center">
-  <img src="../img/estrutura_mecanica_inicial.png" alt="Estrutura mecânica inicial" width="65%">
+  <img src="../img/estrutura_mecanica_inicial.png" alt="Estrutura mecânica inicial" width="55%">
   <p>Figura 2 - Modelo tridimensional da estrutura mecânica inicial da Pulseira SysCare.</p>
 </div>
 
@@ -29,7 +29,7 @@ Após a definição das dimensões externas, foi realizado o detalhamento da reg
 Para isso, foi realizado um corte no modelo tridimensional, permitindo visualizar a geometria interna e definir as principais cotas relacionadas aos diâmetros da estrutura, conforme apresentado na Figura 3.
 
 <div align="center">
-  <img src="../img/cotas_do_espaco_interior_do_dispositivo.png" alt="Cotas do espaço interno do dispositivo" width="65%">
+  <img src="../img/cotas_do_espaco_interior_do_dispositivo.png" alt="Cotas do espaço interno do dispositivo" width="55%">
   <p>Figura 3 - Corte da estrutura para definição das dimensões internas da carcaça.</p>
 </div>
 
@@ -38,7 +38,7 @@ Com base na geometria analisada, foram definidos três diâmetros de referência
 A Figura 4 apresenta a localização das dimensões definidas para os diâmetros externo, interno e útil da carcaça.
 
 <div align="center">
-  <img src="../img/cotas_diametros_internos_externos_e_util.png" alt="Dimensões dos diâmetros da carcaça" width="65%">
+  <img src="../img/cotas_diametros_internos_externos_e_util.png" alt="Dimensões dos diâmetros da carcaça" width="55%">
   <p>Figura 4 - Dimensões dos diâmetros externo, interno e da região útil da carcaça da Pulseira SysCare.</p>
 </div>
 
@@ -84,7 +84,7 @@ Inicialmente, foi estabelecida uma distância de 2,5 mm entre a extremidade das 
 Entretanto, a posição definitiva do furo será definida após a validação dimensional da pulseira selecionada, uma vez que a distância entre a extremidade da pulseira e o eixo do pino pode variar de acordo com o modelo e o fabricante. Dessa forma, a geometria das garras será ajustada de acordo com as dimensões da pulseira efetivamente utilizada no protótipo, garantindo o correto alinhamento entre os furos da carcaça, a pulseira e o pino de mola.
 
 <div align="center"> 
-  <img src="../img/cotas_fixacao_pulseira.png" alt="Cotas iniciais do sistema de fixação da pulseira" width="65%"> 
+  <img src="../img/cotas_fixacao_pulseira.png" alt="Cotas iniciais do sistema de fixação da pulseira" width="55%"> 
   <p>Figura 6 - Dimensões iniciais da região de fixação da pulseira</p> 
 </div>
 
@@ -129,7 +129,31 @@ Assim, o material disponível no IFSC foi definido como referência para a fabri
 
 ## Definição da Massa da Pulseira SysCare
 
-Essa parte ainda vai ser vista por conta dos componentes que vão ser definidos ainda.
+Após a definição dos principais componentes eletrônicos e das dimensões da estrutura mecânica, é possível realizar uma estimativa preliminar da massa total da Pulseira SysCare. Essa estimativa considera a massa dos componentes eletrônicos, da bateria, da placa de circuito impresso (PCI) e da estrutura mecânica produzida por impressão 3D.
+
+A massa total do dispositivo pode ser obtida pela soma das massas individuais dos principais elementos que compõem a pulseira, conforme apresentado na Tabela 2. Essa estimativa permite avaliar se a solução proposta apresenta características adequadas para utilização no pulso, além de auxiliar no dimensionamento e na avaliação da estrutura mecânica.
+
+
+<div align="center">
+
+| Componente                           | Massa estimada (g) |
+| ------------------------------------ | -----------------: |
+| Estrutura da pulseira impressa em 3D |                  X |
+| Bateria                              |                  X |
+| Acelerômetro IIM-42351               |                  X |
+| Microcontrolador XIAO nRF52840       |                4,7 |
+| PCI                                  |                  X |
+| **Massa total estimada**             |              **X** |
+
+</div>
+
+<div align="center">
+  <p>Tabela 2 - Estimativa da massa total</p>
+</div>
+
+
+Essa análise será utilizada como uma estimativa inicial, uma vez que a massa final poderá sofrer alterações após a fabricação da estrutura mecânica e da PCI, principalmente em função da quantidade de material utilizada na impressão 3D e das dimensões finais da placa.
+
 
 ## Referências (links/datasheets/livros)
 

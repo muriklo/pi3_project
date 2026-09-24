@@ -2,6 +2,10 @@
 
 Breve descrição do software...
 
+## Definição do algoritmo de detecção de quedas (Accel., Interrup.)
+
+## Arquitetura do firmware (threads )
+
 ## Referências (links/datasheets/livros)
 
 
