@@ -132,6 +132,9 @@ class Receptor extends Notifier<EstadoReceptor> {
   // ------------------------------------------------------- maquina ----
   Future<void> ligar() async {
     await ref.read(preferenciasProvider).salvarEscutar(true);
+    // No Android 13+ as notificacoes comecam bloqueadas: sem elas, o alarme
+    // local nao toca. Pedido aqui, no primeiro uso da escuta (Secao 4.4).
+    await ref.read(alarmeProvider).pedirNotificacoes();
     await _verificar();
   }
 

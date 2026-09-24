@@ -103,8 +103,8 @@ Sem credenciais, roda em **dry-run**: mostra o texto exato, quantos segmentos
 seriam cobrados e o custo estimado, sem enviar nada. Para o dispatcher também
 simular SMS num alerta de verdade, use `SYSCARE_SMS_PROVIDER=dryrun`.
 
-Para enviar **de verdade** é preciso conta num provedor — não existe SMS grátis
-por API. Com uma conta trial do Twilio:
+Para enviar **de verdade** é preciso conta **paga** num provedor — não existe SMS
+grátis por API. Com o Twilio, depois do upgrade da conta:
 
 ```env
 SYSCARE_SMS_PROVIDER=twilio
@@ -113,10 +113,14 @@ SYSCARE_TWILIO_AUTH_TOKEN=...
 SYSCARE_TWILIO_FROM_NUMBER=+1...
 ```
 
-Duas armadilhas do trial: só envia para números **verificados** no console, e
-prefixa o texto com "Sent from your Twilio trial account". E, para o Brasil,
-tráfego A2P de long code não registrado pode ser filtrado pelas operadoras —
-"aceito pelo Twilio" não é o mesmo que "entregue".
+**A conta trial do Twilio não serve para o SysCare.** Desde 2026 ela só envia
+modelos prontos do próprio Twilio (confirmação de pedido, lembrete de consulta):
+texto personalizado, como o alerta de queda, é recusado com o erro `572006`
+("Trial accounts can only use predefined SMS templates"), testado em 24/09/2026.
+Depois do upgrade, ainda valem duas armadilhas: liberar o Brasil em *Messaging →
+Settings → Geo permissions* (senão, erro `21408`), e o tráfego A2P de long code
+não registrado pode ser filtrado pelas operadoras brasileiras — "aceito pelo
+Twilio" não é o mesmo que "entregue".
 
 **Quando o SMS dispara.** Push vai para todo cuidador com o app, sempre. SMS
 custa dinheiro, então entra só em dois casos: cuidador **sem** app (é o único
