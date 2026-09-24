@@ -7,7 +7,10 @@ plugins {
 android {
     namespace = "br.edu.ifsc.syscare_app"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    // O Flutter 3.47 fixa o NDK 28.2.13676358. Usamos o 30, que e o que o
+    // SDK Manager do Android Studio instala por padrao: nenhum plugin do app
+    // tem codigo C/C++, e o NDK so e usado para enxugar as .so do APK.
+    ndkVersion = "30.0.16248370"
 
     compileOptions {
         // Exigido pelo flutter_local_notifications (alarme local).

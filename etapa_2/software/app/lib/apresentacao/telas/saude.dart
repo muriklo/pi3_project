@@ -68,6 +68,12 @@ class SaudeTela extends ConsumerWidget {
   Future<void> _testarAlarme(BuildContext context, WidgetRef ref) async {
     final alarme = ref.read(alarmeProvider);
     final mensageiro = ScaffoldMessenger.of(context);
+    if (!await alarme.notificacoesPermitidas() && !await alarme.pedirNotificacoes()) {
+      mensageiro.showSnackBar(const SnackBar(
+        content: Text('Notificações bloqueadas: o alarme não pode tocar. Permita nas configurações.'),
+      ));
+      return;
+    }
     await alarme.emergencia(
       id: _idAlarmeTeste,
       titulo: 'TESTE DO ALARME',
