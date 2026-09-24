@@ -8,6 +8,7 @@ import '../dados/api.dart';
 import '../dados/armazenamento.dart';
 import '../dados/fila_envio.dart';
 import '../dados/localizacao.dart';
+import '../dados/sms_celular.dart';
 import '../dados/varredura_ble.dart';
 import '../dominio/modelos.dart';
 import 'envio.dart';
@@ -29,6 +30,7 @@ final alarmeProvider = Provider<Alarme>((ref) => throw UnimplementedError('main.
 final cofreProvider = Provider((ref) => const CofreSessao());
 final varreduraProvider = Provider((ref) => VarreduraBle());
 final localizacaoProvider = Provider((ref) => Localizacao());
+final smsCelularProvider = Provider((ref) => SmsCelular());
 final agregadorProvider = Provider((ref) => AgregadorTelemetria());
 
 final apiProvider = Provider<ApiSysCare>(

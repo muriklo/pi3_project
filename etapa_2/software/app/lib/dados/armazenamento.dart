@@ -87,8 +87,27 @@ class PreferenciasReceptor {
 
   Future<void> salvarPulseirasDaConta(Set<String> ids) => _prefs.setStringList(_pulseiras, ids.toList());
 
+  static const _contatos = 'contatos_sms';
+
+  /// Responsaveis com telefone, por `ble_id`: o SMS sai mesmo sem internet.
+  Map<String, List<ContatoSms>> get contatosSms {
+    final texto = _prefs.getString(_contatos);
+    if (texto == null) return {};
+    return (jsonDecode(texto) as Map<String, dynamic>).map((bleId, lista) => MapEntry(
+          bleId,
+          [for (final c in lista as List) ContatoSms.deJson(c as Map<String, dynamic>)],
+        ));
+  }
+
+  Future<void> salvarContatosSms(Map<String, List<ContatoSms>> contatos) => _prefs.setString(
+        _contatos,
+        jsonEncode(contatos.map((bleId, lista) => MapEntry(bleId, [for (final c in lista) c.paraJson()]))),
+      );
+
   Future<void> limpar() async {
     await _prefs.remove(_escutar);
     await _prefs.remove(_pulseiras);
+    // Telefones de terceiros nao ficam no aparelho depois que o usuario sai.
+    await _prefs.remove(_contatos);
   }
 }

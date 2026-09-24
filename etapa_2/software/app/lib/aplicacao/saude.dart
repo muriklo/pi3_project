@@ -43,6 +43,11 @@ final saudeProvider = FutureProvider.autoDispose<List<ItemSaude>>((ref) async {
   final servidor = await ref.read(apiProvider).servidorNoAr();
   final fila = await ref.read(filaProvider).total();
   final vence = sessao?.venceEm;
+  final sms = ref.read(smsCelularProvider);
+  final smsDisponivel = await sms.disponivel();
+  final smsPermitido = smsDisponivel && await sms.temPermissao();
+  final contatosSms =
+      ref.read(preferenciasProvider).contatosSms.values.fold<int>(0, (n, lista) => n + lista.length);
   final escutando = varredura == EstadoVarredura.escutando;
 
   final itens = <ItemSaude>[
@@ -92,6 +97,24 @@ final saudeProvider = FutureProvider.autoDispose<List<ItemSaude>>((ref) async {
               await alarme.pedirNotificacoes();
               atualizar();
             },
+    ),
+    ItemSaude(
+      'SMS pelo celular',
+      smsPermitido && contatosSms > 0,
+      !smsDisponivel
+          ? 'Este aparelho não envia SMS (sem chip ou tablet).'
+          : !smsPermitido
+              ? 'Sem permissão: os responsáveis não recebem SMS.'
+              : contatosSms == 0
+                  ? 'Nenhum responsável com telefone nas pulseiras de que você é dono.'
+                  : '$contatosSms responsável(is) recebem SMS pelo plano deste celular.',
+      rotuloAcao: smsDisponivel && !smsPermitido ? 'Permitir' : null,
+      acao: smsDisponivel && !smsPermitido
+          ? () async {
+              await sms.pedirPermissao();
+              atualizar();
+            }
+          : null,
     ),
     ItemSaude(
       'Alarme em tela cheia',

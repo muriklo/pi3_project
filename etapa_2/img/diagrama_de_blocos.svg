@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="830" viewBox="0 0 1500 830" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<defs>
+<marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#374151"/></marker>
+<marker id="seta_e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#d97706"/></marker>
+<marker id="seta_b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/></marker>
+</defs>
+<rect width="1500" height="830" rx="12" fill="#ffffff"/>
+
+<!-- Título -->
+<text x="30" y="46" font-size="22" font-weight="bold" fill="#1f2937">SysCare — Diagrama de blocos do sistema</text>
+<text x="30" y="70" font-size="13" fill="#4b5563">Protótipo da etapa 2: pulseira → smartphone → servidor → responsáveis</text>
+
+<!-- ===================== Pulseira ===================== -->
+<rect x="30" y="96" width="580" height="620" rx="12" fill="#f8fafc" stroke="#64748b" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="50" y="126" font-size="16" font-weight="bold" fill="#1f2937">Pulseira (dispositivo vestível)</text>
+
+<!-- Bateria -->
+<rect x="50" y="150" width="190" height="84" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="145" y="180" font-size="15" font-weight="bold" fill="#1f2937" text-anchor="middle">Bateria</text>
+<text x="145" y="202" font-size="13" fill="#1f2937" text-anchor="middle">CR2032 · 3 V</text>
+<text x="145" y="221" font-size="12" fill="#4b5563" text-anchor="middle">alimentação do sistema</text>
+
+<!-- Acelerômetro -->
+<rect x="50" y="300" width="190" height="110" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+<text x="145" y="330" font-size="15" font-weight="bold" fill="#1f2937" text-anchor="middle">Acelerômetro</text>
+<text x="145" y="352" font-size="13" fill="#1f2937" text-anchor="middle">TDK IIM-42351</text>
+<text x="145" y="372" font-size="12" fill="#4b5563" text-anchor="middle">3 eixos · ±16 g</text>
+<text x="145" y="392" font-size="12" fill="#4b5563" text-anchor="middle">free-fall · wake-on-motion</text>
+
+<!-- Botão -->
+<rect x="50" y="480" width="190" height="84" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+<text x="145" y="510" font-size="15" font-weight="bold" fill="#1f2937" text-anchor="middle">Botão de emergência</text>
+<text x="145" y="532" font-size="12" fill="#4b5563" text-anchor="middle">acionamento manual</text>
+<text x="145" y="550" font-size="12" fill="#4b5563" text-anchor="middle">e cancelamento do alerta</text>
+
+<!-- Sinalização -->
+<rect x="50" y="612" width="190" height="84" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+<text x="145" y="642" font-size="15" font-weight="bold" fill="#1f2937" text-anchor="middle">Sinalização local</text>
+<text x="145" y="664" font-size="12" fill="#4b5563" text-anchor="middle">LED · buzzer · vibração</text>
+<text x="145" y="682" font-size="12" fill="#4b5563" text-anchor="middle">pré-alarme e confirmação</text>
+
+<!-- MCU -->
+<rect x="330" y="150" width="260" height="546" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="2.2"/>
+<text x="460" y="178" font-size="16" font-weight="bold" fill="#1f2937" text-anchor="middle">Microcontrolador</text>
+<text x="460" y="198" font-size="13" fill="#1f2937" text-anchor="middle">Seeed XIAO nRF52840</text>
+<text x="460" y="216" font-size="12" fill="#4b5563" text-anchor="middle">Cortex-M4F · 64 MHz · BLE 5</text>
+<text x="460" y="244" font-size="12" font-weight="bold" fill="#15803d" text-anchor="middle">Firmware · nRF Connect SDK (Zephyr)</text>
+
+<rect x="346" y="256" width="228" height="72" rx="8" fill="#ffffff" stroke="#16a34a" stroke-width="1.2"/>
+<text x="460" y="278" font-size="13" font-weight="bold" fill="#1f2937" text-anchor="middle">Detecção de queda (FSM)</text>
+<text x="460" y="298" font-size="12" fill="#4b5563" text-anchor="middle">queda livre → impacto</text>
+<text x="460" y="316" font-size="12" fill="#4b5563" text-anchor="middle">→ imobilidade</text>
+<path d="M460,328 L460,342" fill="none" stroke="#374151" stroke-width="1.4" marker-end="url(#seta)"/>
+
+<rect x="346" y="344" width="228" height="72" rx="8" fill="#ffffff" stroke="#16a34a" stroke-width="1.2"/>
+<text x="460" y="366" font-size="13" font-weight="bold" fill="#1f2937" text-anchor="middle">Pré-alarme</text>
+<text x="460" y="386" font-size="12" fill="#4b5563" text-anchor="middle">janela de cancelamento</text>
+<text x="460" y="404" font-size="12" fill="#4b5563" text-anchor="middle">de ~10 s</text>
+<path d="M460,416 L460,430" fill="none" stroke="#374151" stroke-width="1.4" marker-end="url(#seta)"/>
+
+<rect x="346" y="432" width="228" height="90" rx="8" fill="#ffffff" stroke="#16a34a" stroke-width="1.2"/>
+<text x="460" y="454" font-size="13" font-weight="bold" fill="#1f2937" text-anchor="middle">Montagem do pacote</text>
+<text x="460" y="474" font-size="12" fill="#4b5563" text-anchor="middle">14 bytes + HMAC-SHA256</text>
+<text x="460" y="492" font-size="12" fill="#4b5563" text-anchor="middle">seq persistente (NVS)</text>
+<text x="460" y="510" font-size="12" fill="#4b5563" text-anchor="middle">nível de bateria (ADC)</text>
+<path d="M460,522 L460,536" fill="none" stroke="#374151" stroke-width="1.4" marker-end="url(#seta)"/>
+
+<rect x="346" y="538" width="228" height="72" rx="8" fill="#ffffff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="460" y="560" font-size="13" font-weight="bold" fill="#1f2937" text-anchor="middle">Rádio BLE</text>
+<text x="460" y="580" font-size="12" fill="#4b5563" text-anchor="middle">advertising não-conectável</text>
+<text x="460" y="598" font-size="12" fill="#4b5563" text-anchor="middle">heartbeat 2 s · alerta 100 ms</text>
+
+<rect x="346" y="620" width="228" height="62" rx="8" fill="#ffffff" stroke="#16a34a" stroke-width="1.2"/>
+<text x="460" y="644" font-size="13" font-weight="bold" fill="#1f2937" text-anchor="middle">Gestão de energia</text>
+<text x="460" y="664" font-size="12" fill="#4b5563" text-anchor="middle">sleep até interrupção do sensor</text>
+
+<!-- Ligações internas da pulseira -->
+<path d="M240,192 L328,192" fill="none" stroke="#d97706" stroke-width="1.8" marker-end="url(#seta_e)"/>
+<text x="285" y="184" font-size="11" font-weight="bold" fill="#b45309" text-anchor="middle">VDD 3 V</text>
+<path d="M145,234 L145,298" fill="none" stroke="#d97706" stroke-width="1.8" marker-end="url(#seta_e)"/>
+<text x="153" y="271" font-size="11" font-weight="bold" fill="#b45309">VDD 3 V</text>
+
+<path d="M242,346 L328,346" fill="none" stroke="#374151" stroke-width="1.6" marker-start="url(#seta)" marker-end="url(#seta)"/>
+<text x="285" y="338" font-size="11" fill="#374151" text-anchor="middle">SPI / I²C</text>
+<text x="285" y="362" font-size="11" fill="#374151" text-anchor="middle">+ INT</text>
+
+<path d="M240,522 L328,522" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<text x="285" y="514" font-size="11" fill="#374151" text-anchor="middle">GPIO</text>
+<text x="285" y="538" font-size="11" fill="#374151" text-anchor="middle">(interrupção)</text>
+
+<path d="M330,654 L242,654" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<text x="285" y="646" font-size="11" fill="#374151" text-anchor="middle">GPIO / PWM</text>
+
+<!-- ===================== Enlace BLE ===================== -->
+<path d="M574,572 L778,572" fill="none" stroke="#2563eb" stroke-width="2.4" marker-end="url(#seta_b)"/>
+<text x="695" y="542" font-size="14" font-weight="bold" fill="#1d4ed8" text-anchor="middle">BLE · broadcast</text>
+<text x="695" y="562" font-size="11" fill="#374151" text-anchor="middle">14 B assinados (HMAC)</text>
+<path d="M780,600 L576,600" fill="none" stroke="#2563eb" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#seta_b)"/>
+<text x="695" y="622" font-size="11" fill="#4b5563" text-anchor="middle">conexão p/ confirmar</text>
+<text x="695" y="637" font-size="11" fill="#4b5563" text-anchor="middle">o recebimento (previsto)</text>
+
+<!-- ===================== Smartphone receptor ===================== -->
+<rect x="780" y="440" width="270" height="260" rx="10" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="798" y="468" font-size="16" font-weight="bold" fill="#1f2937">Smartphone próximo</text>
+<text x="798" y="488" font-size="12" fill="#4b5563">App SysCare (Flutter) · receptor</text>
+<text x="798" y="518" font-size="13" fill="#1f2937">• varredura BLE do anúncio</text>
+<text x="798" y="539" font-size="13" fill="#1f2937">• separa heartbeat de alerta</text>
+<text x="798" y="560" font-size="13" fill="#1f2937">• alarme local imediato</text>
+<text x="810" y="579" font-size="12" fill="#4b5563">sirene · tela cheia · vibração</text>
+<text x="798" y="600" font-size="13" fill="#1f2937">• localização (GPS)</text>
+<text x="798" y="621" font-size="13" fill="#1f2937">• fila de reenvio sem conexão</text>
+<text x="798" y="642" font-size="13" fill="#1f2937">• telemetria em lote</text>
+<text x="798" y="682" font-size="12" font-weight="bold" fill="#0e7490">alarme local funciona sem Internet</text>
+
+<!-- Smartphone → API -->
+<path d="M1050,572 L1148,572" fill="none" stroke="#374151" stroke-width="2" marker-end="url(#seta)"/>
+<text x="1099" y="562" font-size="13" font-weight="bold" fill="#1f2937" text-anchor="middle">Internet</text>
+<text x="1099" y="590" font-size="11" fill="#374151" text-anchor="middle">HTTPS · REST</text>
+
+<!-- ===================== API ===================== -->
+<rect x="1150" y="440" width="320" height="260" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+<text x="1168" y="468" font-size="16" font-weight="bold" fill="#1f2937">API SysCare (servidor)</text>
+<text x="1168" y="488" font-size="12" fill="#4b5563">Python · FastAPI</text>
+<text x="1168" y="518" font-size="13" fill="#1f2937">• contas, pulseiras e responsáveis</text>
+<text x="1168" y="539" font-size="13" fill="#1f2937">• valida HMAC e anti-replay (seq)</text>
+<text x="1168" y="560" font-size="13" fill="#1f2937">• deduplica relatos (janela de 180 s)</text>
+<text x="1168" y="581" font-size="13" fill="#1f2937">• histórico de alertas e telemetria</text>
+<text x="1168" y="602" font-size="13" fill="#1f2937">• reenvio até alguém confirmar</text>
+<text x="1168" y="623" font-size="13" fill="#1f2937">• notificação por canais plugáveis</text>
+<text x="1168" y="682" font-size="12" font-weight="bold" fill="#c2410c">Banco: SQLite (dev) → PostgreSQL</text>
+
+<!-- API → FCM -->
+<path d="M1310,440 L1310,332" fill="none" stroke="#374151" stroke-width="2" marker-end="url(#seta)"/>
+<text x="1318" y="392" font-size="11" fill="#374151">envio do push</text>
+
+<!-- ===================== FCM ===================== -->
+<rect x="1150" y="200" width="320" height="130" rx="10" fill="#fefce8" stroke="#ca8a04" stroke-width="1.5"/>
+<text x="1168" y="230" font-size="16" font-weight="bold" fill="#1f2937">Firebase Cloud Messaging</text>
+<text x="1168" y="250" font-size="12" fill="#4b5563">serviço de push do Google</text>
+<text x="1168" y="280" font-size="13" fill="#1f2937">• prioridade alta (atravessa o Doze)</text>
+<text x="1168" y="301" font-size="13" fill="#1f2937">• entrega com o app fechado</text>
+
+<!-- FCM → Responsáveis -->
+<path d="M1150,262 L1052,262" fill="none" stroke="#374151" stroke-width="2" marker-end="url(#seta)"/>
+<text x="1099" y="252" font-size="11" fill="#374151" text-anchor="middle">notificação</text>
+<text x="1099" y="280" font-size="11" fill="#374151" text-anchor="middle">push</text>
+
+<!-- ===================== Responsáveis ===================== -->
+<rect x="780" y="150" width="270" height="220" rx="10" fill="#fdf2f8" stroke="#db2777" stroke-width="1.5"/>
+<text x="798" y="178" font-size="16" font-weight="bold" fill="#1f2937">Familiares / responsáveis</text>
+<text x="798" y="198" font-size="12" fill="#4b5563">App SysCare no smartphone</text>
+<text x="798" y="228" font-size="13" fill="#1f2937">• recebem a notificação</text>
+<text x="798" y="249" font-size="13" fill="#1f2937">• confirmam: "estou indo"</text>
+<text x="798" y="270" font-size="13" fill="#1f2937">• encerram o evento:</text>
+<text x="810" y="289" font-size="12" fill="#4b5563">atendido ou falso positivo</text>
+<text x="798" y="310" font-size="13" fill="#1f2937">• cadastram pulseira e</text>
+<text x="810" y="329" font-size="12" fill="#4b5563">ordem de acionamento</text>
+
+<!-- Responsáveis → API (confirmação) -->
+<path d="M1050,346 L1100,346 L1100,500 L1148,500" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<text x="1092" y="425" font-size="11" fill="#374151" text-anchor="middle" transform="rotate(-90 1092 425)">confirmação · HTTPS</text>
+
+<!-- Fallback offline -->
+<path d="M915,440 L915,372" fill="none" stroke="#374151" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#seta)"/>
+<text x="925" y="400" font-size="11" fill="#374151">SMS / ligação nativa</text>
+<text x="925" y="415" font-size="11" fill="#4b5563">sem Internet (previsto)</text>
+
+<!-- ===================== Legenda ===================== -->
+<line x1="30" y1="740" x2="1470" y2="740" stroke="#e5e7eb" stroke-width="1"/>
+<path d="M30,770 L80,770" fill="none" stroke="#374151" stroke-width="2" marker-end="url(#seta)"/>
+<text x="90" y="774" font-size="12" fill="#1f2937">fluxo de dados</text>
+<path d="M210,770 L260,770" fill="none" stroke="#2563eb" stroke-width="2.4" marker-end="url(#seta_b)"/>
+<text x="270" y="774" font-size="12" fill="#1f2937">enlace sem fio BLE</text>
+<path d="M410,770 L460,770" fill="none" stroke="#d97706" stroke-width="1.8" marker-end="url(#seta_e)"/>
+<text x="470" y="774" font-size="12" fill="#1f2937">alimentação</text>
+<path d="M580,770 L630,770" fill="none" stroke="#374151" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#seta)"/>
+<text x="640" y="774" font-size="12" fill="#1f2937">previsto para as etapas seguintes</text>
+<text x="30" y="806" font-size="12" fill="#4b5563">Qualquer celular com o app ao alcance da pulseira atua como receptor, inclusive o de um responsável. Os relatos repetidos do mesmo evento são consolidados pela API em um único alerta.</text>
+</svg>

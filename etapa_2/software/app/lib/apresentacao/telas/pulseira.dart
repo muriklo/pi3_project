@@ -125,7 +125,11 @@ class _Responsaveis extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final responsaveis = ref.watch(responsaveisProvider(pulseiraId));
     final api = ref.read(apiProvider);
-    void recarregar() => ref.invalidate(responsaveisProvider(pulseiraId));
+    void recarregar() {
+      ref.invalidate(responsaveisProvider(pulseiraId));
+      // Telefones guardados no celular para o SMS sair mesmo sem internet.
+      ref.read(receptorProvider.notifier).atualizarContatos();
+    }
     return responsaveis.when(
       loading: () => const Carregando(),
       error: (e, _) => ErroCarregar(erro: e, tentarDeNovo: recarregar),
@@ -220,6 +224,7 @@ class _Responsaveis extends ConsumerWidget {
             prioridade: proximaPrioridade.clamp(1, 10),
           );
       ref.invalidate(responsaveisProvider(pulseiraId));
+      await ref.read(receptorProvider.notifier).atualizarContatos();
     });
   }
 }

@@ -40,7 +40,7 @@ class AlertaTela extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: emergenciaAtiva ? corEmergencia : null,
         foregroundColor: emergenciaAtiva ? Colors.white : null,
-        title: Text(rotulosEvento[tipo] ?? 'Alerta'),
+        title: Text('${(local?.simulado ?? false) ? 'Simulação: ' : ''}${rotulosEvento[tipo] ?? 'Alerta'}'),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -52,6 +52,7 @@ class AlertaTela extends ConsumerWidget {
             _Cabecalho(tipo: tipo, local: local, alerta: alerta),
             const SizedBox(height: 16),
             if (local != null) _SituacaoLocal(local),
+            if (local != null) _SituacaoSms(local),
             if (remoto != null && remoto.hasError && alerta == null)
               ErroCarregar(erro: remoto.error!, tentarDeNovo: () => ref.invalidate(alertaProvider(alertaId!))),
             if (alerta != null) _SituacaoServidor(alerta),
@@ -88,7 +89,7 @@ class AlertaTela extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
       ],
-      if (alertaId == null && local != null && !local.rebaixado)
+      if (alertaId == null && local != null && !local.rebaixado && !local.simulado)
         const Padding(
           padding: EdgeInsets.only(bottom: 12),
           child: Text('"Estou indo" e "Encerrar" ficam disponíveis quando o servidor '
@@ -134,7 +135,7 @@ class AlertaTela extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
       ],
-      if (local != null && (local.rebaixado || (alerta?.encerrado ?? false)))
+      if (local != null && (local.rebaixado || local.simulado || (alerta?.encerrado ?? false)))
         OutlinedButton(
           onPressed: () async {
             await receptor.dispensar(local.chave);
@@ -230,6 +231,43 @@ class _SituacaoLocal extends StatelessWidget {
           Icons.lock_clock,
           'Sessão vencida. Entre de novo para avisar os responsáveis.',
         ),
+      SituacaoEnvio.simulado => (
+          Icons.science,
+          'Simulação: o evento não foi enviado ao servidor.',
+        ),
+    };
+    return Card(child: ListTile(leading: Icon(icone), title: Text(texto)));
+  }
+}
+
+/// Camada 3: SMS enviado pelo plano deste celular.
+class _SituacaoSms extends StatelessWidget {
+  const _SituacaoSms(this.local);
+
+  final AlarmeLocal local;
+
+  @override
+  Widget build(BuildContext context) {
+    final falhas = local.smsFalhas.isEmpty ? '' : ' Não saiu para: ${local.smsFalhas.join(', ')}.';
+    final (icone, texto) = switch (local.sms) {
+      SituacaoSms.aguardando => (Icons.sms, 'Enviando SMS aos responsáveis...'),
+      SituacaoSms.enviado => (
+          Icons.mark_chat_read,
+          'SMS enviado por este celular para: ${local.smsPara.join(', ')}.$falhas',
+        ),
+      SituacaoSms.falhou => (
+          Icons.sms_failed,
+          'O SMS não saiu. Confira o sinal da operadora e o saldo do celular.',
+        ),
+      SituacaoSms.semPermissao => (
+          Icons.sms_failed,
+          'Sem permissão para enviar SMS. Permita em Saúde do sistema.',
+        ),
+      SituacaoSms.semContatos => (
+          Icons.contact_phone,
+          'Nenhum responsável com telefone. Só a conta dona da pulseira vê os telefones.',
+        ),
+      SituacaoSms.indisponivel => (Icons.phonelink_erase, 'Este aparelho não envia SMS.'),
     };
     return Card(child: ListTile(leading: Icon(icone), title: Text(texto)));
   }

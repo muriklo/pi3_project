@@ -32,7 +32,7 @@
 <path d="M530,480 L530,512" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
 <rect x="360" y="514" width="340" height="74" rx="10" fill="#f5f5f4" stroke="#78716c" stroke-width="1.5"/>
 <text x="378" y="540" font-size="16" font-weight="bold" fill="#1f2937" text-anchor="start">Plataforma Android</text>
-<text x="378" y="561" font-size="12.5" font-weight="normal" fill="#1f2937" text-anchor="start">Canal de alarme · sirene · tela cheia</text>
+<text x="378" y="561" font-size="12.5" font-weight="normal" fill="#1f2937" text-anchor="start">Canal de alarme · sirene · tela cheia · SMS</text>
 <text x="378" y="578" font-size="12.5" font-weight="normal" fill="#1f2937" text-anchor="start">Serviço de varredura em 1º plano (Etapa 3)</text>
 <rect x="30" y="500" width="300" height="88" rx="10" fill="#ffffff" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5 4"/>
 <text x="46" y="526" font-size="12.5" font-weight="normal" fill="#4b5563" text-anchor="start">O domínio é testado com os mesmos</text>

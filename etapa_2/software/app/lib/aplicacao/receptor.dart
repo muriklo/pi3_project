@@ -5,16 +5,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:syscare_protocol/syscare_protocol.dart';
 import 'package:universal_ble/universal_ble.dart' show AvailabilityState;
 
+import '../dados/api.dart';
 import '../dados/fila_envio.dart';
 import '../dados/varredura_ble.dart';
 import '../dominio/modelos.dart';
 import 'envio.dart';
 import 'providers.dart';
+import 'sms_emergencia.dart';
 
 /// Estados da Figura 3 da arquitetura.
 enum EstadoVarredura { desligado, verificando, escutando, suspenso, aguardandoReinicio }
 
-enum SituacaoEnvio { naFila, enviado, jaReportado, rejeitado, descartado, semConexao, sessaoExpirada }
+enum SituacaoEnvio { naFila, enviado, jaReportado, rejeitado, descartado, semConexao, sessaoExpirada, simulado }
+
+/// SMS pelo plano do celular (Camada 3), enviado logo depois do alarme local.
+enum SituacaoSms { aguardando, enviado, falhou, semPermissao, semContatos, indisponivel }
 
 /// Um alarme disparado por este celular a partir do radio.
 class AlarmeLocal {
@@ -27,6 +32,10 @@ class AlarmeLocal {
     this.notificados,
     this.silenciado = false,
     this.detalhe,
+    this.sms = SituacaoSms.aguardando,
+    this.smsPara = const [],
+    this.smsFalhas = const [],
+    this.simulado = false,
   });
 
   final String chave;
@@ -39,6 +48,14 @@ class AlarmeLocal {
   final int? notificados;
   final bool silenciado;
   final String? detalhe;
+  final SituacaoSms sms;
+
+  /// Nomes de quem recebeu o SMS e de quem nao recebeu.
+  final List<String> smsPara;
+  final List<String> smsFalhas;
+
+  /// Disparado pelo botao "Simular queda": nao vai para a API.
+  final bool simulado;
 
   /// A API respondeu que o anuncio nao e legitimo (Secao 4.7).
   bool get rebaixado => situacao == SituacaoEnvio.rejeitado;
@@ -49,6 +66,9 @@ class AlarmeLocal {
     int? notificados,
     bool? silenciado,
     String? detalhe,
+    SituacaoSms? sms,
+    List<String>? smsPara,
+    List<String>? smsFalhas,
   }) =>
       AlarmeLocal(
         chave: chave,
@@ -59,6 +79,10 @@ class AlarmeLocal {
         notificados: notificados ?? this.notificados,
         silenciado: silenciado ?? this.silenciado,
         detalhe: detalhe ?? this.detalhe,
+        sms: sms ?? this.sms,
+        smsPara: smsPara ?? this.smsPara,
+        smsFalhas: smsFalhas ?? this.smsFalhas,
+        simulado: simulado,
       );
 }
 
@@ -121,7 +145,9 @@ class Receptor extends Notifier<EstadoReceptor> {
     _daConta = prefs.pulseirasDaConta;
     ref.listen(pulseirasProvider, (_, proximo) {
       final lista = proximo.value;
-      if (lista != null) _daConta = {for (final p in lista) p.bleId};
+      if (lista == null) return;
+      _daConta = {for (final p in lista) p.bleId};
+      unawaited(atualizarContatos());
     });
     ref.onDispose(_liberar);
     return const EstadoReceptor();
@@ -135,6 +161,8 @@ class Receptor extends Notifier<EstadoReceptor> {
     // No Android 13+ as notificacoes comecam bloqueadas: sem elas, o alarme
     // local nao toca. Pedido aqui, no primeiro uso da escuta (Secao 4.4).
     await ref.read(alarmeProvider).pedirNotificacoes();
+    final sms = ref.read(smsCelularProvider);
+    if (await sms.disponivel() && !await sms.temPermissao()) await sms.pedirPermissao();
     await _verificar();
   }
 
@@ -251,7 +279,7 @@ class Receptor extends Notifier<EstadoReceptor> {
     return 'Pulseira $bleId';
   }
 
-  void _alarmar(Anuncio a, Recepcao r) {
+  void _alarmar(Anuncio a, Recepcao r, {bool simulado = false}) {
     final chave = chaveDoEvento(a);
     final impacto = a.impactoDg > 0 ? ' · impacto de ${a.impactoG.toStringAsFixed(1)} g' : '';
     unawaited(ref.read(alarmeProvider).emergencia(
@@ -262,8 +290,99 @@ class Receptor extends Notifier<EstadoReceptor> {
         ));
     state = state.copiar(alarmes: {
       ...state.alarmes,
-      chave: AlarmeLocal(chave: chave, anuncio: a, recebidoEm: r.em),
+      chave: AlarmeLocal(
+        chave: chave,
+        anuncio: a,
+        recebidoEm: r.em,
+        simulado: simulado,
+        situacao: simulado ? SituacaoEnvio.simulado : SituacaoEnvio.naFila,
+      ),
     });
+    // Camada 3: sai junto com o alarme, sem esperar a API nem a internet.
+    unawaited(_enviarSms(a, r.em, teste: simulado));
+  }
+
+  void _atualizarAlarme(String chave, AlarmeLocal Function(AlarmeLocal) mudar) {
+    final atual = state.alarmes[chave];
+    if (atual != null) state = state.copiar(alarmes: {...state.alarmes, chave: mudar(atual)});
+  }
+
+  /// SMS a todos os responsaveis com telefone, pelo plano do celular.
+  Future<void> _enviarSms(Anuncio a, DateTime quando, {required bool teste}) async {
+    final chave = chaveDoEvento(a);
+    final sms = ref.read(smsCelularProvider);
+    if (!await sms.disponivel()) {
+      return _atualizarAlarme(chave, (x) => x.copiar(sms: SituacaoSms.indisponivel));
+    }
+    if (!await sms.temPermissao()) {
+      return _atualizarAlarme(chave, (x) => x.copiar(sms: SituacaoSms.semPermissao));
+    }
+    final contatos = ref.read(preferenciasProvider).contatosSms[a.bleId] ?? const [];
+    if (contatos.isEmpty) {
+      return _atualizarAlarme(chave, (x) => x.copiar(sms: SituacaoSms.semContatos));
+    }
+    // Espera o GPS ate 15 s: o SMS com o link do mapa vale a espera, e a
+    // sirene ja esta tocando.
+    final localizacao = ref.read(localizacaoProvider);
+    final posicao = await localizacao.recente() ??
+        await localizacao.atual().timeout(const Duration(seconds: 15), onTimeout: () => null);
+    final texto = textoSms(
+      tipo: a.evento.nomeApi,
+      quem: _quem(a.bleId),
+      quando: quando,
+      posicao: posicao,
+      teste: teste,
+    );
+    final para = <String>[];
+    final falhas = <String>[];
+    for (final c in contatos) {
+      try {
+        await sms.enviar(c.telefone, texto);
+        para.add(c.nome);
+      } catch (_) {
+        falhas.add(c.nome);
+      }
+    }
+    _atualizarAlarme(chave, (x) => x.copiar(
+          sms: para.isEmpty ? SituacaoSms.falhou : SituacaoSms.enviado,
+          smsPara: para,
+          smsFalhas: falhas,
+        ));
+  }
+
+  /// Guarda no aparelho os telefones dos responsaveis das pulseiras de que o
+  /// usuario e dono (so o dono ve a lista). Sem internet, vale o que ja estava.
+  Future<void> atualizarContatos() async {
+    final eu = ref.read(sessaoProvider)?.usuario.id;
+    if (eu == null) return;
+    final prefs = ref.read(preferenciasProvider);
+    final contatos = Map.of(prefs.contatosSms);
+    for (final p in ref.read(pulseirasProvider).value ?? const <Pulseira>[]) {
+      if (!p.ehDono(eu)) continue;
+      try {
+        contatos[p.bleId] = destinatariosSms(await ref.read(apiProvider).responsaveis(p.id));
+      } on ErroApi {
+        // Mantem a lista anterior.
+      }
+    }
+    await prefs.salvarContatosSms(contatos);
+  }
+
+  /// Demonstracao sem pulseira: alarme e SMS de verdade, marcados como teste,
+  /// sem passar pela API (ela recusaria o anuncio sem a assinatura).
+  void simularQueda(Pulseira pulseira) {
+    final seq = Random().nextInt(0x10000);
+    final anuncio = Anuncio.decodificar([
+      versaoProtocolo,
+      ...hexParaBytes(pulseira.bleId),
+      TipoEvento.queda.codigo,
+      seq & 0xFF,
+      seq >> 8,
+      pulseira.bateriaPct ?? 80,
+      32,
+      0, 0, 0, 0,
+    ]);
+    _alarmar(anuncio, Recepcao(bytes: anuncio.bytes, em: DateTime.now()), simulado: true);
   }
 
   void _avisar(Anuncio a) {
