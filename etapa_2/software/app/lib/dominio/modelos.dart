@@ -97,6 +97,20 @@ class Responsavel {
   final bool ativo;
 }
 
+/// Quem recebe o SMS enviado pelo celular receptor. Guardado no aparelho para
+/// o SMS sair mesmo sem internet.
+class ContatoSms {
+  const ContatoSms({required this.nome, required this.telefone});
+
+  factory ContatoSms.deJson(Map<String, dynamic> j) =>
+      ContatoSms(nome: j['nome'] as String, telefone: j['telefone'] as String);
+
+  final String nome;
+  final String telefone;
+
+  Map<String, dynamic> paraJson() => {'nome': nome, 'telefone': telefone};
+}
+
 class Entrega {
   const Entrega({
     required this.canal,

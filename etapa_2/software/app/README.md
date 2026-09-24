@@ -39,7 +39,7 @@ O aplicativo é dividido em cinco camadas. A apresentação usa a aplicação; a
 | **Aplicação** | Orquestra os casos de uso e mantém o estado da interface | Processar anúncio, alarme local, envio de alerta, agregação de telemetria, sessão, saúde do sistema; estado com `flutter_riverpod` |
 | **Domínio** | Regras do SysCare, independentes de plataforma | Pacote `syscare_protocol`: decodificação dos 14 bytes, classificação do anúncio, deduplicação por `seq`, entidades pulseira, alerta e responsável |
 | **Dados** | Adaptadores para o mundo externo | Cliente HTTP (`dio`), varredura BLE (`universal_ble`), fila de envio (`sqflite`), cofre de sessão (`flutter_secure_storage`), localização (`geolocator`), notificações (`flutter_local_notifications`), *push* (`firebase_messaging`) |
-| **Plataforma Android** | O que só existe no Android | Canal de notificação de alarme, som de sirene, tela cheia; na Etapa 3, o serviço de varredura em primeiro plano |
+| **Plataforma Android** | O que só existe no Android | Canal de notificação de alarme, som de sirene, tela cheia, envio de SMS pelo plano do celular; na Etapa 3, o serviço de varredura em primeiro plano |
 
 O isolamento do domínio tem uma consequência prática: o pacote `syscare_protocol` é testado com os **mesmos vetores de bytes gerados pelo código Python da API**. Se o aplicativo e o servidor lerem o pacote de forma diferente, o teste falha antes de qualquer pulseira existir — e, depois, o mesmo teste confere o firmware.
 
@@ -56,9 +56,9 @@ O isolamento do domínio tem uma consequência prática: o pacote `syscare_proto
 | **Início** | Ambos | Um cartão por pulseira: pessoa monitorada, bateria, "vista há X min" e se este celular está escutando | Abrir pulseira; ligar ou desligar a escuta neste celular |
 | **Nova pulseira** | Responsável | Pulseiras SysCare próximas, detectadas pelo *heartbeat*, para escolher em vez de digitar o identificador | Cadastrar; exibir a chave do firmware **uma única vez** |
 | **Pulseira** | Responsável | Dados da pulseira; aba de responsáveis por prioridade; aba de histórico | Editar; incluir, ativar, desativar e remover responsáveis — ações exibidas só ao dono, identificado pelo campo `owner_id` |
-| **Alerta** (tela cheia) | Ambos | Tipo do evento, pessoa, horário, impacto, localização e quem já foi avisado | **Estou indo**; **Encerrar** como atendido ou falso alarme; abrir o mapa |
+| **Alerta** (tela cheia) | Ambos | Tipo do evento, pessoa, horário, impacto, localização, quem já foi avisado e quem recebeu o SMS deste celular | **Estou indo**; **Encerrar** como atendido ou falso alarme; abrir o mapa |
 | **Histórico** | Responsável | Eventos de todas as pulseiras, com a situação de cada um; o histórico de uma só pulseira fica na tela dela | Abrir o evento, com as entregas de cada notificação |
-| **Saúde do sistema** | Receptor | Lista de verificação: Bluetooth, permissões, notificações, tela cheia, servidor, sessão, último *heartbeat* de cada pulseira, itens na fila de envio | Corrigir cada item; tocar o alarme de teste |
+| **Saúde do sistema** | Receptor | Lista de verificação: Bluetooth, permissões, notificações, SMS, tela cheia, servidor, sessão, último *heartbeat* de cada pulseira, itens na fila de envio | Corrigir cada item; tocar o alarme de teste; simular uma queda sem a pulseira |
 | **Conta** | Ambos | Dados do usuário e o código de responsável (pendência P6) | Copiar o código; sair |
 
 A tela **Saúde do sistema** existe porque, em um sistema de emergência, a falha silenciosa é o pior modo de falha: uma permissão revogada ou o Bluetooth desligado não geram erro visível, apenas deixam de alarmar. A tela transforma cada pré-condição em um item verificável, e a tela Início mostra um atalho para ela sempre que a escuta estiver suspensa.
@@ -128,6 +128,7 @@ Qualquer saída do estado **Escutando** por causa externa leva ao estado **Suspe
 | Todas | `ACCESS_FINE_LOCATION` | Localização do evento, independentemente da varredura |
 | 13 ou superior | `POST_NOTIFICATIONS` | Sem ela, todos os canais de notificação ficam bloqueados [8] |
 | 14 ou superior | `USE_FULL_SCREEN_INTENT` | Restrita a aplicativos de chamada e de alarme; o aplicativo verifica se foi concedida antes de usar [9] |
+| Todas | `SEND_SMS` | SMS aos responsáveis pelo plano do celular (Seção 5.7). Restrita na Play Store, com exceção para aplicativos de emergência mediante declaração |
 
 As permissões são solicitadas no primeiro uso da escuta, com uma explicação antes de cada pedido, e não todas na abertura do aplicativo.
 
@@ -204,6 +205,23 @@ O *heartbeat* chega a cada 2 s. O aplicativo guarda **uma amostra por pulseira a
 
 O aplicativo cria o canal de notificação `syscare_emergencia` e inclui o som `sirene`, que são os identificadores que a API já envia no *push* de alta prioridade. O som usa o fluxo de áudio de alarme do Android, o mesmo do despertador, que continua ativo com o celular no modo silencioso. O campo `alert_id` do *push* abre diretamente a tela de Alerta. Se o *push* chega para um alerta que este mesmo celular já está exibindo por ter ouvido o anúncio, ele não alarma pela segunda vez.
 
+### 5.7 SMS pelo celular (Camada 3)
+
+A Etapa 1 previu, como terceira camada de notificação, o SMS enviado pelo próprio celular, no plano da operadora. Esta etapa o implementou, e ele passou a ser o canal de SMS do sistema: os provedores de SMS por API são pagos, e a conta de teste do Twilio, avaliada nesta etapa, só aceita modelos de mensagem prontos, recusando o texto de um alerta de queda.
+
+| Aspecto | Definição |
+|---|---|
+| Quando | Em toda emergência (queda, botão de pânico, imobilidade) de uma pulseira da conta, logo depois do alarme local, sem esperar a API nem a internet — só o sinal de celular |
+| Para quem | Todos os responsáveis ativos com telefone, por ordem de prioridade, sem número repetido |
+| Texto | O mesmo formato do SMS da API: tipo do evento, pessoa, hora e o link do mapa quando há posição. Sem acentos, para caber em um único SMS de 160 caracteres; se o nome for longo, o início é encurtado e o link chega inteiro |
+| Localização | A posição recente, se houver; senão, o SMS espera o GPS por até 15 s — a sirene já está tocando |
+| Telefones | Guardados no aparelho para o SMS sair sem internet. Só a conta dona da pulseira vê a lista de responsáveis, então o celular receptor deve estar na conta do dono; os telefones são apagados quando o usuário sai |
+| Envio | Código nativo em Kotlin com o `SmsManager` do Android, que divide mensagens longas; a tela de Alerta mostra quem recebeu |
+
+O SMS parte do número conhecido da própria pessoa ou da família, e chega como uma mensagem comum entre pessoas, sem o filtro que as operadoras aplicam ao tráfego de SMS em massa. A consequência da regra adotada é a redundância: se dois celulares ouvirem a mesma queda, cada responsável recebe dois SMS, e quem tem o aplicativo recebe também o *push*. Em um alerta de emergência, esse excesso foi preferido à falta. O envio só existe no Android, o que coincide com o papel de receptor (Seção 4.6).
+
+Para demonstração sem a pulseira, a tela Saúde do sistema oferece **Simular queda**: a sirene toca e o SMS é enviado de verdade, marcado como TESTE, mas o evento não vai para a API, que o recusaria por não ter a assinatura da pulseira.
+
 ## 6. Fluxo do alerta no aplicativo
 
 <div align="center">
@@ -226,6 +244,7 @@ A ordem da Figura 4 é a principal decisão desta arquitetura: **o alarme local 
 | Histórico e estado da pulseira | Telas Início e Histórico; telemetria | 2 |
 | Confirmação "estou indo" | Tela Alerta | 2 |
 | Encerramento como atendido ou falso positivo | Tela Alerta | 2 |
+| SMS aos responsáveis pelo próprio celular (Camada 3) | SMS pelo celular (Seção 5.7) | 2 |
 
 ## 8. Escopo desta etapa
 
@@ -237,6 +256,7 @@ A ordem da Figura 4 é a principal decisão desta arquitetura: **o alarme local 
 | API | Sessão, pulseiras, responsáveis, envio com fila, histórico, confirmação e encerramento | Renovação de sessão; pendências da Seção 9 |
 | *Push* | Canal e som do alarme já idênticos aos do *push*; recepção pendente da criação do projeto Firebase | Recepção do *push*; projeto Firebase definitivo; iOS |
 | Chave do firmware | Exibida uma vez no cadastro e gravada manualmente | Provisionamento por conexão BLE |
+| SMS pelo celular | Enviado em toda emergência a todos os responsáveis com telefone | Ligação automática ao primeiro responsável (avaliar) |
 
 ## 9. Pendências encontradas na API
 
@@ -261,7 +281,7 @@ O protótipo desta etapa segue a divisão da Seção 2, com cada camada em uma p
 | Aplicação | `lib/aplicacao` | Receptor (máquina de estados da Figura 3), envio da fila, telemetria, sessão e saúde do sistema |
 | Domínio | `packages/syscare_protocol` e `lib/dominio` | Protocolo BLE em Dart puro e entidades da API |
 | Dados | `lib/dados` | Cliente HTTP, varredura BLE, fila em SQLite, cofre da sessão, localização e alarme |
-| Plataforma Android | `android/app/src/main` | Permissões da Seção 4.4, tela de alerta sobre a tela de bloqueio e o som da sirene, sintetizado para o projeto |
+| Plataforma Android | `android/app/src/main` | Permissões da Seção 4.4, tela de alerta sobre a tela de bloqueio, envio de SMS e o som da sirene, sintetizado para o projeto |
 
 A validação é feita em três níveis de testes automatizados, todos sem celular nem pulseira: o pacote de protocolo lê os mesmos vetores de bytes gerados pela API; os modelos do aplicativo leem respostas reais capturadas da API; e o envio da fila é testado contra cada linha da tabela de respostas da Seção 5.4. O endereço da API é definido no momento da execução, o que permite apontar o aplicativo para o computador que roda o servidor na rede local durante os testes de campo. Sem a pulseira, o anúncio é simulado por um segundo celular com um aplicativo de anúncio BLE, usando os bytes gerados pela própria API.
 

@@ -22,7 +22,13 @@
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
 
+    <!-- Camada 3: SMS aos responsaveis pelo plano do proprio celular. Restrita na
+         Play Store; apps de emergencia podem declarar a excecao. -->
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="false"/>
+    <!-- SEND_SMS implicaria exigir telefonia; tablet sem chip ainda instala o app. -->
+    <uses-feature android:name="android.hardware.telephony" android:required="false"/>
 
     <application
         android:label="SysCare"
