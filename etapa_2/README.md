@@ -17,7 +17,6 @@ A Tabela 1, apresenta os componentes selecionados para o protótipo e suas respe
 > 📁 **Documentação de *Hardware*:** Acesse a pasta: [Hardware](./hardware/README.md)
 
 
-
 <div align="center">
 
 | **Categoria** | **Componente** | **Figura** | **Função** | **Critério de seleção** |
@@ -36,11 +35,17 @@ A Tabela 1, apresenta os componentes selecionados para o protótipo e suas respe
 A escolha dos componentes apresentada na Tabela 1, corresponde à configuração utilizada para a validação do primeiro protótipo. Após a validação da arquitetura e do funcionamento do sistema, poderão ser avaliadas alternativas com foco na redução do consumo energético e na integração dos componentes em uma placa dedicada.
 
 ---
-## Definição dos softwares necessários (FW, HW, MEC, APP)
+## Definição dos softwares necessários (FW, HW, MEC, APP) 
 
-Nessa parte será detalhado quais softwares será usado para firmware, hardware, mecanica e aplicativo.
+Para o desenvolvimento da Pulseira SysCare, foram definidos softwares específicos para cada uma das etapas do projeto, abrangendo o desenvolvimento do firmware (FW), projeto eletrônico (HW), desenvolvimento mecânico (MEC) e aplicativo (APP). A seleção considera as ferramentas utilizadas para programação, simulação, desenvolvimento das placas eletrônicas e modelagem da estrutura física do dispositivo.
 
-(tabela)
+| **Etapa**            | **Software**                    | **Aplicação no projeto**                                                                              |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **FW - Firmware**    | Visual Studio Code + nRF Connect NORDIC | Desenvolvimento, compilação e gerenciamento do firmware do XIAO nRF52840.                             |
+| **HW - Hardware**    | Altium Designer                 | Desenvolvimento do esquemático e projeto da placa de circuito impresso (PCI).                         |
+| **MEC - Mecânica**   | FreeCAD                 | Modelagem tridimensional e desenvolvimento da estrutura mecânica da pulseira e de seu encapsulamento. |
+| **APP - Aplicativo** |                                 |                                                                                                       |
+
 
 
 
