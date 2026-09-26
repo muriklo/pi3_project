@@ -23,7 +23,7 @@ A Tabela 1, apresenta os componentes selecionados para o protótipo e suas respe
 |:---:|:---:|:---:|:---|:---|
 | **Microcontrolador** | Seeed Studio XIAO nRF52840 | <img src="./img/xiaonrf52840.png" width="200"> | Processamento, controle do sistema e comunicação BLE | Plataforma compacta, BLE integrado e facilidade de prototipagem |
 | **Acelerômetro** | TDK InvenSense IIM-42351 | <img src="images/iim42351.png" width="120"> | Aquisição de aceleração e detecção de queda | Módulo disponível, conhecimento prévio e Free-fall Detection |
-| **Bateria** | CR2032 | <img src="./img" width="120"> | Alimentação do sistema | Dimensões reduzidas e disponibilidade |
+| **Bateria** | Bateria recarregável 541112 | <img src="./img/battery541112.png" width="120"> | Alimentação do sistema | Dimensões reduzidas e disponibilidade |
 | **Comunicação** | Bluetooth Low Energy | <img src="./img/ble.png" width="120"> | Comunicação com o smartphone | Baixo consumo e integração ao XIAO nRF52840 |
 
 </div>
