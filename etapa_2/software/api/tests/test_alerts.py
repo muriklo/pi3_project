@@ -9,6 +9,7 @@ import hashlib
 import hmac
 import os
 import tempfile
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from fastapi.testclient import TestClient
@@ -20,7 +21,7 @@ os.environ["SYSCARE_JWT_SECRET"] = "secret-de-teste"
 os.environ["SYSCARE_REQUIRE_HMAC"] = "true"
 os.environ["SYSCARE_FCM_CREDENTIALS_FILE"] = ""
 
-from app.ble import EVENT_CODES  # noqa: E402
+from app.ble import EVENT_CODES, decode_payload  # noqa: E402
 from app.database import Base, engine  # noqa: E402
 from app.main import app  # noqa: E402
 
@@ -192,3 +193,171 @@ def test_ack_e_resolucao(client, setup):
 def test_alerta_sem_autenticacao_e_recusado(client):
     r = client.post("/v1/alerts", json={"ble_id": BLE_ID, "event_type": "fall", "seq": 1})
     assert r.status_code == 401
+
+
+# --------------------------------------------------------------------------- #
+# Heartbeat (event_type 0x05) e telemetria
+# --------------------------------------------------------------------------- #
+def _minuto_cheio() -> datetime:
+    agora = datetime.now(timezone.utc)
+    return agora.replace(second=0, microsecond=0)
+
+
+def test_heartbeat_e_decodificado_como_heartbeat(setup):
+    raw = build_raw_payload(setup["secret"], seq=200, event="heartbeat", impact_dg=0)
+    assert decode_payload(bytes.fromhex(raw))["event_type"] == "heartbeat"
+
+
+def test_heartbeat_nao_vira_alerta(client, setup):
+    """O heartbeat repete o seq do ultimo evento: se virasse alerta, seria falso."""
+    raw = build_raw_payload(setup["secret"], seq=200, event="heartbeat", impact_dg=0)
+    r = client.post(
+        "/v1/alerts",
+        json={"ble_id": BLE_ID, "raw_payload": raw},
+        headers=setup["headers"],
+    )
+    assert r.status_code == 422
+    assert "telemetry" in r.json()["detail"]
+
+
+def test_telemetria_deduplica_por_janela_e_nao_por_seq(client, setup):
+    """Dois celulares ouvem o mesmo heartbeat; minutos depois o seq e o mesmo."""
+    base = _minuto_cheio()
+
+    def envia(recorded_at: datetime, battery: int) -> dict:
+        r = client.post(
+            "/v1/telemetry",
+            json={
+                "ble_id": BLE_ID,
+                "samples": [
+                    {
+                        "seq": 200,
+                        "recorded_at": recorded_at.isoformat(),
+                        "battery_pct": battery,
+                        "rssi": -70,
+                    }
+                ],
+            },
+            headers=setup["headers"],
+        )
+        assert r.status_code == 202, r.text
+        return r.json()
+
+    # Mesma janela de 60 s, celulares diferentes: uma amostra so.
+    assert envia(base + timedelta(seconds=5), 81) == {"accepted": 1, "duplicates": 0}
+    assert envia(base + timedelta(seconds=7), 81) == {"accepted": 0, "duplicates": 1}
+    # Janela seguinte, MESMO seq (nenhum evento novo): precisa ser aceito.
+    assert envia(base + timedelta(seconds=65), 80) == {"accepted": 1, "duplicates": 0}
+
+    device = client.get(
+        f"/v1/devices/{setup['device']['id']}", headers=setup["headers"]
+    ).json()
+    assert device["battery_pct"] == 80
+
+
+# --------------------------------------------------------------------------- #
+# Responsavel que nao e o dono da pulseira
+# --------------------------------------------------------------------------- #
+def _conta(client, email: str, nome: str) -> dict:
+    r = client.post(
+        "/v1/auth/register",
+        json={"email": email, "name": nome, "password": "senha-forte-1"},
+    )
+    assert r.status_code == 201, r.text
+    return {
+        "id": r.json()["user"]["id"],
+        "headers": {"Authorization": f"Bearer {r.json()['access_token']}"},
+    }
+
+
+@pytest.fixture(scope="module")
+def cuidador(client, setup):
+    """Joao recebe o push da pulseira da Maria, mas nao e o dono dela."""
+    joao = _conta(client, "joao@exemplo.com", "Joao")
+    r = client.post(
+        f"/v1/devices/{setup['device']['id']}/caregivers",
+        json={"name": "Joao", "user_id": joao["id"], "priority": 2},
+        headers=setup["headers"],
+    )
+    assert r.status_code == 201, r.text
+    joao["caregiver_id"] = r.json()["id"]
+    return joao
+
+
+def _novo_alerta(client, setup, seq: int) -> str:
+    r = client.post(
+        "/v1/alerts",
+        json={"ble_id": BLE_ID, "raw_payload": build_raw_payload(setup["secret"], seq)},
+        headers=setup["headers"],
+    )
+    assert r.status_code == 201, r.text
+    return r.json()["alert"]["id"]
+
+
+def test_responsavel_ve_a_pulseira_e_o_historico(client, setup, cuidador):
+    device_id = setup["device"]["id"]
+    alert_id = _novo_alerta(client, setup, 300)
+
+    pulseiras = client.get("/v1/devices", headers=cuidador["headers"]).json()
+    assert [d["id"] for d in pulseiras] == [device_id]
+    # O app usa owner_id para saber se mostra as acoes de edicao.
+    assert pulseiras[0]["owner_id"] != cuidador["id"]
+    r = client.get(f"/v1/devices/{device_id}", headers=cuidador["headers"])
+    assert r.status_code == 200
+    historico = client.get("/v1/alerts", headers=cuidador["headers"]).json()
+    assert alert_id in [a["id"] for a in historico]
+    r = client.get(f"/v1/alerts/{alert_id}", headers=cuidador["headers"])
+    assert r.status_code == 200
+
+
+def test_responsavel_confirma_e_encerra_o_alerta(client, setup, cuidador):
+    """O "Estou indo" de qualquer responsavel interrompe o reenvio (Etapa 1)."""
+    alert_id = _novo_alerta(client, setup, 301)
+
+    r = client.post(f"/v1/alerts/{alert_id}/ack", headers=cuidador["headers"])
+    assert r.status_code == 200, r.text
+    assert r.json()["status"] == "acked"
+    assert r.json()["acked_by_user_id"] == cuidador["id"]
+
+    r = client.post(
+        f"/v1/alerts/{alert_id}/resolve",
+        json={"status": "resolved"},
+        headers=cuidador["headers"],
+    )
+    assert r.status_code == 200
+    assert r.json()["status"] == "resolved"
+
+
+def test_responsavel_nao_edita_a_pulseira(client, setup, cuidador):
+    """Editar e ver a lista de responsaveis (com telefones) continua so do dono."""
+    device_id = setup["device"]["id"]
+    r = client.patch(
+        f"/v1/devices/{device_id}", json={"name": "Outra"}, headers=cuidador["headers"]
+    )
+    assert r.status_code == 404
+    r = client.get(f"/v1/devices/{device_id}/caregivers", headers=cuidador["headers"])
+    assert r.status_code == 404
+
+
+def test_estranho_nao_ve_nem_confirma(client, setup):
+    estranho = _conta(client, "estranho@exemplo.com", "Estranho")
+    alert_id = _novo_alerta(client, setup, 302)
+
+    assert client.get("/v1/devices", headers=estranho["headers"]).json() == []
+    assert client.get("/v1/alerts", headers=estranho["headers"]).json() == []
+    r = client.post(f"/v1/alerts/{alert_id}/ack", headers=estranho["headers"])
+    assert r.status_code == 404
+
+
+def test_responsavel_desativado_perde_o_acesso(client, setup, cuidador):
+    alert_id = _novo_alerta(client, setup, 303)
+    r = client.patch(
+        f"/v1/devices/{setup['device']['id']}/caregivers/{cuidador['caregiver_id']}",
+        json={"active": False},
+        headers=setup["headers"],
+    )
+    assert r.status_code == 200, r.text
+
+    r = client.get(f"/v1/alerts/{alert_id}", headers=cuidador["headers"])
+    assert r.status_code == 404
+    assert client.get("/v1/devices", headers=cuidador["headers"]).json() == []
