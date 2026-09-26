@@ -29,11 +29,16 @@ redundância.
 zero, entrega em segundos, funciona com o app fechado. Cobre o cuidador que não
 está no alcance do BLE.
 
-**Camada 3 — fallback offline no próprio app.** Se o `POST /v1/alerts` falhar
-(sem sinal de dados), o app enfileira o envio **e** dispara SMS e/ou ligação
-direto pelo celular, pelo plano do usuário. Sai de graça e não depende de
-servidor nenhum. No Android: `SmsManager.sendTextMessage()` (permissão
-`SEND_SMS`) e `Intent(ACTION_CALL)` (permissão `CALL_PHONE`).
+**Camada 3 — SMS pelo próprio app.** O app dispara SMS direto pelo celular,
+pelo plano do usuário. Sai de graça e não depende de servidor nenhum. No
+Android: `SmsManager` (permissão `SEND_SMS`); a ligação automática, com
+`Intent(ACTION_CALL)` (permissão `CALL_PHONE`), segue só avaliada.
+
+> **Implementada na etapa 2** (`etapa_2/software/app`, Seção 5.7 da
+> arquitetura do app), com uma mudança: o SMS sai em **toda** emergência, para
+> todos os responsáveis com telefone, e não só quando a API está inacessível.
+> Virou o canal de SMS do sistema porque a conta de teste do Twilio só envia
+> modelos prontos (erro `572006`, testado em 24/09/2026).
 
 > Atenção na publicação: a Play Store restringe `SEND_SMS` e `CALL_PHONE`, mas
 > abre exceção justamente para apps de emergência/segurança pessoal. É preciso

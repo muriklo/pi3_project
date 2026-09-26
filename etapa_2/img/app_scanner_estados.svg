@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="480" viewBox="0 0 1000 480" font-family="Segoe UI, Helvetica, Arial, sans-serif"><defs><marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#374151"/></marker><marker id="seta_v" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#dc2626"/></marker></defs><rect width="1000" height="480" rx="12" fill="#ffffff"/><circle cx="34" cy="245" r="8" fill="#374151"/>
+<path d="M42,245 L58,245" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<rect x="60" y="215" width="130" height="60" rx="10" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/>
+<text x="125.0" y="250.0" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="middle">Desligado</text>
+<rect x="290" y="215" width="190" height="60" rx="10" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/>
+<text x="385.0" y="241.5" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="middle">Verificando</text>
+<text x="385.0" y="258.5" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="middle">permissões e Bluetooth</text>
+<rect x="580" y="195" width="210" height="100" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="2.5"/>
+<text x="685.0" y="234.0" font-size="16" font-weight="bold" fill="#1f2937" text-anchor="middle">Escutando</text>
+<text x="685.0" y="251.0" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="middle">varredura contínua</text>
+<text x="685.0" y="268.0" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="middle">filtro Company ID 0xFFFF</text>
+<rect x="290" y="370" width="190" height="60" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="385.0" y="396.5" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="middle">Suspenso</text>
+<text x="385.0" y="413.5" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="middle">aviso na Saúde do sistema</text>
+<rect x="580" y="40" width="210" height="60" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="685.0" y="66.5" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="middle">Aguardando reinício</text>
+<text x="685.0" y="83.5" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="middle">espera crescente</text>
+<path d="M190,245 L288,245" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<text x="239" y="236" font-size="11.5" font-weight="normal" fill="#4b5563" text-anchor="middle">liga a escuta</text>
+<path d="M480,245 L578,245" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<text x="529" y="223" font-size="11.5" font-weight="normal" fill="#4b5563" text-anchor="middle">tudo ok /</text>
+<text x="529" y="237" font-size="11.5" font-weight="normal" fill="#4b5563" text-anchor="middle">inicia varredura</text>
+<path d="M355,275 L355,368" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<text x="347" y="316" font-size="11.5" font-weight="normal" fill="#4b5563" text-anchor="end">permissão negada ou</text>
+<text x="347" y="330" font-size="11.5" font-weight="normal" fill="#4b5563" text-anchor="end">Bluetooth desligado</text>
+<path d="M415,370 L415,277" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<text x="423" y="316" font-size="11.5" font-weight="normal" fill="#4b5563" text-anchor="start">Bluetooth ligado ou</text>
+<text x="423" y="330" font-size="11.5" font-weight="normal" fill="#4b5563" text-anchor="start">permissão concedida</text>
+<path d="M685,295 L685,400 L482,400" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<text x="583" y="420" font-size="11.5" font-weight="normal" fill="#4b5563" text-anchor="middle">Bluetooth desligado ou</text>
+<text x="583" y="434" font-size="11.5" font-weight="normal" fill="#4b5563" text-anchor="middle">permissão revogada</text>
+<path d="M685,195 L685,102" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<text x="693" y="152" font-size="11.5" font-weight="normal" fill="#4b5563" text-anchor="start">falha da varredura</text>
+<path d="M580,70 L385,70 L385,213" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<text x="482" y="62" font-size="11.5" font-weight="normal" fill="#4b5563" text-anchor="middle">fim da espera</text>
+<path d="M790,222 C850,192 850,298 792,270" fill="none" stroke="#374151" stroke-width="1.6" marker-end="url(#seta)"/>
+<rect x="848" y="170" width="142" height="130" rx="10" fill="#ffffff" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="860" y="192" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="start">anúncio recebido:</text>
+<text x="860" y="212" font-size="11.5" font-weight="normal" fill="#4b5563" text-anchor="start">valida → classifica</text>
+<text x="860" y="230" font-size="11.5" font-weight="normal" fill="#4b5563" text-anchor="start">→ deduplica</text>
+<text x="860" y="248" font-size="11.5" font-weight="normal" fill="#4b5563" text-anchor="start">emergência: alarme</text>
+<text x="860" y="266" font-size="11.5" font-weight="normal" fill="#4b5563" text-anchor="start">local + fila de envio</text>
+<text x="860" y="284" font-size="11.5" font-weight="normal" fill="#4b5563" text-anchor="start">heartbeat: telemetria</text>
+<rect x="24" y="30" width="230" height="56" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="38" y="52" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="start">De qualquer estado:</text>
+<text x="38" y="70" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="start">usuário desliga → Desligado</text>
+<rect x="24" y="102" width="230" height="72" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="38" y="123" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="start">Reinicia só em mudança de estado:</text>
+<text x="38" y="141" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="start">o Android 7+ ignora mais de 5</text>
+<text x="38" y="159" font-size="12" font-weight="normal" fill="#4b5563" text-anchor="start">inícios de varredura em 30 s.</text></svg>

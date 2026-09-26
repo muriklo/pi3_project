@@ -19,6 +19,11 @@ from app.models import EventType
 COMPANY_ID = 0xFFFF
 PROTOCOL_VERSION = 1
 
+# O heartbeat nao e um EventType: ele nunca vira alerta, vai para /v1/telemetry.
+# Ele repete o `seq` do ultimo evento em vez de incrementa-lo, entao sem um codigo
+# proprio o app nao distinguiria "estou viva" de "cai" (ver docs/ble_payload.md).
+HEARTBEAT = "heartbeat"
+
 # Codigos que trafegam no ar. Nao renumere sem atualizar o firmware.
 EVENT_CODES: dict[str, int] = {
     EventType.TEST.value: 0x00,
@@ -26,6 +31,7 @@ EVENT_CODES: dict[str, int] = {
     EventType.PANIC.value: 0x02,
     EventType.NO_MOVEMENT.value: 0x03,
     EventType.LOW_BATTERY.value: 0x04,
+    HEARTBEAT: 0x05,
 }
 EVENT_NAMES: dict[int, str] = {v: k for k, v in EVENT_CODES.items()}
 
