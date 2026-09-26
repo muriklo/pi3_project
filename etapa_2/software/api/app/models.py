@@ -210,15 +210,24 @@ class AlertDelivery(Base):
 
 
 class Telemetry(Base):
-    """Heartbeat periodico da pulseira: prova que ela esta viva e com bateria."""
+    """Heartbeat periodico da pulseira: prova que ela esta viva e com bateria.
+
+    Deduplicado por (pulseira, janela de tempo), e nao por `seq`: o heartbeat
+    repete o seq do ultimo evento, que fica parado por horas quando nada acontece.
+    """
 
     __tablename__ = "telemetry"
-    __table_args__ = (UniqueConstraint("device_id", "seq", name="uq_telemetry_seq"),)
+    __table_args__ = (
+        UniqueConstraint("device_id", "bucket_start", name="uq_telemetry_bucket"),
+    )
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
     device_id: Mapped[str] = mapped_column(ForeignKey("devices.id"), index=True)
+    # Ultimo seq de evento anunciado. Maior que Device.last_seq = evento perdido.
     seq: Mapped[int] = mapped_column(Integer)
     recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    # Inicio da janela de SYSCARE_TELEMETRY_BUCKET_SECONDS em que a amostra cai.
+    bucket_start: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     battery_pct: Mapped[int | None] = mapped_column(Integer, nullable=True)
     rssi: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

@@ -75,6 +75,9 @@ class DeviceOut(BaseModel):
     ble_id: str
     name: str
     wearer_name: str | None
+    owner_id: str = Field(
+        description="Dono da pulseira. Diferente do usuario logado = so responsavel."
+    )
     battery_pct: int | None
     last_seen_at: datetime | None
     active: bool
@@ -239,14 +242,22 @@ class AlertResolve(BaseModel):
 # Telemetria
 # --------------------------------------------------------------------------- #
 class TelemetrySample(BaseModel):
-    seq: int = Field(ge=0, le=65535)
+    seq: int = Field(
+        ge=0,
+        le=65535,
+        description="Seq do ultimo evento, repetido pelo heartbeat (nao incrementa).",
+    )
     recorded_at: datetime
     battery_pct: int | None = Field(default=None, ge=0, le=100)
     rssi: int | None = Field(default=None, ge=-127, le=20)
 
 
 class TelemetryBatch(BaseModel):
-    """O app acumula heartbeats offline e envia em lote para poupar radio/bateria."""
+    """O app acumula heartbeats offline e envia em lote para poupar radio/bateria.
+
+    Basta uma amostra por janela de SYSCARE_TELEMETRY_BUCKET_SECONDS; as demais
+    da mesma janela sao contadas como duplicadas.
+    """
 
     ble_id: str = Field(min_length=8, max_length=8)
     samples: list[TelemetrySample] = Field(min_length=1, max_length=200)

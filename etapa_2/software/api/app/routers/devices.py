@@ -4,7 +4,7 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 
-from app.deps import CurrentUser, DbSession, OwnedDevice
+from app.deps import CurrentUser, DbSession, OwnedDevice, VisibleDevice, visible_device_ids
 from app.models import Caregiver, Device, User
 from app.schemas import (
     CaregiverCreate,
@@ -46,13 +46,18 @@ def create_device(body: DeviceCreate, db: DbSession, user: CurrentUser) -> Devic
 
 @router.get("", response_model=list[DeviceOut])
 def list_devices(db: DbSession, user: CurrentUser) -> list[Device]:
+    # As do usuario e as de que ele e responsavel; owner_id diz qual e qual.
     return list(
-        db.scalars(select(Device).where(Device.owner_id == user.id).order_by(Device.name))
+        db.scalars(
+            select(Device)
+            .where(Device.id.in_(visible_device_ids(user.id)))
+            .order_by(Device.name)
+        )
     )
 
 
 @router.get("/{device_id}", response_model=DeviceOut)
-def get_device(device: OwnedDevice) -> Device:
+def get_device(device: VisibleDevice) -> Device:
     return device
 
 
