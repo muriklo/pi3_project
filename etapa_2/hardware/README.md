@@ -81,7 +81,20 @@ Após a validação do primeiro protótipo, poderá ser realizada uma nova avali
 
 Portanto, a seleção do IIM-42351 representa uma decisão de desenvolvimento voltada à validação inicial do sistema, considerando simultaneamente a disponibilidade do hardware, o conhecimento prévio da equipe e a presença de uma funcionalidade considerada fundamental para a aplicação, mesmo que existam alternativas com menor consumo energético.
 
- 
+
+## Seleção da bateria
+
+Para o primeiro protótipo da Pulseira SysCare, será utilizada uma bateria recarregável modelo 541112, com capacidade de 50 mAh, que estava disponível para utilização no projeto, como vista na Figura 3 [3]. A escolha também é adequada às características do protótipo, principalmente devido às suas pequenas dimensões, baixo peso e possibilidade de recarga.
+
+A bateria pode ser recarregada diretamente por meio da interface USB do XIAO nRF52840, eliminando a necessidade de um circuito externo dedicado para recarga durante esta etapa do desenvolvimento. Além disso, a capacidade disponível é suficiente para manter o sistema em funcionamento por aproximadamente 7 dias de forma ininterrupta, considerando o consumo do protótipo desenvolvido.
+
+Dessa forma, a bateria atende aos requisitos do primeiro protótipo tanto em relação às dimensões físicas quanto à autonomia e praticidade de recarga. Em etapas futuras, a bateria poderá ser reavaliada de acordo com os resultados obtidos nos testes de consumo energético e com eventuais alterações no projeto.
+
+<div align="center"> 
+  <img src="../img/battery541112.png" alt="Bateria recarregável 541112" width="50%"> 
+  <p>Figura 3 - Bateria recarregável 541112 utilizada no protótipo</p>
+</div>
+
 
 ## Referências (links/datasheets/livros)
 
@@ -90,5 +103,5 @@ Portanto, a seleção do IIM-42351 representa uma decisão de desenvolvimento vo
 
 - [2] [High-performance 3-Axis SmartIndustrial™ Accelerometer MEMS Device for Industrial Applications](https://product.tdk.com/system/files/dam/doc/product/sensor/mortion-inertial/accelero/data_sheet/ds-000441-iim-42351-typ-v1.2.pdf)
 
-
+- [3] [Bateria de polímero de lítio de 3.7v 50mah 541112 para fone de ouvido bluetooth](https://pt.aliexpress.com/item/1005010578056028.html?gatewayAdapt=glo2bra)
 
