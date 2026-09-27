@@ -49,7 +49,7 @@ Para o desenvolvimento da Pulseira SysCare, foram definidos softwares específic
 
 
 
-## Referências (links/datasheets/livros)
+## Referências
 
 
 - [1] []()
