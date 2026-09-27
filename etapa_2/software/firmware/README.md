@@ -49,6 +49,20 @@ Dessa forma, o acelerômetro é responsável pela detecção inicial e geração
 
 Essa configuração é particularmente interessante para o primeiro protótipo porque permite utilizar a funcionalidade de detecção de queda do próprio acelerômetro em Low Power a partir de 25 Hz, contribuindo para reduzir o consumo energético da pulseira. O XIAO nRF52840 permanece responsável pelo processamento do evento apenas quando uma interrupção é gerada.
 
+## Arquitetura do firmware
+
+Para detalhar a implementação do firmware da Pulseira SysCare, foi elaborado um diagrama de blocos relacionando os principais módulos de software, os periféricos internos do XIAO nRF52840 e os componentes externos do sistema. O diagrama apresenta também as principais interconexões utilizadas, incluindo a comunicação SPI entre o microcontrolador e o acelerômetro IIM-42351 e a linha de interrupção utilizada para sinalizar eventos de detecção.
+
+A arquitetura foi organizada sobre o Zephyr RTOS / nRF Connect SDK, sendo dividida em módulos responsáveis pela detecção e confirmação de quedas, tratamento de interrupções, comunicação com o acelerômetro, gerenciamento de energia, armazenamento de dados, montagem dos pacotes e comunicação BLE.
+
+Na detecção de quedas, o acelerômetro IIM-42351 realiza a detecção inicial de *freefall* e gera uma interrupção por meio da linha INT1. O XIAO nRF52840 recebe essa interrupção e executa a máquina de estados responsável pelo envio das mensagens via BLE.
+
+<div align="center">
+    <img src="../../img/diagrama_de_blocos_hardware.png" alt="Diagrama de blocos da arquitetura de hardware e firmware da Pulseira SysCare" width="65%">
+    <p>Figura 1 - Diagrama de blocos da arquitetura de hardware e firmware da Pulseira SysCare.</p>
+</div>
+
+
 ## Referências
 
 - [1] [High-performance 3-Axis SmartIndustrial™ Accelerometer MEMS Device for Industrial Applications](https://product.tdk.com/system/files/dam/doc/product/sensor/mortion-inertial/accelero/data_sheet/ds-000441-iim-42351-typ-v1.2.pdf)
