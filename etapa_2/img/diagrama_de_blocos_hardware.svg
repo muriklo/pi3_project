@@ -1,0 +1,181 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="990" viewBox="0 0 1440 990" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14">
+<defs>
+<marker id="v" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#15803d"/></marker>
+<marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#dc2626"/></marker>
+<marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#374151"/></marker>
+</defs>
+<rect width="1440" height="990" fill="#ffffff"/>
+<text x="20" y="30" font-size="18" font-weight="bold" fill="#111827">Diagrama de blocos da pulseira — hardware e firmware</text>
+<text x="20" y="52" font-size="13" fill="#4b5563">SysCare · protótipo da etapa 2</text>
+
+<!-- ============ Bateria ============ -->
+<rect x="640" y="40" width="200" height="80" fill="#ffc7c7" stroke="#1f2937" stroke-width="1.5"/>
+<text x="740" y="74" text-anchor="middle" font-weight="bold" fill="#111827">Bateria</text>
+<text x="740" y="96" text-anchor="middle" fill="#111827">CR2032 · 3 V</text>
+
+<!-- ============ XIAO nRF52840 ============ -->
+<rect x="380" y="210" width="720" height="470" fill="#fff2b3" stroke="#1f2937" stroke-width="1.5"/>
+<text x="740" y="238" text-anchor="middle" font-size="16" font-weight="bold" fill="#111827">XIAO nRF52840 (Seeed Studio)</text>
+
+<!-- Linha A: lógica da aplicação no firmware -->
+<g stroke="#1f2937" stroke-width="1.2" fill="#c9daf8">
+  <rect x="400" y="260" width="260" height="60"/>
+  <rect x="680" y="260" width="120" height="60"/>
+  <rect x="820" y="260" width="260" height="60"/>
+</g>
+<text x="530" y="286" text-anchor="middle" font-weight="bold" fill="#111827">Detecção de queda (FSM)</text>
+<text x="530" y="306" text-anchor="middle" font-size="12" fill="#374151">queda livre → impacto → imobilidade</text>
+<text x="740" y="286" text-anchor="middle" font-weight="bold" fill="#111827">Pré-alarme</text>
+<text x="740" y="306" text-anchor="middle" font-size="12" fill="#374151">cancelamento 10 s</text>
+<text x="950" y="286" text-anchor="middle" font-weight="bold" fill="#111827">Montagem do pacote</text>
+<text x="950" y="306" text-anchor="middle" font-size="12" fill="#374151">14 bytes + HMAC-SHA256</text>
+
+<!-- Linha B: serviços e drivers -->
+<g stroke="#1f2937" stroke-width="1.2" fill="#c9daf8">
+  <rect x="400" y="360" width="120" height="60"/>
+  <rect x="540" y="360" width="120" height="60"/>
+  <rect x="680" y="360" width="120" height="60"/>
+  <rect x="820" y="360" width="120" height="60"/>
+  <rect x="960" y="360" width="120" height="60"/>
+</g>
+<text x="460" y="386" text-anchor="middle" fill="#111827">Tratamento de</text>
+<text x="460" y="404" text-anchor="middle" fill="#111827">interrupção</text>
+<text x="600" y="386" text-anchor="middle" fill="#111827">Driver do</text>
+<text x="600" y="404" text-anchor="middle" fill="#111827">acelerômetro</text>
+<text x="740" y="386" text-anchor="middle" fill="#111827">NVS</text>
+<text x="740" y="404" text-anchor="middle" font-size="12" fill="#374151">seq e chave</text>
+<text x="880" y="386" text-anchor="middle" fill="#111827">Gestão de</text>
+<text x="880" y="404" text-anchor="middle" fill="#111827">energia</text>
+<text x="1020" y="386" text-anchor="middle" fill="#111827">BLE Stack</text>
+<text x="1020" y="404" text-anchor="middle" font-size="12" fill="#374151">advertising</text>
+
+<!-- Ligações que atravessam o Zephyr (a barra fica por cima) -->
+<g fill="none" stroke="#15803d" stroke-width="2">
+  <path d="M460,500 L460,422" marker-end="url(#v)"/>
+  <path d="M600,422 L600,498" marker-start="url(#v)" marker-end="url(#v)"/>
+  <path d="M740,422 L740,498" marker-start="url(#v)" marker-end="url(#v)"/>
+  <path d="M880,500 L880,422" marker-end="url(#v)"/>
+  <path d="M1020,420 L1020,498" marker-end="url(#v)"/>
+</g>
+<!-- Zephyr -->
+<rect x="400" y="440" width="680" height="34" fill="#a4c2f4" stroke="#1f2937" stroke-width="1.2"/>
+<text x="740" y="462" text-anchor="middle" fill="#111827"><tspan font-weight="bold">Zephyr RTOS</tspan> · nRF Connect SDK (kernel, drivers, controlador BLE)</text>
+
+<!-- Linha C: periféricos do SoC -->
+<rect x="392" y="490" width="696" height="110" fill="none" stroke="#6b7280" stroke-width="1.2" stroke-dasharray="6 4"/>
+<g stroke="#1f2937" stroke-width="1.2" fill="#ffe680">
+  <rect x="400" y="500" width="120" height="60"/>
+  <rect x="540" y="500" width="120" height="60"/>
+  <rect x="680" y="500" width="120" height="60"/>
+  <rect x="820" y="500" width="120" height="60"/>
+  <rect x="960" y="500" width="120" height="60"/>
+</g>
+<text x="460" y="526" text-anchor="middle" fill="#111827">GPIO</text>
+<text x="460" y="544" text-anchor="middle" font-size="12" fill="#374151">+ GPIOTE</text>
+<text x="600" y="526" text-anchor="middle" fill="#111827">SPIM</text>
+<text x="600" y="544" text-anchor="middle" font-size="12" fill="#374151">SPI mestre</text>
+<text x="740" y="526" text-anchor="middle" fill="#111827">Flash interna</text>
+<text x="740" y="544" text-anchor="middle" font-size="12" fill="#374151">1 MB</text>
+<text x="880" y="526" text-anchor="middle" fill="#111827">SAADC</text>
+<text x="880" y="544" text-anchor="middle" font-size="12" fill="#374151">mede VDD</text>
+<text x="1020" y="526" text-anchor="middle" fill="#111827">Rádio</text>
+<text x="1020" y="544" text-anchor="middle" font-size="12" fill="#374151">2,4 GHz</text>
+<text x="620" y="588" font-size="12" font-style="italic" fill="#4b5563">SoC nRF52840 · Cortex-M4F · 64 MHz · 256 KB RAM</text>
+
+<!-- Antena -->
+<rect x="960" y="612" width="120" height="52" fill="#ffe680" stroke="#1f2937" stroke-width="1.2"/>
+<text x="1020" y="634" text-anchor="middle" fill="#111827">Antena</text>
+<text x="1020" y="652" text-anchor="middle" font-size="12" fill="#374151">cerâmica, na placa</text>
+
+<!-- Ligações internas -->
+<g fill="none" stroke="#15803d" stroke-width="2">
+  <path d="M660,290 L678,290" marker-end="url(#v)"/>
+  <path d="M800,290 L818,290" marker-end="url(#v)"/>
+  <path d="M460,360 L460,322" marker-end="url(#v)"/>
+  <path d="M600,360 L600,322" marker-end="url(#v)"/>
+  <path d="M880,360 L880,322" marker-end="url(#v)"/>
+  <path d="M1020,320 L1020,358" marker-end="url(#v)"/>
+  <path d="M740,360 L740,340 L840,340 L840,322" marker-start="url(#v)" marker-end="url(#v)"/>
+  <path d="M1020,560 L1020,610" marker-end="url(#v)"/>
+</g>
+
+<!-- ============ Alimentação ============ -->
+<path d="M700,120 L700,208" fill="none" stroke="#dc2626" stroke-width="2" marker-end="url(#r)"/>
+<path d="M780,120 L780,208" fill="none" stroke="#374151" stroke-width="2" marker-end="url(#p)"/>
+<text x="690" y="170" text-anchor="end" font-size="16" fill="#dc2626">VCC 3 V</text>
+<text x="790" y="170" font-size="16" fill="#374151">GND</text>
+<path d="M640,68 L90,68 L90,820 L378,820" fill="none" stroke="#dc2626" stroke-width="2" marker-end="url(#r)"/>
+<path d="M640,100 L112,100 L112,850 L378,850" fill="none" stroke="#374151" stroke-width="2" marker-end="url(#p)"/>
+<text x="250" y="812" font-size="14" fill="#dc2626">VCC</text>
+<text x="250" y="842" font-size="14" fill="#374151">GND</text>
+
+<!-- ============ Periféricos externos ============ -->
+<rect x="150" y="380" width="150" height="50" fill="#ffffff" stroke="#1f2937" stroke-width="1.2" stroke-dasharray="6 4"/>
+<text x="225" y="401" text-anchor="middle" fill="#111827">Buzzer / vibração</text>
+<text x="225" y="419" text-anchor="middle" font-size="12" fill="#4b5563">(previsto)</text>
+<rect x="150" y="470" width="150" height="50" fill="#fff2b3" stroke="#1f2937" stroke-width="1.2"/>
+<text x="225" y="500" text-anchor="middle" fill="#111827">LEDs de status</text>
+<rect x="150" y="575" width="150" height="50" fill="#fff2b3" stroke="#1f2937" stroke-width="1.2"/>
+<text x="225" y="597" text-anchor="middle" fill="#111827">Botão de</text>
+<text x="225" y="615" text-anchor="middle" fill="#111827">emergência</text>
+
+<g fill="none" stroke="#15803d" stroke-width="2">
+  <path d="M400,520 L340,520 L340,495 L302,495" marker-end="url(#v)"/>
+  <path d="M302,600 L340,600 L340,545 L398,545" marker-end="url(#v)"/>
+  <path d="M340,495 L340,405 L302,405" stroke-dasharray="6 4" marker-end="url(#v)"/>
+</g>
+<text x="225" y="455" text-anchor="middle" font-size="13" fill="#15803d">GPIO · saída</text>
+<text x="225" y="646" text-anchor="middle" font-size="13" fill="#15803d">GPIO · entrada (IRQ)</text>
+
+<!-- ============ Acelerômetro ============ -->
+<rect x="380" y="760" width="380" height="180" fill="#fff2b3" stroke="#1f2937" stroke-width="1.5"/>
+<text x="570" y="788" text-anchor="middle" font-size="15" font-weight="bold" fill="#111827">Acelerômetro IIM-42351 (TDK)</text>
+<text x="570" y="810" text-anchor="middle" font-size="13" fill="#374151">3 eixos · ±16 g · 16 bits · FIFO 2 KB</text>
+<rect x="430" y="828" width="280" height="96" fill="#ffe680" stroke="#1f2937" stroke-width="1.2"/>
+<text x="570" y="852" text-anchor="middle" font-weight="bold" fill="#111827">Funções internas do sensor</text>
+<text x="570" y="876" text-anchor="middle" fill="#111827">detecção de queda livre</text>
+<text x="570" y="898" text-anchor="middle" fill="#111827">wake-on-motion</text>
+<text x="570" y="916" text-anchor="middle" font-size="12" fill="#4b5563">geram a interrupção INT1</text>
+
+<g fill="none" stroke="#15803d" stroke-width="2">
+  <path d="M600,562 L600,758" marker-start="url(#v)" marker-end="url(#v)"/>
+  <path d="M460,758 L460,562" marker-end="url(#v)"/>
+</g>
+<text x="612" y="722" font-size="15" fill="#15803d">SPI</text>
+<text x="612" y="740" font-size="12" fill="#15803d">SCK · MOSI · MISO · CS</text>
+<text x="450" y="730" text-anchor="end" font-size="15" fill="#15803d">INT1</text>
+
+<!-- ============ Smartphone ============ -->
+<rect x="1220" y="600" width="180" height="80" fill="#ffa64d" stroke="#1f2937" stroke-width="1.5"/>
+<text x="1310" y="636" text-anchor="middle" fill="#111827">Smartphone</text>
+<text x="1310" y="656" text-anchor="middle" fill="#111827">App SysCare</text>
+<path d="M1080,630 L1218,630" fill="none" stroke="#15803d" stroke-width="2" marker-end="url(#v)"/>
+<path d="M1220,662 L1082,662" fill="none" stroke="#15803d" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#v)"/>
+<text x="1150" y="608" text-anchor="middle" font-size="16" fill="#15803d">BLE</text>
+<text x="1150" y="623" text-anchor="middle" font-size="12" fill="#15803d">advertising</text>
+<text x="1160" y="696" text-anchor="middle" font-size="12" fill="#4b5563">conexão (previsto)</text>
+
+<!-- ============ Legenda ============ -->
+<g transform="translate(1160,760)">
+  <rect x="0" y="0" width="240" height="26" fill="#ffffff" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="120" y="18" text-anchor="middle" fill="#111827">Legenda</text>
+  <rect x="0" y="26" width="240" height="30" fill="#c9daf8" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="120" y="46" text-anchor="middle" fill="#111827">Firmware</text>
+  <rect x="0" y="56" width="240" height="30" fill="#fff2b3" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="120" y="76" text-anchor="middle" fill="#111827">Hardware</text>
+  <rect x="0" y="86" width="240" height="30" fill="#ffe680" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="120" y="106" text-anchor="middle" fill="#111827">Hardware interno (periférico)</text>
+  <rect x="0" y="116" width="240" height="30" fill="#ffa64d" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="120" y="136" text-anchor="middle" fill="#111827">Aplicativo</text>
+  <rect x="0" y="146" width="240" height="30" fill="#ffc7c7" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="120" y="166" text-anchor="middle" fill="#111827">Alimentação</text>
+  <path d="M0,198 L40,198" stroke="#15803d" stroke-width="2" marker-end="url(#v)"/>
+  <text x="50" y="203" font-size="13" fill="#111827">sinal / dados</text>
+  <path d="M130,198 L170,198" stroke="#dc2626" stroke-width="2" marker-end="url(#r)"/>
+  <text x="180" y="203" font-size="13" fill="#111827">VCC</text>
+  <path d="M0,222 L40,222" stroke="#374151" stroke-width="2" marker-end="url(#p)"/>
+  <text x="50" y="227" font-size="13" fill="#111827">GND</text>
+  <path d="M130,222 L170,222" stroke="#15803d" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#v)"/>
+  <text x="180" y="227" font-size="13" fill="#111827">previsto</text>
+</g>
+</svg>
