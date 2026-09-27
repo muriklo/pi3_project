@@ -68,13 +68,13 @@ curl -X POST localhost:8000/v1/alerts -H "Authorization: Bearer $TOKEN" \
 | GET | `/v1/auth/me` | Dados do usuário logado |
 | POST/DELETE | `/v1/auth/push-tokens` | Token FCM do aparelho (registro/logout) |
 | POST/GET | `/v1/devices` | Cadastrar e listar pulseiras |
-| GET/PATCH | `/v1/devices/{id}` | Detalhe e edição |
-| POST/GET/PATCH/DELETE | `/v1/devices/{id}/caregivers` | Quem é avisado |
+| GET/PATCH | `/v1/devices/{id}` | Detalhe (dono e responsáveis) e edição (só o dono) |
+| POST/GET/PATCH/DELETE | `/v1/devices/{id}/caregivers` | Quem é avisado (só o dono: a lista tem telefones de terceiros) |
 | **POST** | **`/v1/alerts`** | **Reportar evento ouvido no BLE** |
 | GET | `/v1/alerts` · `/v1/alerts/{id}` | Histórico |
-| POST | `/v1/alerts/{id}/ack` | "Estou indo" — interrompe o escalonamento |
+| POST | `/v1/alerts/{id}/ack` | "Estou indo" — interrompe o escalonamento; dono ou qualquer responsável ativo |
 | POST | `/v1/alerts/{id}/resolve` | Encerrar: `resolved` ou `false_positive` |
-| POST | `/v1/telemetry` | Lote de heartbeats (bateria, presença) |
+| POST | `/v1/telemetry` | Lote de heartbeats `0x05` (bateria, presença), deduplicado por janela de 60 s |
 | GET | `/health` | Liveness |
 
 ## As três decisões de projeto que importam
@@ -103,8 +103,8 @@ Sem credenciais, roda em **dry-run**: mostra o texto exato, quantos segmentos
 seriam cobrados e o custo estimado, sem enviar nada. Para o dispatcher também
 simular SMS num alerta de verdade, use `SYSCARE_SMS_PROVIDER=dryrun`.
 
-Para enviar **de verdade** é preciso conta num provedor — não existe SMS grátis
-por API. Com uma conta trial do Twilio:
+Para enviar **de verdade** é preciso conta **paga** num provedor — não existe SMS
+grátis por API. Com o Twilio, depois do upgrade da conta:
 
 ```env
 SYSCARE_SMS_PROVIDER=twilio
@@ -113,10 +113,14 @@ SYSCARE_TWILIO_AUTH_TOKEN=...
 SYSCARE_TWILIO_FROM_NUMBER=+1...
 ```
 
-Duas armadilhas do trial: só envia para números **verificados** no console, e
-prefixa o texto com "Sent from your Twilio trial account". E, para o Brasil,
-tráfego A2P de long code não registrado pode ser filtrado pelas operadoras —
-"aceito pelo Twilio" não é o mesmo que "entregue".
+**A conta trial do Twilio não serve para o SysCare.** Desde 2026 ela só envia
+modelos prontos do próprio Twilio (confirmação de pedido, lembrete de consulta):
+texto personalizado, como o alerta de queda, é recusado com o erro `572006`
+("Trial accounts can only use predefined SMS templates"), testado em 24/09/2026.
+Depois do upgrade, ainda valem duas armadilhas: liberar o Brasil em *Messaging →
+Settings → Geo permissions* (senão, erro `21408`), e o tráfego A2P de long code
+não registrado pode ser filtrado pelas operadoras brasileiras — "aceito pelo
+Twilio" não é o mesmo que "entregue".
 
 **Quando o SMS dispara.** Push vai para todo cuidador com o app, sempre. SMS
 custa dinheiro, então entra só em dois casos: cuidador **sem** app (é o único
@@ -162,10 +166,11 @@ app/
   notifications/     base (interface), fcm, sms, dispatcher
 scripts/
   send_test_sms.py   teste do canal de SMS (dry-run ou envio real)
+  gerar_vetores_ble.py vetores de teste do anúncio para o app; payload para o nRF Connect
 docs/
   ble_payload.md     protocolo BLE, energia, esqueleto do firmware
   canais_de_alerta.md comparativo de custo dos canais
 tests/
-  test_alerts.py     duplicação, falsificação, replay, ack/resolve
+  test_alerts.py     duplicação, falsificação, replay, ack/resolve, heartbeat
   test_sms.py        renderização GSM-7, contagem de segmentos, truncamento
 ```

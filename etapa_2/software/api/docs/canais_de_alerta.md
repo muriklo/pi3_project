@@ -13,7 +13,8 @@ páginas oficiais antes de citar no relatório.
 | **Ligação nativa** | Grátis (usa o plano) | — | **Sim** | Baixo — `ACTION_CALL` |
 | **Telegram Bot** | **Grátis, ilimitado** | Sim | Não | Baixo — 1 requisição HTTP |
 | WhatsApp Cloud API | Grátis p/ 5 números de teste; em produção ~US$ 0,008/msg *utility* no Brasil | Sim | Não | **Alto** — verificação de negócio, templates aprovados |
-| SMS via Twilio | ~US$ 0,06/msg + US$ 1,15/mês do número | — | Não | Médio |
+| SMS via Twilio | ~US$ 0,06/msg + US$ 1,15/mês do número; a conta de teste não envia texto próprio | — | Não | Médio |
+| SMS via Textbelt (código aberto) | Grátis | — | Não | Médio — **descartado**: sem operadoras brasileiras |
 | Ligação via Twilio | Por minuto, além do número | — | Não | Médio |
 
 ## Recomendação para o SysCare
@@ -29,11 +30,16 @@ redundância.
 zero, entrega em segundos, funciona com o app fechado. Cobre o cuidador que não
 está no alcance do BLE.
 
-**Camada 3 — fallback offline no próprio app.** Se o `POST /v1/alerts` falhar
-(sem sinal de dados), o app enfileira o envio **e** dispara SMS e/ou ligação
-direto pelo celular, pelo plano do usuário. Sai de graça e não depende de
-servidor nenhum. No Android: `SmsManager.sendTextMessage()` (permissão
-`SEND_SMS`) e `Intent(ACTION_CALL)` (permissão `CALL_PHONE`).
+**Camada 3 — SMS pelo próprio app.** O app dispara SMS direto pelo celular,
+pelo plano do usuário. Sai de graça e não depende de servidor nenhum. No
+Android: `SmsManager` (permissão `SEND_SMS`); a ligação automática, com
+`Intent(ACTION_CALL)` (permissão `CALL_PHONE`), segue só avaliada.
+
+> **Implementada na etapa 2** (`etapa_2/software/app`, Seção 5.7 da
+> arquitetura do app), com uma mudança: o SMS sai em **toda** emergência, para
+> todos os responsáveis com telefone, e não só quando a API está inacessível.
+> Virou o canal de SMS do sistema porque a conta de teste do Twilio só envia
+> modelos prontos (erro `572006`, testado em 24/09/2026).
 
 > Atenção na publicação: a Play Store restringe `SEND_SMS` e `CALL_PHONE`, mas
 > abre exceção justamente para apps de emergência/segurança pessoal. É preciso
@@ -84,6 +90,22 @@ que o Twilio para volume brasileiro, e com atendimento em português.
 Para o protótipo, o SMS nativo do celular (camada 3) entrega o mesmo resultado
 por R$ 0,00.
 
+## Alternativas de SMS avaliadas e descartadas
+
+Antes de adotar o SMS pelo próprio celular (camada 3), duas formas de enviar SMS
+a partir do servidor foram testadas ou analisadas na etapa 2:
+
+| Alternativa | Como envia | Por que foi descartada |
+|---|---|---|
+| **Twilio (conta de teste)** | API HTTP de um provedor de SMS | A conta de teste só envia modelos prontos do próprio Twilio (confirmação de pedido, lembrete de consulta). O texto do alerta foi recusado com o erro `572006` em 24/09/2026. Enviar texto próprio exige conta paga. |
+| **Textbelt (código aberto)** | Manda um **e-mail** para o endereço de conversão da operadora (`numero@operadora`), que o transforma em SMS | A lista de operadoras suportadas não inclui nenhuma brasileira, e as operadoras daqui não oferecem essa conversão. Exige ainda saber a operadora de cada número, o que a portabilidade impede. O próprio projeto avisa que "sucesso" só significa que a mensagem foi entregue à operadora, sem garantia de chegada, e indica o serviço pago para uso confiável. |
+
+Num sistema de alerta de queda, um canal que *talvez* entregue é pior que
+nenhum, porque cria uma falsa sensação de segurança. O SMS enviado pelo próprio
+celular não tem esses problemas: é grátis, chega como SMS comum a partir do
+número da pessoa, não depende de internet e foi validado num celular Android
+real em 26/09/2026.
+
 ## Fontes
 
 - [WhatsApp Business Platform — pricing](https://whatsappbusiness.com/products/platform-pricing/)
@@ -91,3 +113,5 @@ por R$ 0,00.
 - [Limitações do número de teste do Cloud API](https://help.wanotifier.com/en/article/test-phone-number-limitations-in-direct-setup-kt0ly2/)
 - [Twilio — SMS pricing Brazil](https://www.twilio.com/en-us/sms/pricing/br)
 - [GTI SMS vs Zenvia — comparativo de preços no Brasil](https://gtisms.com/gti-sms-vs-zenvia/)
+- [Twilio — restrições da conta de teste](https://www.twilio.com/docs/usage/trials)
+- [Textbelt — repositório de código aberto](https://github.com/typpo/textbelt)

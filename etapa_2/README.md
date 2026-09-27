@@ -44,7 +44,7 @@ Para o desenvolvimento da Pulseira SysCare, foram definidos softwares específic
 | **FW - Firmware**    | Visual Studio Code + nRF Connect NORDIC | Desenvolvimento, compilação e gerenciamento do firmware do XIAO nRF52840.                             |
 | **HW - Hardware**    | Altium Designer                 | Desenvolvimento do esquemático e projeto da placa de circuito impresso (PCI).                         |
 | **MEC - Mecânica**   | FreeCAD                 | Modelagem tridimensional e desenvolvimento da estrutura mecânica da pulseira e de seu encapsulamento. |
-| **APP - Aplicativo** |                                 |                                                                                                       |
+| **APP - Aplicativo** | Flutter (Dart) + Visual Studio Code + Android Studio | Desenvolvimento do aplicativo em Flutter no VS Code; o Android Studio fornece o Android SDK e o emulador usados para compilar e testar o APK. |
 
 
 

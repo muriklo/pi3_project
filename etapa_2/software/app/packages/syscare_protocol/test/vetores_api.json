@@ -1,0 +1,215 @@
+{
+  "gerado_por": "etapa_2/software/api/scripts/gerar_vetores_ble.py",
+  "secret": "000102030405060708090a0b0c0d0e0f",
+  "validos": [
+    {
+      "nome": "evento test",
+      "hex": "01a1b2c3d4002b0057204371c23d",
+      "esperado": {
+        "version": 1,
+        "ble_id": "a1b2c3d4",
+        "event_type": "test",
+        "seq": 43,
+        "battery_pct": 87,
+        "impact_g": 3.2,
+        "signature": "4371c23d",
+        "impact_dg": 32
+      }
+    },
+    {
+      "nome": "evento fall",
+      "hex": "01a1b2c3d4012b005720b655d1a6",
+      "esperado": {
+        "version": 1,
+        "ble_id": "a1b2c3d4",
+        "event_type": "fall",
+        "seq": 43,
+        "battery_pct": 87,
+        "impact_g": 3.2,
+        "signature": "b655d1a6",
+        "impact_dg": 32
+      }
+    },
+    {
+      "nome": "evento panic",
+      "hex": "01a1b2c3d4022b005720ee723da3",
+      "esperado": {
+        "version": 1,
+        "ble_id": "a1b2c3d4",
+        "event_type": "panic",
+        "seq": 43,
+        "battery_pct": 87,
+        "impact_g": 3.2,
+        "signature": "ee723da3",
+        "impact_dg": 32
+      }
+    },
+    {
+      "nome": "evento no_movement",
+      "hex": "01a1b2c3d4032b005720be1b59a5",
+      "esperado": {
+        "version": 1,
+        "ble_id": "a1b2c3d4",
+        "event_type": "no_movement",
+        "seq": 43,
+        "battery_pct": 87,
+        "impact_g": 3.2,
+        "signature": "be1b59a5",
+        "impact_dg": 32
+      }
+    },
+    {
+      "nome": "evento low_battery",
+      "hex": "01a1b2c3d4042b0057205a64c6dd",
+      "esperado": {
+        "version": 1,
+        "ble_id": "a1b2c3d4",
+        "event_type": "low_battery",
+        "seq": 43,
+        "battery_pct": 87,
+        "impact_g": 3.2,
+        "signature": "5a64c6dd",
+        "impact_dg": 32
+      }
+    },
+    {
+      "nome": "evento heartbeat",
+      "hex": "01a1b2c3d4052b0057009172ec0f",
+      "esperado": {
+        "version": 1,
+        "ble_id": "a1b2c3d4",
+        "event_type": "heartbeat",
+        "seq": 43,
+        "battery_pct": 87,
+        "impact_g": 0.0,
+        "signature": "9172ec0f",
+        "impact_dg": 0
+      }
+    },
+    {
+      "nome": "seq 0",
+      "hex": "01a1b2c3d4010000641958eaef33",
+      "esperado": {
+        "version": 1,
+        "ble_id": "a1b2c3d4",
+        "event_type": "fall",
+        "seq": 0,
+        "battery_pct": 100,
+        "impact_g": 2.5,
+        "signature": "58eaef33",
+        "impact_dg": 25
+      }
+    },
+    {
+      "nome": "seq 255 (so byte baixo)",
+      "hex": "01a1b2c3d401ff0032192b6327d6",
+      "esperado": {
+        "version": 1,
+        "ble_id": "a1b2c3d4",
+        "event_type": "fall",
+        "seq": 255,
+        "battery_pct": 50,
+        "impact_g": 2.5,
+        "signature": "2b6327d6",
+        "impact_dg": 25
+      }
+    },
+    {
+      "nome": "seq 256 (little-endian)",
+      "hex": "01a1b2c3d40100013219a2d99ddd",
+      "esperado": {
+        "version": 1,
+        "ble_id": "a1b2c3d4",
+        "event_type": "fall",
+        "seq": 256,
+        "battery_pct": 50,
+        "impact_g": 2.5,
+        "signature": "a2d99ddd",
+        "impact_dg": 25
+      }
+    },
+    {
+      "nome": "seq 65535 (maximo)",
+      "hex": "01a1b2c3d402ffff010091010175",
+      "esperado": {
+        "version": 1,
+        "ble_id": "a1b2c3d4",
+        "event_type": "panic",
+        "seq": 65535,
+        "battery_pct": 1,
+        "impact_g": 0.0,
+        "signature": "91010175",
+        "impact_dg": 0
+      }
+    },
+    {
+      "nome": "impacto saturado em 25,5 g",
+      "hex": "01a1b2c3d40107003cffe38c31d5",
+      "esperado": {
+        "version": 1,
+        "ble_id": "a1b2c3d4",
+        "event_type": "fall",
+        "seq": 7,
+        "battery_pct": 60,
+        "impact_g": 25.5,
+        "signature": "e38c31d5",
+        "impact_dg": 255
+      }
+    },
+    {
+      "nome": "bateria zerada",
+      "hex": "01a1b2c3d40408000000a5fd05dd",
+      "esperado": {
+        "version": 1,
+        "ble_id": "a1b2c3d4",
+        "event_type": "low_battery",
+        "seq": 8,
+        "battery_pct": 0,
+        "impact_g": 0.0,
+        "signature": "a5fd05dd",
+        "impact_dg": 0
+      }
+    },
+    {
+      "nome": "outro ble_id",
+      "hex": "01ffee00010109004628522c7fa5",
+      "esperado": {
+        "version": 1,
+        "ble_id": "ffee0001",
+        "event_type": "fall",
+        "seq": 9,
+        "battery_pct": 70,
+        "impact_g": 4.0,
+        "signature": "522c7fa5",
+        "impact_dg": 40
+      }
+    }
+  ],
+  "invalidos": [
+    {
+      "nome": "13 bytes",
+      "hex": "01a1b2c3d4012b005720b655d1",
+      "erro": "esperado 14 bytes, recebido 13"
+    },
+    {
+      "nome": "15 bytes",
+      "hex": "01a1b2c3d4012b005720b655d1a600",
+      "erro": "esperado 14 bytes, recebido 15"
+    },
+    {
+      "nome": "versao 2",
+      "hex": "02a1b2c3d4012b005720b655d1a6",
+      "erro": "versao de protocolo nao suportada: 2"
+    },
+    {
+      "nome": "evento 0x06 desconhecido",
+      "hex": "01a1b2c3d4062b005720b655d1a6",
+      "erro": "event_type desconhecido: 0x06"
+    },
+    {
+      "nome": "evento 0xff desconhecido",
+      "hex": "01a1b2c3d4ff2b005720b655d1a6",
+      "erro": "event_type desconhecido: 0xff"
+    }
+  ]
+}
