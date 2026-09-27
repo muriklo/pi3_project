@@ -8,6 +8,6 @@ Arquitetura do aplicativo móvel: escolha da plataforma, divisão em camadas, te
 
 ## Firmware
 
-Nessa etapa, foi realizada a definição de como será implementado o **algoritmo de detecção de quedas**, utilizando o acelerômetro para identificar o evento de queda e gerar uma interrupção para o microcontrolador. Também foram definidos o funcionamento da detecção, o processamento da interrupção e os critérios utilizados para a confirmação de uma queda.
+Nessa etapa, foi realizada a definição de como será implementado o algoritmo de detecção de quedas, utilizando o acelerômetro para identificar o evento de queda e gerar uma interrupção para o microcontrolador. Também foram definidos o funcionamento da detecção, o processamento da interrupção e os critérios utilizados para a confirmação de uma queda.
 
 > 📁 **Documentação do Firmware:** Acesse a pasta: [Firmware](./firmware/README.md)

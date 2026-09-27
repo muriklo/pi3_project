@@ -291,15 +291,15 @@ Além dos testes automatizados, o protótipo foi instalado em um celular Android
 
 - [1] [ANDROID DEVELOPERS. Make apps more accessible](https://developer.android.com/guide/topics/ui/accessibility/apps)
 
-- [2] [NAVIDECK. universal_ble — pub.dev](https://pub.dev/packages/universal_ble)
+- [2] [NAVIDECK. universal_ble - pub.dev](https://pub.dev/packages/universal_ble)
 
-- [3] [FLUTTER BLUE PLUS. flutter_blue_plus — pub.dev](https://pub.dev/packages/flutter_blue_plus)
+- [3] [FLUTTER BLUE PLUS. flutter_blue_plus - pub.dev](https://pub.dev/packages/flutter_blue_plus)
 
-- [4] [PHILIPS HUE. flutter_reactive_ble — pub.dev](https://pub.dev/packages/flutter_reactive_ble)
+- [4] [PHILIPS HUE. flutter_reactive_ble - pub.dev](https://pub.dev/packages/flutter_reactive_ble)
 
 - [5] [PUNCH THROUGH. Troubleshooting Android BLE Scan Errors](https://punchthrough.com/android-ble-scan-errors/)
 
-- [6] [VAN WELIE, M. Making Android BLE work — part 1](https://medium.com/@martijn.van.welie/making-android-ble-work-part-1-a736dcd53b02)
+- [6] [VAN WELIE, M. Making Android BLE work - part 1](https://medium.com/@martijn.van.welie/making-android-ble-work-part-1-a736dcd53b02)
 
 - [7] [ANDROID DEVELOPERS. Bluetooth permissions](https://developer.android.com/develop/connectivity/bluetooth/bt-permissions)
 
@@ -313,7 +313,7 @@ Além dos testes automatizados, o protótipo foi instalado em um celular Android
 
 - [12] [APPLE. Core Bluetooth Background Processing for iOS Apps](https://developer.apple.com/library/archive/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/CoreBluetoothBackgroundProcessingForIOSApps/PerformingTasksWhileYourAppIsInTheBackground.html)
 
-- [13] [FASTAPI. First Steps — OpenAPI](https://fastapi.tiangolo.com/tutorial/first-steps/)
+- [13] [FASTAPI. First Steps - OpenAPI](https://fastapi.tiangolo.com/tutorial/first-steps/)
 
 <div align="center">
 
