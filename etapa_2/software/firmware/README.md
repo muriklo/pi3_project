@@ -36,6 +36,8 @@ Dessa forma, o acelerômetro é responsável pela detecção inicial e geração
 
 ### Configuração inicial proposta
 
+<div align="center">
+
 | Parâmetro | Configuração |
 |---|---|
 | **Acelerômetro** | IIM-42351 |
@@ -46,6 +48,12 @@ Dessa forma, o acelerômetro é responsável pela detecção inicial e geração
 | **Saída da detecção** | Interrupção para o MCU |
 | **Processamento posterior** | Impacto + imobilidade |
 | **MCU** | XIAO nRF52840 |
+
+</div>
+
+<div align="center">
+  <p>Tabela 1 - Proposta inicial de configuração</p>
+</div>
 
 Essa configuração é particularmente interessante para o primeiro protótipo porque permite utilizar a funcionalidade de detecção de queda do próprio acelerômetro em Low Power a partir de 25 Hz, contribuindo para reduzir o consumo energético da pulseira. O XIAO nRF52840 permanece responsável pelo processamento do evento apenas quando uma interrupção é gerada.
 
