@@ -1,6 +1,6 @@
 # Aplicativo - Arquitetura (UI, comunicação BLE e API)
 
-Este documento define a arquitetura do aplicativo móvel do SysCare. A [Etapa 1](../../../etapa_1/software/README.md) estabeleceu **o que** o aplicativo faz — escutar o anúncio da pulseira, alarmar localmente antes de qualquer acesso à rede, repassar o evento ao servidor e oferecer a interface de gestão dos responsáveis — e deixou para esta etapa a escolha da plataforma e da forma de implementação. Aqui se define **como** o aplicativo é construído: plataforma, divisão em camadas, telas, tratamento do anúncio BLE e integração com a API.
+Este documento define a arquitetura do aplicativo móvel do SysCare. A [Etapa 1](../../../etapa_1/software/README.md) estabeleceu o que o aplicativo faz escutar o anúncio da pulseira, alarmar localmente antes de qualquer acesso à rede, repassar o evento ao servidor e oferecer a interface de gestão dos responsáveis, e deixou para esta etapa a escolha da plataforma e da forma de implementação. Aqui se define como o aplicativo é construído: plataforma, divisão em camadas, telas, tratamento do anúncio BLE e integração com a API.
 
 O aplicativo não é projetado no vácuo: ele se encaixa entre dois contratos já fixados. De um lado, o [protocolo BLE](../api/docs/ble_payload.md), que define os 14 bytes anunciados pela pulseira; do outro, a [API](../api/README.md), cujas rotas e formatos são publicados automaticamente em OpenAPI. Toda decisão deste documento respeita esses dois contratos, e as divergências encontradas entre eles foram registradas na Seção 9.
 
@@ -22,7 +22,7 @@ A distinção é determinante para a escolha da plataforma. O papel de receptor 
 | Acesso a recursos exclusivos do Android (canal de alarme, serviço em primeiro plano) | Por *platform channels* | Direto | Por módulos nativos |
 | Regras de negócio testáveis sem aparelho | Sim, em Dart puro | Sim, na JVM | Sim, em Node |
 
-Foi adotado o **Flutter**. O Kotlin nativo excluiria os responsáveis com iPhone, e a parte que exige código nativo do Android — canal de alarme e, na Etapa 3, o serviço de varredura em segundo plano — é pequena e fica isolada em uma única camada. Entre as duas opções multiplataforma, o Flutter permite concentrar o protocolo em um pacote Dart puro, testado byte a byte contra a implementação de referência da API (Seção 2). O aplicativo é, portanto, **multiplataforma para o papel de responsável e exclusivo do Android para o papel de receptor**.
+Foi adotado o **Flutter**. O Kotlin nativo excluiria os responsáveis com iPhone, e a parte que exige código nativo do Android - canal de alarme e, na Etapa 3, o serviço de varredura em segundo plano - é pequena e fica isolada em uma única camada. Entre as duas opções multiplataforma, o Flutter permite concentrar o protocolo em um pacote Dart puro, testado byte a byte contra a implementação de referência da API (Seção 2). O aplicativo é, portanto, multiplataforma para o papel de responsável e exclusivo do Android para o papel de receptor.
 
 ## 2. Arquitetura em camadas
 
@@ -41,7 +41,7 @@ O aplicativo é dividido em cinco camadas. A apresentação usa a aplicação; a
 | **Dados** | Adaptadores para o mundo externo | Cliente HTTP (`dio`), varredura BLE (`universal_ble`), fila de envio (`sqflite`), cofre de sessão (`flutter_secure_storage`), localização (`geolocator`), notificações (`flutter_local_notifications`), *push* (`firebase_messaging`) |
 | **Plataforma Android** | O que só existe no Android | Canal de notificação de alarme, som de sirene, tela cheia, envio de SMS pelo plano do celular; na Etapa 3, o serviço de varredura em primeiro plano |
 
-O isolamento do domínio tem uma consequência prática: o pacote `syscare_protocol` é testado com os **mesmos vetores de bytes gerados pelo código Python da API**. Se o aplicativo e o servidor lerem o pacote de forma diferente, o teste falha antes de qualquer pulseira existir — e, depois, o mesmo teste confere o firmware.
+O isolamento do domínio tem uma consequência prática: o pacote `syscare_protocol` é testado com os **mesmos vetores de bytes gerados pelo código Python da API**. Se o aplicativo e o servidor lerem o pacote de forma diferente, o teste falha antes de qualquer pulseira existir e, depois, o mesmo teste confere o firmware.
 
 ## 3. Interface (UI)
 
@@ -55,7 +55,7 @@ O isolamento do domínio tem uma consequência prática: o pacote `syscare_proto
 | **Entrar / Criar conta** | Ambos | Formulário de acesso e endereço do servidor | Autenticar; criar conta; trocar o servidor |
 | **Início** | Ambos | Um cartão por pulseira: pessoa monitorada, bateria, "vista há X min" e se este celular está escutando | Abrir pulseira; ligar ou desligar a escuta neste celular |
 | **Nova pulseira** | Responsável | Pulseiras SysCare próximas, detectadas pelo *heartbeat*, para escolher em vez de digitar o identificador | Cadastrar; exibir a chave do firmware **uma única vez** |
-| **Pulseira** | Responsável | Dados da pulseira; aba de responsáveis por prioridade; aba de histórico | Editar; incluir, ativar, desativar e remover responsáveis — ações exibidas só ao dono, identificado pelo campo `owner_id` |
+| **Pulseira** | Responsável | Dados da pulseira; aba de responsáveis por prioridade; aba de histórico | Editar; incluir, ativar, desativar e remover responsáveis, ações exibidas só ao dono, identificado pelo campo `owner_id` |
 | **Alerta** (tela cheia) | Ambos | Tipo do evento, pessoa, horário, impacto, localização, quem já foi avisado e quem recebeu o SMS deste celular | **Estou indo**; **Encerrar** como atendido ou falso alarme; abrir o mapa |
 | **Histórico** | Responsável | Eventos de todas as pulseiras, com a situação de cada um; o histórico de uma só pulseira fica na tela dela | Abrir o evento, com as entregas de cada notificação |
 | **Saúde do sistema** | Receptor | Lista de verificação: Bluetooth, permissões, notificações, SMS, tela cheia, servidor, sessão, último *heartbeat* de cada pulseira, itens na fila de envio | Corrigir cada item; tocar o alarme de teste; simular uma queda sem a pulseira |
@@ -101,7 +101,7 @@ Cada anúncio recebido passa por quatro etapas, todas no domínio:
 
 O código `0x05` é uma **revisão do protocolo feita nesta etapa**. A versão anterior previa o *heartbeat*, mas sem código próprio: um aplicativo recém-aberto que ouvisse o *heartbeat* repetindo o último evento tocaria a sirene por uma queda antiga. A revisão, com a justificativa completa, está no [contrato BLE](../api/docs/ble_payload.md), e a API já foi ajustada para recusar `0x05` como alerta e deduplicar a telemetria por janela de tempo.
 
-Pulseiras que não pertencem à conta do receptor não tocam a sirene, mas seus eventos de emergência são repassados à API. Isso preserva a propriedade do *broadcast* definida na Etapa 1 — qualquer celular próximo ajuda — sem alarmar um desconhecido: a API só notifica os responsáveis daquela pulseira.
+Pulseiras que não pertencem à conta do receptor não tocam a sirene, mas seus eventos de emergência são repassados à API. Isso preserva a propriedade do *broadcast* definida na Etapa 1, qualquer celular próximo ajuda, sem alarmar um desconhecido: a API só notifica os responsáveis daquela pulseira.
 
 ### 4.3 Máquina de estados da varredura
 
@@ -136,7 +136,7 @@ As permissões são solicitadas no primeiro uso da escuta, com uma explicação 
 
 Nesta etapa, a varredura funciona **com o aplicativo em primeiro plano**, o que basta para validar o protocolo, o alarme e a integração com a API. A varredura com a tela apagada e o aplicativo fechado, exigida pela Etapa 1, fica especificada aqui e é implementada na Etapa 3:
 
-- **Serviço em primeiro plano** do tipo `connectedDevice`, cuja pré-condição é satisfeita pela própria permissão `BLUETOOTH_SCAN` [10]. Ele foi preferido à varredura entregue por *PendingIntent* porque o evento precisa disparar trabalho imediato — alarme, localização e envio — e o serviço mantém o processo ativo para isso.
+- **Serviço em primeiro plano** do tipo `connectedDevice`, cuja pré-condição é satisfeita pela própria permissão `BLUETOOTH_SCAN` [10]. Ele foi preferido à varredura entregue por *PendingIntent* porque o evento precisa disparar trabalho imediato, alarme, localização e envio, e o serviço mantém o processo ativo para isso.
 - **Reinício automático** após o celular ser ligado (`RECEIVE_BOOT_COMPLETED`).
 - **Isenção da otimização de bateria**, pedida pela tela Saúde do sistema, e testes em aparelhos de fabricantes que encerram serviços em segundo plano de forma agressiva.
 
@@ -211,10 +211,10 @@ A Etapa 1 previu, como terceira camada de notificação, o SMS enviado pelo pró
 
 | Aspecto | Definição |
 |---|---|
-| Quando | Em toda emergência (queda, botão de pânico, imobilidade) de uma pulseira da conta, logo depois do alarme local, sem esperar a API nem a internet — só o sinal de celular |
+| Quando | Em toda emergência (queda, botão de pânico, imobilidade) de uma pulseira da conta, logo depois do alarme local, sem esperar a API nem a internet, só o sinal de celular |
 | Para quem | Todos os responsáveis ativos com telefone, por ordem de prioridade, sem número repetido |
 | Texto | O mesmo formato do SMS da API: tipo do evento, pessoa, hora e o link do mapa quando há posição. Sem acentos, para caber em um único SMS de 160 caracteres; se o nome for longo, o início é encurtado e o link chega inteiro |
-| Localização | A posição recente, se houver; senão, o SMS espera o GPS por até 15 s — a sirene já está tocando |
+| Localização | A posição recente, se houver; senão, o SMS espera o GPS por até 15 s e a sirene já está tocando |
 | Telefones | Guardados no aparelho para o SMS sair sem internet. Só a conta dona da pulseira vê a lista de responsáveis, então o celular receptor deve estar na conta do dono; os telefones são apagados quando o usuário sai |
 | Envio | Código nativo em Kotlin com o `SmsManager` do Android, que divide mensagens longas; a tela de Alerta mostra quem recebeu |
 
@@ -229,7 +229,7 @@ Para demonstração sem a pulseira, a tela Saúde do sistema oferece **Simular q
   <p>Figura 4 - Sequência do alerta, do anúncio à confirmação</p>
 </div>
 
-A ordem da Figura 4 é a principal decisão desta arquitetura: **o alarme local vem antes de tudo**. Ele depende apenas do rádio e do próprio celular, e é disparado assim que o anúncio é classificado como emergência. Localização, fila e API vêm depois, e nenhuma falha nessas etapas cancela o alarme — só uma rejeição explícita do servidor o rebaixa.
+A ordem da Figura 4 é a principal decisão desta arquitetura: **o alarme local vem antes de tudo**. Ele depende apenas do rádio e do próprio celular, e é disparado assim que o anúncio é classificado como emergência. Localização, fila e API vêm depois, e nenhuma falha nessas etapas cancela o alarme, só uma rejeição explícita do servidor o rebaixa.
 
 ## 7. Rastreabilidade com a Etapa 1
 
