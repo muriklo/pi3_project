@@ -87,6 +87,12 @@ class PreferenciasReceptor {
 
   Future<void> salvarPulseirasDaConta(Set<String> ids) => _prefs.setStringList(_pulseiras, ids.toList());
 
+  static const _servidor = 'servidor';
+
+  /// Endereco da API escolhido na tela de entrada (muda de rede para rede).
+  String? get servidor => _prefs.getString(_servidor);
+  Future<void> salvarServidor(String url) => _prefs.setString(_servidor, url);
+
   static const _contatos = 'contatos_sms';
 
   /// Responsaveis com telefone, por `ble_id`: o SMS sai mesmo sem internet.

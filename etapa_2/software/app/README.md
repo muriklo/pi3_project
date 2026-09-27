@@ -52,7 +52,7 @@ O isolamento do domínio tem uma consequência prática: o pacote `syscare_proto
 
 | Tela | Papel | O que mostra | Ações |
 |---|---|---|---|
-| **Entrar / Criar conta** | Ambos | Formulário de acesso | Autenticar; criar conta |
+| **Entrar / Criar conta** | Ambos | Formulário de acesso e endereço do servidor | Autenticar; criar conta; trocar o servidor |
 | **Início** | Ambos | Um cartão por pulseira: pessoa monitorada, bateria, "vista há X min" e se este celular está escutando | Abrir pulseira; ligar ou desligar a escuta neste celular |
 | **Nova pulseira** | Responsável | Pulseiras SysCare próximas, detectadas pelo *heartbeat*, para escolher em vez de digitar o identificador | Cadastrar; exibir a chave do firmware **uma única vez** |
 | **Pulseira** | Responsável | Dados da pulseira; aba de responsáveis por prioridade; aba de histórico | Editar; incluir, ativar, desativar e remover responsáveis — ações exibidas só ao dono, identificado pelo campo `owner_id` |
@@ -283,7 +283,9 @@ O protótipo desta etapa segue a divisão da Seção 2, com cada camada em uma p
 | Dados | `lib/dados` | Cliente HTTP, varredura BLE, fila em SQLite, cofre da sessão, localização e alarme |
 | Plataforma Android | `android/app/src/main` | Permissões da Seção 4.4, tela de alerta sobre a tela de bloqueio, envio de SMS e o som da sirene, sintetizado para o projeto |
 
-A validação é feita em três níveis de testes automatizados, todos sem celular nem pulseira: o pacote de protocolo lê os mesmos vetores de bytes gerados pela API; os modelos do aplicativo leem respostas reais capturadas da API; e o envio da fila é testado contra cada linha da tabela de respostas da Seção 5.4. O endereço da API é definido no momento da execução, o que permite apontar o aplicativo para o computador que roda o servidor na rede local durante os testes de campo. Sem a pulseira, o anúncio é simulado por um segundo celular com um aplicativo de anúncio BLE, usando os bytes gerados pela própria API.
+A validação é feita em três níveis de testes automatizados, todos sem celular nem pulseira: o pacote de protocolo lê os mesmos vetores de bytes gerados pela API; os modelos do aplicativo leem respostas reais capturadas da API; e o envio da fila é testado contra cada linha da tabela de respostas da Seção 5.4. O endereço da API tem um valor padrão definido na compilação e pode ser trocado na tela de entrada, o que permite apontar o aplicativo para o computador que roda o servidor em qualquer rede local durante os testes de campo, sem gerar outro APK. Sem a pulseira, o anúncio é simulado por um segundo celular com um aplicativo de anúncio BLE, usando os bytes gerados pela própria API.
+
+Além dos testes automatizados, o protótipo foi instalado em um celular Android físico, conectado à API pela rede local: com o botão **Simular queda**, o SMS de teste saiu pelo plano do celular e chegou ao telefone do responsável, validando a Camada 3 de ponta a ponta.
 
 ## Referências (links/datasheets/livros)
 
