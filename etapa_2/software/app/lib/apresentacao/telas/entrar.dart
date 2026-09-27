@@ -16,6 +16,7 @@ class _EntrarTelaState extends ConsumerState<EntrarTela> {
   final _nome = TextEditingController();
   final _email = TextEditingController();
   final _senha = TextEditingController();
+  late final _servidor = TextEditingController(text: ref.read(servidorProvider));
   bool _criarConta = false;
   bool _enviando = false;
   String? _erro;
@@ -25,6 +26,7 @@ class _EntrarTelaState extends ConsumerState<EntrarTela> {
     _nome.dispose();
     _email.dispose();
     _senha.dispose();
+    _servidor.dispose();
     super.dispose();
   }
 
@@ -35,6 +37,8 @@ class _EntrarTelaState extends ConsumerState<EntrarTela> {
     });
     final sessao = ref.read(sessaoProvider.notifier);
     try {
+      await ref.read(servidorProvider.notifier).definir(_servidor.text);
+      _servidor.text = ref.read(servidorProvider);
       if (_criarConta) {
         await sessao.criarConta(_nome.text.trim(), _email.text.trim(), _senha.text);
       } else {
@@ -102,6 +106,25 @@ class _EntrarTelaState extends ConsumerState<EntrarTela> {
               ),
               obscureText: true,
               onSubmitted: (_) => _enviar(),
+            ),
+            const SizedBox(height: 4),
+            ExpansionTile(
+              tilePadding: EdgeInsets.zero,
+              leading: const Icon(Icons.dns),
+              title: const Text('Servidor'),
+              subtitle: Text(ref.watch(servidorProvider)),
+              children: [
+                TextField(
+                  controller: _servidor,
+                  decoration: const InputDecoration(
+                    labelText: 'Endereço da API',
+                    helperText: 'IP do computador que roda a API, ex.: 192.168.1.20',
+                  ),
+                  keyboardType: TextInputType.url,
+                  autocorrect: false,
+                ),
+                const SizedBox(height: 8),
+              ],
             ),
             if (_erro != null) ...[
               const SizedBox(height: 12),

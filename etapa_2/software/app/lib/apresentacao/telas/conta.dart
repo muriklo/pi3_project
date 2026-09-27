@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../aplicacao/providers.dart';
-import '../../config.dart';
 
 class ContaTela extends ConsumerWidget {
   const ContaTela({super.key});
@@ -36,7 +35,11 @@ class ContaTela extends ConsumerWidget {
               'dela no app e poder responder "Estou indo".'),
         ),
         const SizedBox(height: 8),
-        const ListTile(leading: Icon(Icons.dns), title: Text('Servidor'), subtitle: Text(urlApi)),
+        ListTile(
+          leading: const Icon(Icons.dns),
+          title: const Text('Servidor'),
+          subtitle: Text(ref.watch(servidorProvider)),
+        ),
         const SizedBox(height: 24),
         OutlinedButton.icon(
           onPressed: () async {

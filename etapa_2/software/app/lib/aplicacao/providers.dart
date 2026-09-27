@@ -33,9 +33,24 @@ final localizacaoProvider = Provider((ref) => Localizacao());
 final smsCelularProvider = Provider((ref) => SmsCelular());
 final agregadorProvider = Provider((ref) => AgregadorTelemetria());
 
+/// Endereco da API: o padrao do build, ou o digitado na tela de entrada.
+final servidorProvider = NotifierProvider<ServidorControle, String>(ServidorControle.new);
+
+class ServidorControle extends Notifier<String> {
+  @override
+  String build() => ref.read(preferenciasProvider).servidor ?? urlApi;
+
+  Future<void> definir(String texto) async {
+    final url = normalizarServidor(texto);
+    if (url == state) return;
+    await ref.read(preferenciasProvider).salvarServidor(url);
+    state = url;
+  }
+}
+
 final apiProvider = Provider<ApiSysCare>(
   (ref) => ApiSysCare(
-    urlBase: urlApi,
+    urlBase: ref.watch(servidorProvider),
     token: () async => ref.read(sessaoProvider)?.token,
     aoExpirarSessao: () => ref.read(sessaoProvider.notifier).expirou(),
   ),

@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:universal_ble/universal_ble.dart' show AvailabilityState;
 
-import '../config.dart';
 import 'providers.dart';
 import 'receptor.dart';
 
@@ -41,6 +40,7 @@ final saudeProvider = FutureProvider.autoDispose<List<ItemSaude>>((ref) async {
   final gps = await ref.read(localizacaoProvider).disponivel();
   final notificacoes = await alarme.notificacoesPermitidas();
   final servidor = await ref.read(apiProvider).servidorNoAr();
+  final urlApi = ref.read(servidorProvider);
   final fila = await ref.read(filaProvider).total();
   final vence = sessao?.venceEm;
   final sms = ref.read(smsCelularProvider);
