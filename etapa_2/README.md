@@ -2,8 +2,29 @@
 
 A etapa 2 é destinada ao desenvolvimento e à definição da arquitetura do primeiro protótipo da Pulseira SysCare, abrangendo as áreas de hardware, firmware, mecânica e aplicativo. Nesta etapa, foram selecionados os principais componentes do sistema, definidos os softwares e ferramentas utilizados no desenvolvimento, estabelecida a arquitetura de hardware e firmware, incluindo a comunicação com o acelerômetro e o BLE, e desenvolvido o projeto mecânico da pulseira e de seu encapsulamento. Também foram consideradas as restrições de dimensões, massa, integração dos componentes e montagem do protótipo, buscando uma solução compatível com os requisitos funcionais e físicos definidos para o projeto.
 
+### Definição dos *softwares* necessários para o projeto
 
-## Desenvolvimento
+Para o desenvolvimento da Pulseira SysCare, foram definidos softwares específicos para cada uma das etapas do projeto, abrangendo o desenvolvimento do firmware (FW), projeto eletrônico (HW), desenvolvimento mecânico (MEC) e aplicativo (APP). A seleção considera as ferramentas utilizadas para programação, simulação, desenvolvimento das placas eletrônicas e modelagem da estrutura física do dispositivo.
+Após todas os estudos envolvidos foi decidido os *softwares* a serem usados, podendo ser visto na Tabela 1:
+
+<div align="center">
+
+| **Etapa**            | **Software**                    | **Aplicação no projeto**                                                                              |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **FW - Firmware**    | Visual Studio Code + nRF Connect NORDIC | Desenvolvimento, compilação e gerenciamento do firmware do XIAO nRF52840.                             |
+| **HW - Hardware**    | Altium Designer                 | Desenvolvimento do esquemático e projeto da placa de circuito impresso (PCI).                         |
+| **MEC - Mecânica**   | FreeCAD                 | Modelagem tridimensional e desenvolvimento da estrutura mecânica da pulseira e de seu encapsulamento. |
+| **APP - Aplicativo** | Flutter (Dart) + Visual Studio Code + Android Studio | Desenvolvimento do aplicativo em Flutter no VS Code; o Android Studio fornece o Android SDK e o emulador usados para compilar e testar o APK. |
+
+</div>
+
+<div align="center">
+  <p>Tabela 1 - Definição dos componentes do sistema</p>
+</div>
+
+--- 
+
+## Desenvolvimento de *Hardware*
 
 ### Componentes selecionados
 
@@ -28,14 +49,15 @@ A Tabela 1, apresenta os componentes selecionados para o protótipo e suas respe
 </div>
 
 <div align="center">
-  <p>Tabela 1 - Definição dos componentes do sistema</p>
+  <p>Tabela 2 - Definição dos componentes do sistema</p>
 </div>
 
-A escolha dos componentes apresentada na Tabela 1, corresponde à configuração utilizada para a validação do primeiro protótipo. Após a validação da arquitetura e do funcionamento do sistema, poderão ser avaliadas alternativas com foco na redução do consumo energético e na integração dos componentes em uma placa dedicada.
+A escolha dos componentes apresentada na Tabela 2, corresponde à configuração utilizada para a validação do primeiro protótipo. Após a validação da arquitetura e do funcionamento do sistema, poderão ser avaliadas alternativas com foco na redução do consumo energético e na integração dos componentes em uma placa dedicada.
+
 
 ### Desenvolvimento do esquemático
 
-A partir dos componentes definidos na Tabela 1, foi desenvolvido o esquemático da Pulseira SysCare no **Altium Designer**, com o projeto armazenado no **Altium 365**. Por se tratar do primeiro protótipo, o circuito prioriza a flexibilidade de montagem e a facilidade de depuração.
+A partir dos componentes definidos na Tabela 1, foi desenvolvido o esquemático da Pulseira SysCare no Altium Designer, com o projeto armazenado no Altium 365. Por se tratar do primeiro protótipo, o circuito prioriza a flexibilidade de montagem e a facilidade de depuração.
 
 O circuito de carregamento integrado ao XIAO nRF52840 permitiu adotar a bateria recarregável 541112, com recarga pela própria porta USB, e entre a bateria e o módulo foi previsto um ponto para medição do consumo. Também foram disponibilizados os sinais da interface SWD para depuração do firmware. O acelerômetro IIM-42351 se comunica via SPI e utiliza os pinos de interrupção para acordar o microcontrolador na detecção de queda, podendo ser soldado diretamente na placa ou conectado como módulo avulso. A interface com o usuário é composta por um LED de indicação e um botão de emergência com *debounce* em hardware.
 
@@ -44,21 +66,58 @@ O circuito de carregamento integrado ao XIAO nRF52840 permitiu adotar a bateria 
   <p>Figura XX - Esquemático completo da Pulseira SysCare</p>
 </div>
 
+> Nesta seção, foram detalhadas as escolhas dos componentes para o protótipo inicial, bem como o esquemático da PCI. Todas as considerações e comparações podem ser vistas no documento.
+>
 > 📁 **Documentação do esquemático:** Acesse a pasta: [Esquemático](./hardware/schematics/README.md)
 
 ---
-## Definição dos softwares necessários
 
-Para o desenvolvimento da Pulseira SysCare, foram definidos softwares específicos para cada uma das etapas do projeto, abrangendo o desenvolvimento do firmware (FW), projeto eletrônico (HW), desenvolvimento mecânico (MEC) e aplicativo (APP). A seleção considera as ferramentas utilizadas para programação, simulação, desenvolvimento das placas eletrônicas e modelagem da estrutura física do dispositivo.
+## Desenvolvimento de *Software* e *Firmware*
 
-| **Etapa**            | **Software**                    | **Aplicação no projeto**                                                                              |
-| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| **FW - Firmware**    | Visual Studio Code + nRF Connect NORDIC | Desenvolvimento, compilação e gerenciamento do firmware do XIAO nRF52840.                             |
-| **HW - Hardware**    | Altium Designer                 | Desenvolvimento do esquemático e projeto da placa de circuito impresso (PCI).                         |
-| **MEC - Mecânica**   | FreeCAD                 | Modelagem tridimensional e desenvolvimento da estrutura mecânica da pulseira e de seu encapsulamento. |
-| **APP - Aplicativo** | Flutter (Dart) + Visual Studio Code + Android Studio | Desenvolvimento do aplicativo em Flutter no VS Code; o Android Studio fornece o Android SDK e o emulador usados para compilar e testar o APK. |
+Descrever atividades feitas...
 
---- 
+### API
+ESCREVERRR
+
+
+### Firmware
+
+Nesta etapa foram definidas as principais soluções para o firmware da Pulseira SysCare, com foco na detecção de quedas e na arquitetura do software.
+
+A detecção de quedas será realizada utilizando o acelerômetro IIM-42351, aproveitando seu recurso interno de Freefall Detection em modo de baixo consumo. Foi definida inicialmente uma frequência de operação de 25 Hz, permitindo o uso do algoritmo em Low Power. Quando uma possível queda livre é identificada, o acelerômetro gera uma interrupção para o XIAO nRF52840, que realiza o processamento do evento.
+
+
+<div align="center">
+
+| Parâmetro | Configuração |
+|---|---|
+| **Acelerômetro** | IIM-42351 |
+| **Accel ODR** | 25 Hz |
+| **DMP ODR** | 25 Hz |
+| **Freefall Detection** | Low Power |
+| **Detecção inicial** | Freefall Detection interno |
+| **Saída da detecção** | Interrupção para o MCU |
+| **Processamento posterior** | Impacto + imobilidade -> (se necessário) |
+| **MCU** | XIAO nRF52840 |
+
+</div>
+
+<div align="center">
+  <p>Tabela XX - Proposta inicial de configuração</p>
+</div>
+
+Dessa forma, o acelerômetro é responsável pela detecção inicial e geração da interrupção, enquanto o microcontrolador é responsável pelo tratamento da interrupção e envio do pedido de ajuda.
+
+
+Já a arquitetura do *firmware* e de *hardware* é possível ser vista na Figura XX **(REFERENCIAR)** será desenvolvida utilizando Zephyr RTOS / nRF Connect SDK, sendo organizada em módulos para detecção e confirmação de quedas, tratamento de interrupções, comunicação com o acelerômetro, gerenciamento de energia, armazenamento de dados e comunicação BLE. A comunicação entre o XIAO nRF52840 e o IIM-42351 será realizada por SPI, enquanto a linha INT1 será utilizada para sinalizar os eventos de detecção ao microcontrolador.
+
+<div align="center">
+  <img src="./img/diagrama_de_blocos_hardware.png" alt="" width="70%">
+  <p>Figura XX - Diagrama de blocos da arquitetura de hardware e firmware da Pulseira SysCare.</p>
+</div>
+
+
+---
 
 ## Desenvolvimento mecânico
 
@@ -130,6 +189,11 @@ Também foi iniciada uma estimativa da massa total da pulseira, possível ser vi
 </div>
 
 As definições apresentadas constituem a referência mecânica para o primeiro protótipo e serão utilizadas nas etapas seguintes de integração dos componentes, detalhamento da carcaça e fabricação.
+
+<div align="center"> 
+  <img src="./img/" alt="Cotas iniciais do sistema de fixação da pulseira" width="65%"> 
+  <p>Figura XX - Projeto 3D com protótipo da PCI integrada</p> 
+</div>
 
 > 📁 **Documentação de Mecânica:** Acesse a pasta: [Mecânica](./mechanics/README.md)
 
