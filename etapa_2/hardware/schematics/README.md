@@ -8,7 +8,7 @@ A partir da definição dos componentes principais apresentada na [seleção de 
 O objetivo desta etapa é consolidar, em um único documento eletrônico, as decisões tomadas durante a seleção dos componentes e detalhar como cada bloco funcional do sistema é interligado. Como o primeiro protótipo é voltado à validação da arquitetura, o esquemático foi elaborado priorizando a flexibilidade de montagem: sempre que possível, foram previstas alternativas de montagem (SMD ou PTH) e pontos de acesso que facilitam a depuração e a caracterização do consumo energético.
 
 <div align="center">
-  <img src="../../img/" alt="Esquemático completo da Pulseira SysCare" width="90%">
+  <img src="../../img/schematics_all.png" alt="Esquemático completo da Pulseira SysCare" width="90%">
   <p>Figura 1 - Esquemático completo da Pulseira SysCare</p>
 </div>
 
@@ -21,7 +21,7 @@ Durante essa análise, verificou-se que o módulo já possui um **circuito de ca
 A bateria é conectada à placa pelos conectores **J2** e **J3**. Entre o terminal positivo da bateria e o pino `BAT+` do módulo foram previstos o resistor **R1 (0 Ω)** e o conector **J1 (SHUNT)**, ligados em paralelo. Esse arranjo permite que, durante os testes, o resistor de 0 Ω seja substituído por um resistor de shunt, ou que o jumper seja removido para a inserção de um amperímetro em série com a alimentação, viabilizando a **medição do consumo real do protótipo**. Como a autonomia é um dos requisitos centrais do projeto, a possibilidade de medir a corrente consumida sem modificar a placa foi considerada importante para a etapa de validação. Em operação normal, o jumper permanece inserido e a alimentação segue pelo caminho de menor resistência.
 
 <div align="center">
-  <img src="../../img/" alt="Circuito de alimentação e conexão da bateria" width="70%">
+  <img src="../../img/schematics_batt_circuit.jpeg" alt="Circuito de alimentação e conexão da bateria" width="70%">
   <p>Figura 2 - Circuito de alimentação, conectores da bateria e ponto de medição de consumo</p>
 </div>
 
@@ -43,8 +43,14 @@ Como a equipe já dispunha de um **módulo avulso do acelerômetro**, optou-se p
 Essa abordagem foi adotada para reduzir o risco da primeira montagem. Caso ocorra algum problema na soldagem do encapsulamento do IIM-42351, que possui dimensões reduzidas, o desenvolvimento do firmware pode prosseguir utilizando o módulo avulso, sem bloquear o cronograma do projeto.
 
 <div align="center">
-  <img src="../../img/" alt="Circuito do acelerômetro IIM-42351 e conectores do módulo" width="80%">
+  <img src="../../img/schematics_acc_mounting_options.png" alt="Circuito do acelerômetro IIM-42351 e conectores do módulo" width="80%">
   <p>Figura 3 - Alternativas de montagem do acelerômetro: componente soldado na placa e módulo conectado via headers PTH</p>
+</div>
+
+<div align="center">
+  <img src="../../img/acc_module_top.jpeg" alt="Vista superior do módulo do acelerômetro" width="40%">
+  <img src="../../img/acc_module_bottom.jpeg" alt="Vista inferior do módulo do acelerômetro" width="40%">
+  <p>Figura 4 - Modelo 3D do módulo avulso do acelerômetro IIM-42351: vista superior (esquerda) e inferior (direita)</p>
 </div>
 
 A comunicação entre o acelerômetro e o microcontrolador é realizada por meio da interface **SPI**, escolhida por oferecer maior taxa de transferência e melhor imunidade a ruído quando comparada à I²C, características relevantes para a leitura contínua dos dados de aceleração. Foram disponibilizados todos os sinais da interface — `SPI_SCLK`, `SPI_MISO`, `SPI_MOSI` e `SPI_CS` — conectados aos pinos correspondentes do módulo XIAO (`D8/SCK`, `D9/MISO`, `D10/MOSI` e `D4`).
@@ -60,8 +66,8 @@ O LED é controlado pelo sinal `LED_RED` através do resistor limitador **R2 (10
 O botão **SW1 (1-1825910-4)** é responsável pelo acionamento manual do alerta de emergência. O circuito utiliza o resistor de *pull-up* **R3 (10 kΩ)**, que mantém o sinal `BUTTON` em nível alto enquanto o botão não é pressionado, o resistor **R4 (100 Ω)** para limitação de corrente e proteção do GPIO, e o capacitor **C4 (100 nF)**, que realiza a filtragem do repique mecânico dos contatos (*debounce*) em hardware, reduzindo a necessidade de tratamento do repique por software.
 
 <div align="center">
-  <img src="../../img/" alt="Circuito da interface com o usuário" width="70%">
-  <p>Figura 4 - Interface com o usuário: LED de indicação (opções SMD e PTH) e botão de emergência</p>
+  <img src="../../img/schematics_user_interface.png" alt="Circuito da interface com o usuário" width="70%">
+  <p>Figura 5 - Interface com o usuário: LED de indicação (opções SMD e PTH) e botão de emergência</p>
 </div>
 
 ## Considerações finais
