@@ -20,7 +20,7 @@ onde $FF_{DUR}$ representa a duração da queda em número de amostras e $DMP\_O
 
 O funcionamento proposto para o protótipo pode ser representado pela seguinte sequência:
 
-**Acelerômetro em baixo consumo → detecção de queda livre → interrupção → processamento pelo MCU → verificação do impacto → verificação de imobilidade → confirmação da queda → envio do alerta**
+**Acelerômetro em baixo consumo → detecção de queda livre → interrupção → processamento pelo MCU → envio do alerta**
 
 Durante a operação normal, o IIM-42351 permanece monitorando continuamente a aceleração, utilizando o algoritmo interno de *Freefall Detection*. Quando os parâmetros configurados indicarem a ocorrência de uma queda livre, o acelerômetro gera uma interrupção, que é recebida pelo XIAO nRF52840.
 
@@ -32,7 +32,7 @@ A partir dessa interrupção, o microcontrolador passa a executar o processament
 4. **Imobilidade:** permanência do usuário com baixa variação de aceleração após o impacto.
 5. **Confirmação:** caso as condições sejam satisfeitas, o evento será considerado uma queda e o sistema poderá iniciar o procedimento de alerta aos responsáveis.
 
-Dessa forma, o acelerômetro é responsável pela detecção inicial e geração da interrupção, enquanto o microcontrolador é responsável pelo tratamento da interrupção e pela confirmação do evento, reduzindo a possibilidade de que movimentos cotidianos sejam interpretados como uma queda.
+Dessa forma, o acelerômetro é responsável pela detecção inicial e geração da interrupção, enquanto o microcontrolador é responsável pelo tratamento da interrupção e envio do pedido de ajuda.
 
 ### Configuração inicial proposta
 
@@ -46,7 +46,7 @@ Dessa forma, o acelerômetro é responsável pela detecção inicial e geração
 | **Freefall Detection** | Low Power |
 | **Detecção inicial** | Freefall Detection interno |
 | **Saída da detecção** | Interrupção para o MCU |
-| **Processamento posterior** | Impacto + imobilidade |
+| **Processamento posterior** | Impacto + imobilidade -> (se necessário) |
 | **MCU** | XIAO nRF52840 |
 
 </div>
