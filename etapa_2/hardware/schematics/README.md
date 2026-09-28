@@ -74,6 +74,35 @@ O botão **SW1 (1-1825910-4)** é responsável pelo acionamento manual do alerta
 
 O esquemático desenvolvido consolida a arquitetura definida na etapa de seleção de componentes e incorpora decisões voltadas à validação do primeiro protótipo, entre elas o aproveitamento do circuito de carregamento integrado ao módulo XIAO, a disponibilização de alternativas de montagem para o acelerômetro e para o LED, o acesso à interface SWD para depuração e a previsão de um ponto dedicado à medição de consumo. Após a validação do protótipo, o esquemático poderá ser revisado para uma versão mais compacta do dispositivo, na qual as redundâncias de montagem podem ser removidas e o microcontrolador incorporado diretamente à placa.
 
+## Lista de materiais
+
+A lista de materiais (*Bill of Materials* – BOM) foi exportada do Altium Designer e está disponível na planilha [Bill of Materials-PROJETO PI3.xlsx](./Bill%20of%20Materials-PROJETO%20PI3.xlsx). A coluna **Montar** indica quais componentes serão efetivamente soldados no primeiro protótipo: como o acelerômetro será utilizado na forma de módulo avulso, o IIM-42351 (U2) e seus capacitores de desacoplamento não serão montados, assim como as opções alternativas de montagem.
+
+<div align="center">
+
+| **Montar** | **Designador** | **Qtd.** | **Part Number** | **Fabricante** | **Descrição** | **Observação** |
+|:---:|:---|:---:|:---|:---|:---|:---|
+| Não | C1 | 1 | 04026D105KAT2A | KYOCERA AVX | Chip Capacitor, 1 uF, +/- 10%, 6.3 V, 0402 (1005 Metric) | Já tem no módulo do acelerômetro |
+| Não | C2, C3 | 2 | C0402C104K8PACTU | Yageo Group | Chip Capacitor, 100nF +/-20%, 10V, 0402, Thickness 0.6 mm | Já tem no módulo do acelerômetro |
+| Sim | C4 | 1 | C0402C104K8PACTU | Yageo Group | Chip Capacitor, 100nF +/-20%, 10V, 0402, Thickness 0.6 mm | |
+| Não | J1, J2, J3 | 3 | DS1021-1X2SF162-B | Connfly | Pin header; pin strips; male; PIN: 2; straight; 2.54mm; THT; 1x2 | |
+| Sim | J5, J6, J7, J10 | 4 | TSW-103-07-T-S | Samtec | Pin header; male; PIN: 3; straight; 2.54mm; THT; 1x3 | |
+| Sim | J8, J9 | 2 | HTSW-104-07-G-S | Samtec | Pin header; male; PIN: 4; straight; 2.54mm; THT; 1x4 | |
+| Sim | LED1 | 1 | LTL-1CHEE | Diodes Inc. | Red LED, 80 mW, 30 mA, -25 to 85 degC, 2-Pin THD | |
+| Não | LED2 | 1 | EL-19-217/R6C-ALM2VY/3T | Everlight | Chip LED, Red, 3 V, 25 mA, -40 to 85 degC, 2-Pin SMD (0603), RoHS, Tape and Reel | Opção alternativa SMD |
+| Sim | R1 | 1 | ERJ-2GE0R00X | Panasonic | Chip Resistor, 0 Ohm, 0.1 W, -55 to 155 degC, 0402 (1005 Metric) | Retirar para medição de corrente |
+| Sim | R2, R3 | 2 | AC0402FR-1310KL | Yageo Group | 10K 0.063W 1% 0402 (1005 Metric) SMD | |
+| Sim | R4 | 1 | CRCW0402100RJNEE | Vishay | 100R 0.063W 1% 0402 (1005 Metric) SMD | |
+| Sim | SW1 | 1 | 118259104 | TE Connectivity | FSM8JH=6MM TACT SWITCH, HIGH TEMP | |
+| Sim | U1 | 1 | 102010469 | Seeed Studio | nRF52840 - Transceiver; Bluetooth® 5.x (BLE) 2.4GHz Evaluation Board | |
+| Não | U2 | 1 | IIM-42351 | TDK | Accelerometer X, Y, Z Axis ±2g, 4g, 8g, 16g 6.25Hz ~ 4kHz 14-LGA (2.5x3) | Já tem no módulo do acelerômetro |
+
+</div>
+
+<div align="center">
+  <p>Tabela 1 - Lista de materiais do esquemático da Pulseira SysCare</p>
+</div>
+
 ## Referências
 
 - [1] [SEEED STUDIO. Seeed Studio XIAO nRF52840 - Schematic](https://files.seeedstudio.com/wiki/XIAO-BLE/Res/260828_XIAO_nRF52840.pdf)
