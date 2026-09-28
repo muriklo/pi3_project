@@ -33,6 +33,19 @@ A Tabela 1, apresenta os componentes selecionados para o protótipo e suas respe
 
 A escolha dos componentes apresentada na Tabela 1, corresponde à configuração utilizada para a validação do primeiro protótipo. Após a validação da arquitetura e do funcionamento do sistema, poderão ser avaliadas alternativas com foco na redução do consumo energético e na integração dos componentes em uma placa dedicada.
 
+### Desenvolvimento do esquemático
+
+A partir dos componentes definidos na Tabela 1, foi desenvolvido o esquemático da Pulseira SysCare no **Altium Designer**, com o projeto armazenado no **Altium 365**. Por se tratar do primeiro protótipo, o circuito prioriza a flexibilidade de montagem e a facilidade de depuração.
+
+O circuito de carregamento integrado ao XIAO nRF52840 permitiu adotar a bateria recarregável 541112, com recarga pela própria porta USB, e entre a bateria e o módulo foi previsto um ponto para medição do consumo. Também foram disponibilizados os sinais da interface SWD para depuração do firmware. O acelerômetro IIM-42351 se comunica via SPI e utiliza os pinos de interrupção para acordar o microcontrolador na detecção de queda, podendo ser soldado diretamente na placa ou conectado como módulo avulso. A interface com o usuário é composta por um LED de indicação e um botão de emergência com *debounce* em hardware.
+
+<div align="center">
+  <img src="./img/schematics_all.png" alt="Esquemático completo da Pulseira SysCare" width="90%">
+  <p>Figura XX - Esquemático completo da Pulseira SysCare</p>
+</div>
+
+> 📁 **Documentação do esquemático:** Acesse a pasta: [Esquemático](./hardware/schematics/README.md)
+
 ---
 ## Definição dos softwares necessários
 
