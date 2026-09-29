@@ -191,7 +191,7 @@ Também foi iniciada uma estimativa da massa total da pulseira, possível ser vi
 As definições apresentadas constituem a referência mecânica para o primeiro protótipo e serão utilizadas nas etapas seguintes de integração dos componentes, detalhamento da carcaça e fabricação.
 
 <div align="center"> 
-  <img src="./img/" alt="Cotas iniciais do sistema de fixação da pulseira" width="65%"> 
+  <img src="./img/prototipo_mecanico.png" alt="Cotas iniciais do sistema de fixação da pulseira" width="75%"> 
   <p>Figura XX - Projeto 3D com protótipo da PCI integrada</p> 
 </div>
 
