@@ -28,7 +28,7 @@ Este projeto deve implementar:
 
 <div align="center">
   <img src="./etapa_1/img/diagrama_de_blocos.png" alt="Figura 3" width="85%">
-  <p>Figura 3 - Diagrama de blocos do sistema</p>
+  <p>Figura 1 - Diagrama de blocos do sistema</p>
 </div>
 
 O sistema funciona em fluxo contínuo iniciando no Dispositivo Vestível (Camada 0) e seu *Hardware* Embarcado (Camada 1), onde a Camada 2 (Detecção e Comunicação) monitora os movimentos via algoritmos de detecção de queda, gerencia o botão de emergência, a bateria e o status luminoso, enviando os alertas via BLE para a Camada 3 (Aplicação Móvel/Smartphone); em seguida, o aplicativo repassa esses dados pela internet até a Camada 4 (Backend/Servidor) para processamento via API, resultando no disparo de notificações para a Camada 5 (Familiares/Responsáveis) prestarem o auxílio necessário.
