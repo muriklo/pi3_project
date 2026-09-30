@@ -17,7 +17,7 @@ aplicativo ouviu por BLE, guarda o histórico e notifica os cuidadores.
                                                                             cuidadores
 ```
 
-A API é um processo num servidor Linux — **nada dela roda no nRF**. O consumo da
+A API é um processo num servidor Linux **nada dela roda no nRF**. O consumo da
 pulseira depende do protocolo BLE (intervalo de anúncio, potência de TX,
 tamanho do payload), documentado em [`docs/ble_payload.md`](docs/ble_payload.md).
 
@@ -103,7 +103,7 @@ Sem credenciais, roda em **dry-run**: mostra o texto exato, quantos segmentos
 seriam cobrados e o custo estimado, sem enviar nada. Para o dispatcher também
 simular SMS num alerta de verdade, use `SYSCARE_SMS_PROVIDER=dryrun`.
 
-Para enviar **de verdade** é preciso conta **paga** num provedor — não existe SMS
+Para enviar **de verdade** é preciso conta **paga** num provedor, não existe SMS
 grátis por API. Com o Twilio, depois do upgrade da conta:
 
 ```env
@@ -119,17 +119,17 @@ texto personalizado, como o alerta de queda, é recusado com o erro `572006`
 ("Trial accounts can only use predefined SMS templates"), testado em 24/09/2026.
 Depois do upgrade, ainda valem duas armadilhas: liberar o Brasil em *Messaging →
 Settings → Geo permissions* (senão, erro `21408`), e o tráfego A2P de long code
-não registrado pode ser filtrado pelas operadoras brasileiras — "aceito pelo
+não registrado pode ser filtrado pelas operadoras brasileiras, "aceito pelo
 Twilio" não é o mesmo que "entregue".
 
 **Quando o SMS dispara.** Push vai para todo cuidador com o app, sempre. SMS
 custa dinheiro, então entra só em dois casos: cuidador **sem** app (é o único
-jeito de alcançá-lo) ou **escalonamento** — ninguém confirmou e o push não
+jeito de alcançá-lo) ou **escalonamento**, ninguém confirmou e o push não
 bastou. Controlado por `SYSCARE_SMS_FROM_ESCALATION_ROUND`.
 
 **Por que o texto do SMS não tem acento.** Um único caractere fora do GSM-7
 ("ã", "ç", emoji) joga a mensagem inteira para UCS-2 e derruba o limite de 160
-para 70 caracteres — um acento inocente triplica o custo do alerta. O
+para 70 caracteres, um acento inocente triplica o custo do alerta. O
 `render_sms_body()` normaliza para ASCII e corta em um segmento.
 
 ## Alerta local é responsabilidade do app, não da API
@@ -142,7 +142,7 @@ canais (incluindo o fallback grátis de SMS/ligação pelo próprio celular) est
 
 ## Para a Etapa 3
 
-- [ ] Migrar de `create_all` para **Alembic** — `create_all` não altera tabelas existentes.
+- [ ] Migrar de `create_all` para **Alembic** `create_all` não altera tabelas existentes.
 - [ ] Trocar SQLite por **PostgreSQL**.
 - [ ] Rate limit no `POST /v1/alerts`.
 - [ ] Escalonador em worker externo, se rodar mais de uma instância da API.
