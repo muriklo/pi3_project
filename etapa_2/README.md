@@ -1,11 +1,10 @@
 # Etapa 2
 
-A etapa 2 é destinada ao desenvolvimento e à definição da arquitetura do primeiro protótipo da Pulseira SysCare, abrangendo as áreas de hardware, firmware, mecânica e aplicativo. Nesta etapa, foram selecionados os principais componentes do sistema, definidos os softwares e ferramentas utilizados no desenvolvimento, estabelecida a arquitetura de hardware e firmware, incluindo a comunicação com o acelerômetro e o BLE, e desenvolvido o projeto mecânico da pulseira e de seu encapsulamento. Também foram consideradas as restrições de dimensões, massa, integração dos componentes e montagem do protótipo, buscando uma solução compatível com os requisitos funcionais e físicos definidos para o projeto.
+A etapa 2 corresponde ao desenvolvimento do primeiro protótipo da Pulseira SysCare e à definição de sua arquitetura nas áreas de *hardware*, *firmware*, aplicativo, API e mecânica. Nesta etapa, foram selecionados os componentes, definidas as ferramentas de desenvolvimento, elaborados o esquemático e a arquitetura do *firmware*, implementados o aplicativo e a API responsáveis por receber e repassar os alertas, e desenvolvido o projeto mecânico da carcaça. Este documento resume cada frente; o detalhamento está nos documentos indicados ao final de cada seção.
 
 ### Definição dos *softwares* necessários para o projeto
 
-Para o desenvolvimento da Pulseira SysCare, foram definidos softwares específicos para cada uma das etapas do projeto, abrangendo o desenvolvimento do firmware (FW), projeto eletrônico (HW), desenvolvimento mecânico (MEC) e aplicativo (APP). A seleção considera as ferramentas utilizadas para programação, simulação, desenvolvimento das placas eletrônicas e modelagem da estrutura física do dispositivo.
-Após todas os estudos envolvidos foi decidido os *softwares* a serem usados, podendo ser visto na Tabela 1:
+Para cada área do projeto, foi definida uma ferramenta de desenvolvimento, considerando a programação, o projeto da placa eletrônica e a modelagem da estrutura física do dispositivo, conforme a Tabela 1.
 
 <div align="center">
 
@@ -14,7 +13,8 @@ Após todas os estudos envolvidos foi decidido os *softwares* a serem usados, po
 | **FW - Firmware**    | Visual Studio Code + nRF Connect NORDIC | Desenvolvimento, compilação e gerenciamento do firmware do XIAO nRF52840.                             |
 | **HW - Hardware**    | Altium Designer                 | Desenvolvimento do esquemático e projeto da placa de circuito impresso (PCI).                         |
 | **MEC - Mecânica**   | FreeCAD                 | Modelagem tridimensional e desenvolvimento da estrutura mecânica da pulseira e de seu encapsulamento. |
-| **APP - Aplicativo** | Flutter (Dart) + Visual Studio Code + Android Studio | Desenvolvimento do aplicativo em Flutter no VS Code; o Android Studio fornece o Android SDK e o emulador usados para compilar e testar o APK. |
+| **APP - Aplicativo** | Flutter (Dart) + Visual Studio Code + Android Studio | Desenvolvimento do aplicativo; o Android Studio fornece o Android SDK e o emulador para compilar e testar o APK. |
+| **API**              | Python + FastAPI                | Servidor que recebe os eventos, guarda o histórico e notifica os responsáveis.                        |
 
 </div>
 
@@ -22,20 +22,13 @@ Após todas os estudos envolvidos foi decidido os *softwares* a serem usados, po
   <p>Tabela 1 - Definição dos <i>softwares</i> do projeto</p>
 </div>
 
---- 
+---
 
 ## Desenvolvimento de *Hardware*
 
 ### Componentes selecionados
 
-Após a análise dos requisitos e a comparação entre as alternativas disponíveis, foram definidos os principais componentes para a implementação do primeiro protótipo. A seleção considerou tanto as características elétricas e funcionais dos componentes quanto fatores relacionados à disponibilidade, facilidade de integração e restrições dimensionais da pulseira.
-
-A Tabela 2 apresenta os componentes selecionados para o protótipo e suas respectivas funções no sistema. Todo o estudo e seleção, bem como os benchmarks feitos estão localizados no *README.md* na pasta *Hardware*.
-
-> Nesta seção, foram detalhadas as escolhas dos componentes para o protótipo inicial, bem como o esquemático da PCI. Todas as considerações e comparações podem ser vistas no documento.
->
-> 📁 **Documentação de *Hardware*:** Acesse a pasta: [Hardware](./hardware/README.md)
-
+Os componentes do primeiro protótipo, apresentados na Tabela 2, foram escolhidos considerando as características elétricas e funcionais, a disponibilidade, a facilidade de integração e as restrições dimensionais da pulseira. Trata-se de uma configuração voltada à validação da arquitetura: após os testes, poderão ser avaliadas alternativas de menor consumo e a integração dos componentes em uma placa dedicada.
 
 <div align="center">
 
@@ -52,40 +45,26 @@ A Tabela 2 apresenta os componentes selecionados para o protótipo e suas respec
   <p>Tabela 2 - Definição dos componentes do sistema</p>
 </div>
 
-A escolha dos componentes apresentada na Tabela 2 corresponde à configuração utilizada para a validação do primeiro protótipo. Após a validação da arquitetura e do funcionamento do sistema, poderão ser avaliadas alternativas com foco na redução do consumo energético e na integração dos componentes em uma placa dedicada.
-
+> 📁 **Documentação de *Hardware*:** comparativos e critérios de seleção dos componentes em [Hardware](./hardware/README.md)
 
 ### Desenvolvimento do esquemático
 
-A partir dos componentes definidos na Tabela 2, foi desenvolvido o esquemático da Pulseira SysCare no Altium Designer, apresentado na Figura 1, com o projeto armazenado no Altium 365. Por se tratar do primeiro protótipo, o circuito prioriza a flexibilidade de montagem e a facilidade de depuração.
-
-O circuito de carregamento integrado ao XIAO nRF52840 permitiu adotar a bateria recarregável 541112, com recarga pela própria porta USB, e entre a bateria e o módulo foi previsto um ponto para medição do consumo. Também foram disponibilizados os sinais da interface SWD para depuração do firmware. O acelerômetro IIM-42351 se comunica via SPI e utiliza os pinos de interrupção para acordar o microcontrolador na detecção de queda, podendo ser soldado diretamente na placa ou conectado como módulo avulso. A interface com o usuário é composta por um LED de indicação e um botão de emergência com *debounce* em hardware.
+O esquemático, apresentado na Figura 1, foi desenvolvido no Altium Designer e armazenado no Altium 365. Por se tratar do primeiro protótipo, ele prioriza a flexibilidade de montagem e a facilidade de depuração. O circuito de carregamento integrado ao XIAO nRF52840 permitiu adotar a bateria recarregável 541112, com recarga pela porta USB, e entre a bateria e o módulo foi previsto um ponto para medição do consumo. Os sinais da interface SWD foram disponibilizados para depuração do *firmware*. O acelerômetro IIM-42351 se comunica via SPI e utiliza os pinos de interrupção para acordar o microcontrolador, podendo ser soldado na placa ou conectado como módulo avulso. A interface com o usuário é composta por um LED de indicação e um botão de emergência com *debounce* em *hardware*.
 
 <div align="center">
   <img src="./img/schematics_all.png" alt="Esquemático completo da Pulseira SysCare" width="90%">
   <p>Figura 1 - Esquemático completo da Pulseira SysCare</p>
 </div>
 
-> Nesta seção, foram detalhadas as escolhas dos componentes para o protótipo inicial, bem como o esquemático da PCI. Todas as considerações e comparações podem ser vistas no documento.
->
-> 📁 **Documentação do esquemático:** Acesse a pasta: [Esquemático](./hardware/schematics/README.md)
+> 📁 **Documentação do esquemático:** circuitos, decisões de projeto e lista de materiais em [Esquemático](./hardware/schematics/README.md)
 
 ---
 
 ## Desenvolvimento de *Software* e *Firmware*
 
-Descrever atividades feitas...
-
-### API
-ESCREVERRR
-
-
 ### Firmware
 
-Nesta etapa foram definidas as principais soluções para o firmware da Pulseira SysCare, com foco na detecção de quedas e na arquitetura do software.
-
-A detecção de quedas será realizada utilizando o acelerômetro IIM-42351, aproveitando seu recurso interno de Freefall Detection em modo de baixo consumo. Foi definida inicialmente uma frequência de operação de 25 Hz, permitindo o uso do algoritmo em Low Power, conforme a configuração apresentada na Tabela 3. Quando uma possível queda livre é identificada, o acelerômetro gera uma interrupção para o XIAO nRF52840, que realiza o processamento do evento.
-
+A detecção de quedas utiliza o recurso interno de *Freefall Detection* do IIM-42351, configurado a 25 Hz para operar em modo de baixo consumo, conforme a Tabela 3. Ao identificar uma queda livre, o acelerômetro gera uma interrupção pela linha INT1, e o XIAO nRF52840 confirma o evento verificando o impacto e a imobilidade posteriores antes de emitir o alerta.
 
 <div align="center">
 
@@ -106,26 +85,41 @@ A detecção de quedas será realizada utilizando o acelerômetro IIM-42351, apr
   <p>Tabela 3 - Proposta inicial de configuração do acelerômetro</p>
 </div>
 
-Dessa forma, o acelerômetro é responsável pela detecção inicial e geração da interrupção, enquanto o microcontrolador é responsável pelo tratamento da interrupção e envio do pedido de ajuda.
-
-
-Já a arquitetura de *hardware* e *firmware*, apresentada na Figura 2, será desenvolvida utilizando Zephyr RTOS / nRF Connect SDK, sendo organizada em módulos para detecção e confirmação de quedas, tratamento de interrupções, comunicação com o acelerômetro, gerenciamento de energia, armazenamento de dados e comunicação BLE. A comunicação entre o XIAO nRF52840 e o IIM-42351 será realizada por SPI, enquanto a linha INT1 será utilizada para sinalizar os eventos de detecção ao microcontrolador.
+O *firmware* será desenvolvido sobre o Zephyr RTOS / nRF Connect SDK e organizado em módulos de detecção e confirmação de quedas, tratamento de interrupções, comunicação SPI com o acelerômetro, gerenciamento de energia, armazenamento de dados e comunicação BLE, conforme a Figura 2.
 
 <div align="center">
   <img src="./img/diagrama_de_blocos_hardware.png" alt="Diagrama de blocos da arquitetura de hardware e firmware" width="70%">
   <p>Figura 2 - Diagrama de blocos da arquitetura de <i>hardware</i> e <i>firmware</i> da Pulseira SysCare</p>
 </div>
 
+A pulseira não mantém conexão com o celular: ela transmite anúncios BLE (*advertising*) de 14 bytes, assinados com HMAC, contendo o tipo do evento, um número de sequência, o nível da bateria e a intensidade do impacto. Em repouso, envia um *heartbeat* a cada 2 s; em uma emergência, repete o anúncio a cada 100 ms. Como qualquer celular próximo pode receber o anúncio, o alerta não depende de um aparelho pareado.
+
+> 📁 **Documentação do *Firmware*:** [Firmware](./software/firmware/README.md) · **Protocolo BLE:** [ble_payload.md](./software/api/docs/ble_payload.md)
+
+### Aplicativo
+
+O aplicativo foi desenvolvido em Flutter e atende a dois papéis. O **receptor**, exclusivo do Android devido às restrições do iOS à varredura BLE em segundo plano, escuta a pulseira, dispara o alarme local e repassa o evento à API. O **responsável**, disponível em Android e iOS, recebe a notificação, confirma o atendimento e gerencia as pulseiras e os demais responsáveis. O código é dividido em cinco camadas, com as regras do protocolo isoladas em um pacote Dart puro, testado com os mesmos vetores de bytes gerados pela API.
+
+A principal decisão da arquitetura é que o alarme local precede qualquer acesso à rede, como mostra a Figura 3. A sirene toca assim que o anúncio é classificado como emergência; em seguida, o aplicativo envia SMS aos responsáveis pelo plano do próprio celular, obtém a localização e envia o evento à API por meio de uma fila persistente, que não descarta eventos em caso de falha de rede. O protótipo foi instalado em um celular Android físico, e o envio de SMS foi validado de ponta a ponta.
+
+<div align="center">
+  <img src="./img/app_fluxo_alerta.svg" alt="Fluxo do alerta no aplicativo" width="95%">
+  <p>Figura 3 - Sequência do alerta no aplicativo, do anúncio à confirmação</p>
+</div>
+
+> 📁 **Documentação do Aplicativo:** [Aplicativo](./software/app/README.md)
+
+### API
+
+A API é um servidor em Python (FastAPI) que recebe os eventos repassados pelo aplicativo, guarda o histórico e notifica os responsáveis. Três decisões orientam sua implementação: a **deduplicação**, pois vários celulares podem reportar o mesmo anúncio e a API gera um único alerta por número de sequência, aproveitando a localização de qualquer um deles; a **verificação da assinatura** HMAC, que impede que um rádio próximo forje uma queda; e o **escalonamento**, que reenvia o alerta periodicamente enquanto nenhum responsável confirmar o atendimento. As notificações são enviadas por *push* (Firebase Cloud Messaging) e, quando há provedor contratado, por SMS. O levantamento de custos dos canais de alerta levou à adoção do SMS enviado pelo próprio celular como canal principal de SMS, já que os provedores de SMS por API são pagos.
+
+> 📁 **Documentação da API:** [API](./software/api/README.md) · **Canais de alerta:** [canais_de_alerta.md](./software/api/docs/canais_de_alerta.md)
 
 ---
 
 ## Desenvolvimento mecânico
 
-Na etapa 2, foi desenvolvido o projeto mecânico da Pulseira SysCare a partir dos requisitos dimensionais, ergonômicos e de fabricação definidos anteriormente. Foram estabelecidas as dimensões da carcaça, o espaço disponível para os componentes eletrônicos, o sistema de fixação da pulseira, o material de fabricação e uma estimativa inicial da massa do conjunto.
-
-### Dimensões e integração mecânica
-
-Para o primeiro protótipo, foi definida uma carcaça compacta, com dimensões externas de 42 mm de largura e 52 mm de comprimento total, incluindo as regiões de fixação da pulseira. O espaço interno foi definido considerando um diâmetro interno de 37 mm e uma região útil de 35 mm para acomodação dos componentes eletrônicos. As dimensões definidas estão resumidas na Tabela 4.
+O projeto mecânico, que cobria os requisitos dimensionais, ergonômicos e de fabricação na Etapa 1, foi definido e prototipado em uma carcaça compacta, com 42 mm de largura e 52 mm de comprimento total, incluindo as garras de fixação. O diâmetro interno é de 37 mm, e a região útil de 35 mm, com cerca de 962,11 mm², é a referência para o posicionamento da PCI, da bateria e do acelerômetro, como mostra a Figura 4. As dimensões estão resumidas na Tabela 4.
 
 <div align="center">
 
@@ -144,32 +138,19 @@ Para o primeiro protótipo, foi definida uma carcaça compacta, com dimensões e
   <p>Tabela 4 - Dimensões mecânicas definidas</p>
 </div>
 
-A Figura 3 apresenta a localização das dimensões definidas para os diâmetros externo, interno e útil da carcaça. A região útil de 35 mm de diâmetro corresponde a uma área de aproximadamente 962,11 mm², utilizada como referência para o posicionamento da PCI, bateria, acelerômetro e demais componentes.
-
-
 <div align="center">
   <img src="./img/cotas_diametros_internos_externos_e_util.png" alt="Dimensões dos diâmetros da carcaça" width="55%">
-  <p>Figura 3 - Dimensões dos diâmetros externo, interno e da região útil da carcaça da Pulseira SysCare</p>
+  <p>Figura 4 - Dimensões dos diâmetros externo, interno e da região útil da carcaça da Pulseira SysCare</p>
 </div>
 
-### Pulseira e fixação
-
-Foi definida uma pulseira comercial de silicone de 18 mm, apresentada na Figura 4, escolhida pela disponibilidade e facilidade de integração ao protótipo. A fixação da pulseira à carcaça será realizada por meio de pinos de mola (spring bars), devido à sua simplicidade construtiva, pequeno volume e facilidade de montagem.
-
-Como referência inicial para a geometria das garras, foi definida uma distância de 2,5 mm entre a extremidade da garra e o centro do furo do pino. Essa dimensão poderá ser ajustada após a validação física da pulseira utilizada.
+A carcaça é fixada a uma pulseira comercial de silicone de 18 mm, apresentada na Figura 5, por meio de pinos de mola (*spring bars*), escolhidos pela simplicidade construtiva, pelo pequeno volume e pela facilidade de montagem. A distância inicial de 2,5 mm entre a extremidade da garra e o centro do furo do pino será ajustada após a validação com a pulseira física.
 
 <div align="center"> 
   <img src="./img/pulseira_da_estrutura_mecanica.png" alt="Pulseira comercial de silicone de 18 mm" width="65%"> 
-  <p>Figura 4 - Pulseira de silicone Wawe de 18 mm</p> 
+  <p>Figura 5 - Pulseira de silicone Wawe de 18 mm</p> 
 </div>
 
-### Material e fabricação
-
-A carcaça será fabricada por impressão 3D, utilizando o filamento disponível no IFSC para o primeiro protótipo. A escolha considera principalmente a disponibilidade do material, a facilidade de fabricação e a possibilidade de realizar alterações dimensionais durante o desenvolvimento. Para versões posteriores, o material poderá ser reavaliado considerando propriedades mecânicas, acabamento e requisitos relacionados ao contato prolongado com a pele.
-
-### Massa do conjunto
-
-Também foi iniciada uma estimativa da massa total da pulseira, apresentada na Tabela 5, considerando a carcaça, bateria, acelerômetro, microcontrolador e PCI.
+A carcaça será fabricada por impressão 3D com o filamento disponível no IFSC, o que permite alterar a geometria ao longo do desenvolvimento. Em versões futuras, o material será reavaliado quanto ao contato prolongado com a pele. A estimativa de massa do conjunto, apresentada na Tabela 5, será completada após a fabricação da carcaça e da PCI. A Figura 6 apresenta o modelo 3D da pulseira com a PCI integrada.
 
 <div align="center">
 
@@ -188,14 +169,12 @@ Também foi iniciada uma estimativa da massa total da pulseira, apresentada na T
   <p>Tabela 5 - Estimativa da massa total</p>
 </div>
 
-As definições apresentadas constituem a referência mecânica para o primeiro protótipo e serão utilizadas nas etapas seguintes de integração dos componentes, detalhamento da carcaça e fabricação. A Figura 5 apresenta o modelo 3D da pulseira com o protótipo da PCI integrado.
-
 <div align="center"> 
   <img src="./img/prototipo_mecanico.png" alt="Modelo 3D da pulseira com a PCI integrada" width="75%"> 
-  <p>Figura 5 - Projeto 3D com protótipo da PCI integrada</p> 
+  <p>Figura 6 - Projeto 3D com protótipo da PCI integrada</p> 
 </div>
 
-> 📁 **Documentação de Mecânica:** Acesse a pasta: [Mecânica](./mechanics/README.md)
+> 📁 **Documentação de Mecânica:** dimensionamento, fixação, material e massa em [Mecânica](./mechanics/README.md)
 
 
 
