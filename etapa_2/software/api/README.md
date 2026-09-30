@@ -72,7 +72,7 @@ curl -X POST localhost:8000/v1/alerts -H "Authorization: Bearer $TOKEN" \
 | POST/GET/PATCH/DELETE | `/v1/devices/{id}/caregivers` | Quem é avisado (só o dono: a lista tem telefones de terceiros) |
 | **POST** | **`/v1/alerts`** | **Reportar evento ouvido no BLE** |
 | GET | `/v1/alerts` · `/v1/alerts/{id}` | Histórico |
-| POST | `/v1/alerts/{id}/ack` | "Estou indo" — interrompe o escalonamento; dono ou qualquer responsável ativo |
+| POST | `/v1/alerts/{id}/ack` | "Estou indo"  interrompe o escalonamento; dono ou qualquer responsável ativo |
 | POST | `/v1/alerts/{id}/resolve` | Encerrar: `resolved` ou `false_positive` |
 | POST | `/v1/telemetry` | Lote de heartbeats `0x05` (bateria, presença), deduplicado por janela de 60 s |
 | GET | `/health` | Liveness |
@@ -81,7 +81,7 @@ curl -X POST localhost:8000/v1/alerts -H "Authorization: Bearer $TOKEN" \
 
 **1. Deduplicação.** BLE broadcast é ouvido por todos os celulares no alcance, e
 todos vão reportar. A API deduplica por `(device_id, seq)` numa janela de 180 s:
-um alerta, uma notificação — mas aproveitando o GPS de quem quer que o tenha.
+um alerta, uma notificação, mas aproveitando o GPS de quem quer que o tenha.
 
 **2. Assinatura.** Sem HMAC, qualquer rádio próximo forja um alerta de queda. A
 pulseira assina o payload com uma chave gravada no firmware; o celular só
