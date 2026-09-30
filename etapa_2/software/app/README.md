@@ -285,7 +285,14 @@ O protótipo desta etapa segue a divisão da Seção 2, com cada camada em uma p
 
 A validação é feita em três níveis de testes automatizados, todos sem celular nem pulseira: o pacote de protocolo lê os mesmos vetores de bytes gerados pela API; os modelos do aplicativo leem respostas reais capturadas da API; e o envio da fila é testado contra cada linha da tabela de respostas da Seção 5.4. O endereço da API tem um valor padrão definido na compilação e pode ser trocado na tela de entrada, o que permite apontar o aplicativo para o computador que roda o servidor em qualquer rede local durante os testes de campo, sem gerar outro APK. Sem a pulseira, o anúncio é simulado por um segundo celular com um aplicativo de anúncio BLE, usando os bytes gerados pela própria API.
 
-Além dos testes automatizados, o protótipo foi instalado em um celular Android físico, conectado à API pela rede local: com o botão **Simular queda**, o SMS de teste saiu pelo plano do celular e chegou ao telefone do responsável, validando a Camada 3 de ponta a ponta.
+Além dos testes automatizados, o protótipo foi instalado em um celular Android físico, conectado à API pela rede local, como mostra a Figura 5. A tela Início exibe a escuta ligada e a pulseira cadastrada, ainda não ouvida pelo rádio. A tela Saúde do sistema confirma cada pré-condição do alarme, exceto o alarme em tela cheia, que o Android só permite pedir, sem verificar, e por isso aparece como item a conferir. Com o botão **Simular queda**, o SMS de teste saiu pelo plano do celular e chegou ao telefone do responsável em uma única mensagem, com o tipo do evento, a pessoa, o horário e o link do mapa, validando a Camada 3 de ponta a ponta.
+
+<div align="center">
+  <img src="../../img/app_print_inicio.jpg" alt="Tela Início do aplicativo com a escuta ligada" width="30%">
+  <img src="../../img/app_print_saude.jpg" alt="Tela Saúde do sistema com as pré-condições do alarme" width="30%">
+  <img src="../../img/app_print_sms.jpg" alt="SMS de teste recebido pelo responsável" width="30%">
+  <p>Figura 5 - Protótipo em um celular Android: tela Início, tela Saúde do sistema e SMS de teste recebido pelo responsável (telefone e coordenadas ocultados)</p>
+</div>
 
 ## Referências (links/datasheets/livros)
 
