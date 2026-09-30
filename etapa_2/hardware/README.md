@@ -68,9 +68,10 @@ A Tabela abaixo apresenta a comparação entre alguns dos acelerômetros avaliad
 
 Apesar de existirem alternativas com consumo significativamente inferior, como o ADXL362, LIS2DW12 e BMA400, foi selecionado o IIM-42351 [2] para o primeiro protótipo. Essa escolha ocorre principalmente devido à disponibilidade de um módulo do componente já disponível para a equipe, permitindo iniciar o desenvolvimento sem a necessidade de projetar inicialmente uma placa específica para o acelerômetro.
 
-<div align="center"> 
-  <img src="../img/" alt="" width="60%"> 
-  <p>Figura 2 - Adicionar a figura do nosso acelerometro</p> 
+<div align="center">
+  <img src="../img/acc_module_top.jpeg" alt="Vista superior do módulo do acelerômetro" width="40%">
+  <img src="../img/acc_module_bottom.jpeg" alt="Vista inferior do módulo do acelerômetro" width="40%">
+  <p>Figura 2 - Módulo avulso do acelerômetro IIM-42351: vista superior (esquerda) e inferior (direita)</p>
 </div>
 
 Outro fator determinante é a familiaridade da equipe com o funcionamento do IIM-42351 e, principalmente, a disponibilidade do recurso de detecção de queda livre (Free-fall Detection). Esse recurso é particularmente relevante para a aplicação, pois a detecção de uma condição de queda pode ser realizada pelo próprio acelerômetro, gerando uma interrupção para que o microcontrolador realize o processamento posterior. Dessa forma, parte do processamento necessário para identificar uma possível queda pode ser realizada pelo próprio sensor, o que aumenta muito a economia de bateria.
