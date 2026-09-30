@@ -6,9 +6,9 @@ A partir desta etapa, será definida as soluções escolidas para o firmware. A 
 
 A detecção de quedas da Pulseira SysCare será baseada no acelerômetro IIM-42351 [1], utilizando o recurso interno de *Freefall Detection* para identificar o início de uma possível queda e gerar uma interrupção para o microcontrolador. Essa abordagem permite que o processamento principal permaneça em um estado de baixo consumo durante a maior parte do tempo, sendo acionado quando o acelerômetro identificar um evento compatível com queda.
 
-O IIM-42351 possui um modo de operação de baixo consumo para os algoritmos APEX (Advanced Pedometer and Event eXecution). Conforme a configuração apresentada no datasheet, para uma frequência de saída do acelerômetro igual ou superior a 25 Hz, o algoritmo de *freefall detection* pode operar em *low power*. Dessa forma, será adotada inicialmente uma configuração de 25 Hz, reduzindo o consumo energético do sistema sem desabilitar a detecção de queda. Nessa condição, o DMP opera a 25 Hz, conforme a tabela de configuração apresentada pelo fabricante.
+O IIM-42351 possui um modo de operação de baixo consumo para os algoritmos APEX (Advanced Pedometer and Event eXecution). Conforme a configuração apresentada no datasheet, para uma frequência de saída do acelerômetro igual ou superior a 25 Hz, o algoritmo de *freefall detection* pode operar em *low power*. Dessa forma, será adotada inicialmente uma configuração de 25 Hz, reduzindo o consumo energético do sistema sem desabilitar a detecção de queda. Nessa condição, o DMP opera a 25 Hz, conforme a tabela de configuração apresentada pelo fabricante [1].
 
-A detecção interna de *freefall* utiliza detectores de aceleração para identificar o início e o término de um período de queda livre. O evento é definido a partir de parâmetros de limiar e duração configuráveis no acelerômetro. Entre os parâmetros disponíveis estão o limiar de início da queda, o tempo mínimo de queda, o limiar de término e as durações mínima e máxima do evento. O próprio datasheet também relaciona a duração da queda livre à distância percorrida durante o evento:
+A detecção interna de *freefall* utiliza detectores de aceleração para identificar o início e o término de um período de queda livre. O evento é definido a partir de parâmetros de limiar e duração configuráveis no acelerômetro. Entre os parâmetros disponíveis estão o limiar de início da queda, o tempo mínimo de queda, o limiar de término e as durações mínima e máxima do evento. O próprio datasheet também relaciona a duração da queda livre à distância percorrida durante o evento [1]:
 
 $$
 FF_{DISTANCE}=0,5\cdot9,81\cdot(FF_{DUR}\cdot DMP\_ODR_S)^2
@@ -63,7 +63,7 @@ Essa configuração é particularmente interessante para o primeiro protótipo p
 
 Para detalhar a implementação do firmware da Pulseira SysCare, foi elaborado o diagrama de blocos apresentado na Figura 1, relacionando os principais módulos de software, os periféricos internos do XIAO nRF52840 e os componentes externos do sistema. O diagrama apresenta também as principais interconexões utilizadas, incluindo a comunicação SPI entre o microcontrolador e o acelerômetro IIM-42351 e a linha de interrupção utilizada para sinalizar eventos de detecção.
 
-A arquitetura foi organizada sobre o Zephyr RTOS / nRF Connect SDK, sendo dividida em módulos responsáveis pela detecção e confirmação de quedas, tratamento de interrupções, comunicação com o acelerômetro, gerenciamento de energia, armazenamento de dados, montagem dos pacotes e comunicação BLE.
+A arquitetura foi organizada sobre o Zephyr RTOS / nRF Connect SDK [2], sendo dividida em módulos responsáveis pela detecção e confirmação de quedas, tratamento de interrupções, comunicação com o acelerômetro, gerenciamento de energia, armazenamento de dados, montagem dos pacotes e comunicação BLE.
 
 Na detecção de quedas, o acelerômetro IIM-42351 realiza a detecção inicial de *freefall* e gera uma interrupção por meio da linha INT1. O XIAO nRF52840 recebe essa interrupção e executa a máquina de estados responsável pelo envio das mensagens via BLE.
 
@@ -73,6 +73,8 @@ Na detecção de quedas, o acelerômetro IIM-42351 realiza a detecção inicial 
 </div>
 
 
-## Referências
+## Referências (links/datasheets/livros)
 
-- [1] [High-performance 3-Axis SmartIndustrial™ Accelerometer MEMS Device for Industrial Applications](https://product.tdk.com/system/files/dam/doc/product/sensor/mortion-inertial/accelero/data_sheet/ds-000441-iim-42351-typ-v1.2.pdf)
+- [1] [TDK INVENSENSE. High-performance 3-Axis SmartIndustrial™ Accelerometer MEMS Device for Industrial Applications (IIM-42351)](https://product.tdk.com/system/files/dam/doc/product/sensor/mortion-inertial/accelero/data_sheet/ds-000441-iim-42351-typ-v1.2.pdf)
+
+- [2] [NORDIC SEMICONDUCTOR. nRF Connect SDK - Documentation](https://docs.nordicsemi.com/bundle/ncs-latest/page/nrf/index.html)
