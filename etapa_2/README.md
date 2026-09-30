@@ -34,9 +34,9 @@ Os componentes do primeiro protótipo, apresentados na Tabela 2, foram escolhido
 
 | **Categoria** | **Componente** | **Figura** | **Função** | **Critério de seleção** |
 |:---:|:---:|:---:|:---|:---|
-| **Microcontrolador** | Seeed Studio XIAO nRF52840 | <img src="./img/xiaonrf52840.png" width="200"> | Processamento, controle do sistema e comunicação BLE | Plataforma compacta, BLE integrado e facilidade de prototipagem |
-| **Acelerômetro** | TDK InvenSense IIM-42351 | <img src="img/iim42351.png" width="120"> | Aquisição de aceleração e detecção de queda | Módulo disponível, conhecimento prévio e Free-fall Detection |
-| **Bateria** | Bateria recarregável 541112 | <img src="./img/battery541112.png" width="120"> | Alimentação do sistema | Dimensões reduzidas e disponibilidade |
+| **Microcontrolador** | Seeed Studio XIAO nRF52840 [1] | <img src="./img/xiaonrf52840.png" width="200"> | Processamento, controle do sistema e comunicação BLE | Plataforma compacta, BLE integrado e facilidade de prototipagem |
+| **Acelerômetro** | TDK InvenSense IIM-42351 [2] | <img src="img/iim42351.png" width="120"> | Aquisição de aceleração e detecção de queda | Módulo disponível, conhecimento prévio e Free-fall Detection |
+| **Bateria** | Bateria recarregável 541112 [3] | <img src="./img/battery541112.png" width="120"> | Alimentação do sistema | Dimensões reduzidas e disponibilidade |
 | **Comunicação** | Bluetooth Low Energy | <img src="./img/ble.png" width="120"> | Comunicação com o smartphone | Baixo consumo e integração ao XIAO nRF52840 |
 
 </div>
@@ -49,7 +49,7 @@ Os componentes do primeiro protótipo, apresentados na Tabela 2, foram escolhido
 
 ### Desenvolvimento do esquemático
 
-O esquemático, apresentado na Figura 1, foi desenvolvido no Altium Designer e armazenado no Altium 365. Por se tratar do primeiro protótipo, ele prioriza a flexibilidade de montagem e a facilidade de depuração. O circuito de carregamento integrado ao XIAO nRF52840 permitiu adotar a bateria recarregável 541112, com recarga pela porta USB, e entre a bateria e o módulo foi previsto um ponto para medição do consumo. Os sinais da interface SWD foram disponibilizados para depuração do *firmware*. O acelerômetro IIM-42351 se comunica via SPI e utiliza os pinos de interrupção para acordar o microcontrolador, podendo ser soldado na placa ou conectado como módulo avulso. A interface com o usuário é composta por um LED de indicação e um botão de emergência com *debounce* em *hardware*.
+O esquemático, apresentado na Figura 1, foi desenvolvido no Altium Designer e armazenado no Altium 365 [4]. Por se tratar do primeiro protótipo, ele prioriza a flexibilidade de montagem e a facilidade de depuração. O circuito de carregamento integrado ao XIAO nRF52840 [5] permitiu adotar a bateria recarregável 541112, com recarga pela porta USB, e entre a bateria e o módulo foi previsto um ponto para medição do consumo. Os sinais da interface SWD foram disponibilizados para depuração do *firmware*. O acelerômetro IIM-42351 se comunica via SPI e utiliza os pinos de interrupção para acordar o microcontrolador, podendo ser soldado na placa ou conectado como módulo avulso. A interface com o usuário é composta por um LED de indicação e um botão de emergência com *debounce* em *hardware*.
 
 <div align="center">
   <img src="./img/schematics_all.png" alt="Esquemático completo da Pulseira SysCare" width="90%">
@@ -64,7 +64,7 @@ O esquemático, apresentado na Figura 1, foi desenvolvido no Altium Designer e a
 
 ### Firmware
 
-A detecção de quedas utiliza o recurso interno de *Freefall Detection* do IIM-42351, configurado a 25 Hz para operar em modo de baixo consumo, conforme a Tabela 3. Ao identificar uma queda livre, o acelerômetro gera uma interrupção pela linha INT1, e o XIAO nRF52840 confirma o evento verificando o impacto e a imobilidade posteriores antes de emitir o alerta.
+A detecção de quedas utiliza o recurso interno de *Freefall Detection* do IIM-42351 [2], configurado a 25 Hz para operar em modo de baixo consumo, conforme a Tabela 3. Ao identificar uma queda livre, o acelerômetro gera uma interrupção pela linha INT1, e o XIAO nRF52840 confirma o evento verificando o impacto e a imobilidade posteriores antes de emitir o alerta.
 
 <div align="center">
 
@@ -85,20 +85,20 @@ A detecção de quedas utiliza o recurso interno de *Freefall Detection* do IIM-
   <p>Tabela 3 - Proposta inicial de configuração do acelerômetro</p>
 </div>
 
-O *firmware* será desenvolvido sobre o Zephyr RTOS / nRF Connect SDK e organizado em módulos de detecção e confirmação de quedas, tratamento de interrupções, comunicação SPI com o acelerômetro, gerenciamento de energia, armazenamento de dados e comunicação BLE, conforme a Figura 2.
+O *firmware* será desenvolvido sobre o Zephyr RTOS / nRF Connect SDK [6] e organizado em módulos de detecção e confirmação de quedas, tratamento de interrupções, comunicação SPI com o acelerômetro, gerenciamento de energia, armazenamento de dados e comunicação BLE, conforme a Figura 2.
 
 <div align="center">
   <img src="./img/diagrama_de_blocos_hardware.png" alt="Diagrama de blocos da arquitetura de hardware e firmware" width="70%">
   <p>Figura 2 - Diagrama de blocos da arquitetura de <i>hardware</i> e <i>firmware</i> da Pulseira SysCare</p>
 </div>
 
-A pulseira não mantém conexão com o celular: ela transmite anúncios BLE (*advertising*) de 14 bytes, assinados com HMAC, contendo o tipo do evento, um número de sequência, o nível da bateria e a intensidade do impacto. Em repouso, envia um *heartbeat* a cada 2 s; em uma emergência, repete o anúncio a cada 100 ms. Como qualquer celular próximo pode receber o anúncio, o alerta não depende de um aparelho pareado.
+A pulseira não mantém conexão com o celular: ela transmite anúncios BLE (*advertising*) [7] de 14 bytes, assinados com HMAC [8], contendo o tipo do evento, um número de sequência, o nível da bateria e a intensidade do impacto. Em repouso, envia um *heartbeat* a cada 2 s; em uma emergência, repete o anúncio a cada 100 ms. Como qualquer celular próximo pode receber o anúncio, o alerta não depende de um aparelho pareado.
 
 > 📁 **Documentação do *Firmware*:** [Firmware](./software/firmware/README.md) · **Protocolo BLE:** [ble_payload.md](./software/api/docs/ble_payload.md)
 
 ### Aplicativo
 
-O aplicativo foi desenvolvido em Flutter e atende a dois papéis. O **receptor**, exclusivo do Android devido às restrições do iOS à varredura BLE em segundo plano, escuta a pulseira, dispara o alarme local e repassa o evento à API. O **responsável**, disponível em Android e iOS, recebe a notificação, confirma o atendimento e gerencia as pulseiras e os demais responsáveis. O código é dividido em cinco camadas, com as regras do protocolo isoladas em um pacote Dart puro, testado com os mesmos vetores de bytes gerados pela API.
+O aplicativo foi desenvolvido em Flutter e atende a dois papéis. O **receptor**, exclusivo do Android devido às restrições do iOS à varredura BLE em segundo plano [9, 10], escuta a pulseira, dispara o alarme local e repassa o evento à API. O **responsável**, disponível em Android e iOS, recebe a notificação, confirma o atendimento e gerencia as pulseiras e os demais responsáveis. O código é dividido em cinco camadas, com as regras do protocolo isoladas em um pacote Dart puro, testado com os mesmos vetores de bytes gerados pela API.
 
 A principal decisão da arquitetura é que o alarme local precede qualquer acesso à rede, como mostra a Figura 3. A sirene toca assim que o anúncio é classificado como emergência; em seguida, o aplicativo envia SMS aos responsáveis pelo plano do próprio celular, obtém a localização e envia o evento à API por meio de uma fila persistente, que não descarta eventos em caso de falha de rede.
 
@@ -120,7 +120,7 @@ O protótipo foi instalado em um celular Android físico, e o envio de SMS foi v
 
 ### API
 
-A API é um servidor em Python (FastAPI) que recebe os eventos repassados pelo aplicativo, guarda o histórico e notifica os responsáveis. Três decisões orientam sua implementação: a **deduplicação**, pois vários celulares podem reportar o mesmo anúncio e a API gera um único alerta por número de sequência, aproveitando a localização de qualquer um deles; a **verificação da assinatura** HMAC, que impede que um rádio próximo forje uma queda; e o **escalonamento**, que reenvia o alerta periodicamente enquanto nenhum responsável confirmar o atendimento. As notificações são enviadas por *push* (Firebase Cloud Messaging) e, quando há provedor contratado, por SMS. O levantamento de custos dos canais de alerta levou à adoção do SMS enviado pelo próprio celular como canal principal de SMS, já que os provedores de SMS por API são pagos.
+A API é um servidor em Python (FastAPI) [11] que recebe os eventos repassados pelo aplicativo, guarda o histórico e notifica os responsáveis. Três decisões orientam sua implementação: a **deduplicação**, pois vários celulares podem reportar o mesmo anúncio e a API gera um único alerta por número de sequência, aproveitando a localização de qualquer um deles; a **verificação da assinatura** HMAC [8], que impede que um rádio próximo forje uma queda; e o **escalonamento**, que reenvia o alerta periodicamente enquanto nenhum responsável confirmar o atendimento. As notificações são enviadas por *push* (Firebase Cloud Messaging) [12] e, quando há provedor contratado, por SMS. O levantamento de custos dos canais de alerta levou à adoção do SMS enviado pelo próprio celular como canal principal de SMS, já que os provedores de SMS por API são pagos [13, 14].
 
 > 📁 **Documentação da API:** [API](./software/api/README.md) · **Canais de alerta:** [canais_de_alerta.md](./software/api/docs/canais_de_alerta.md)
 
@@ -152,7 +152,7 @@ O projeto mecânico, que cobria os requisitos dimensionais, ergonômicos e de fa
   <p>Figura 5 - Dimensões dos diâmetros externo, interno e da região útil da carcaça da Pulseira SysCare</p>
 </div>
 
-A carcaça é fixada a uma pulseira comercial de silicone de 18 mm, apresentada na Figura 6[REFERENCIAR], por meio de pinos de mola (*spring bars*), escolhidos pela simplicidade construtiva, pelo pequeno volume e pela facilidade de montagem. A distância inicial de 2,5 mm entre a extremidade da garra e o centro do furo do pino será ajustada após a validação com a pulseira física.
+A carcaça é fixada a uma pulseira comercial de silicone de 18 mm, apresentada na Figura 6 [15], por meio de pinos de mola (*spring bars*), escolhidos pela simplicidade construtiva, pelo pequeno volume e pela facilidade de montagem. A distância inicial de 2,5 mm entre a extremidade da garra e o centro do furo do pino será ajustada após a validação com a pulseira física.
 
 <div align="center"> 
   <img src="./img/pulseira_da_estrutura_mecanica.png" alt="Pulseira comercial de silicone de 18 mm" width="65%"> 
@@ -187,12 +187,44 @@ A carcaça será fabricada por impressão 3D com o filamento disponível no IFSC
 
 
 
-## Referências
+## Referências (links/datasheets/livros)
 
-FAZER TODAS AS REFERENCIASSSS
+**Hardware e esquemático**
 
-- [XX] [High-performance 3-Axis SmartIndustrial™ Accelerometer MEMS Device for Industrial Applications](https://product.tdk.com/system/files/dam/doc/product/sensor/mortion-inertial/accelero/data_sheet/ds-000441-iim-42351-typ-v1.2.pdf)
+- [1] [SEEED STUDIO. Getting Started with Seeed Studio XIAO nRF52840 Series](https://wiki.seeedstudio.com/XIAO_BLE/)
 
-- [XX] [Pulseira 22mm Silicone Wawe Para Relogio Smartwatch C/ Pinos Cor Preta - Mercado Livre](https://www.mercadolivre.com.br/pulseira-22mm-silicone-wawe-para-relogio-smartwatch-c-pinos-cor-preta/p/MLB27101261?pdp_filters=seller_id%3A554440847#polycard_client=recommendations_pdp-seller_items-above&reco_backend=ranker-retsys-same-seller&reco_model=fallback_same-seller&reco_client=pdp-seller_items-above&reco_item_pos=0&reco_backend_type=low_level&reco_id=53201d97-38cf-43e9-8262-48ce6e3023e8&wid=MLB3449594979&sid=recos)
+- [2] [TDK INVENSENSE. High-performance 3-Axis SmartIndustrial™ Accelerometer MEMS Device for Industrial Applications (IIM-42351)](https://product.tdk.com/system/files/dam/doc/product/sensor/mortion-inertial/accelero/data_sheet/ds-000441-iim-42351-typ-v1.2.pdf)
 
+- [3] [ALIEXPRESS. Bateria de polímero de lítio de 3.7v 50mah 541112 para fone de ouvido bluetooth](https://pt.aliexpress.com/item/1005010578056028.html?gatewayAdapt=glo2bra)
 
+- [4] [ALTIUM. Altium 365 - Cloud Platform for PCB Design](https://www.altium.com/altium-365)
+
+- [5] [SEEED STUDIO. Seeed Studio XIAO nRF52840 - Schematic](https://files.seeedstudio.com/wiki/XIAO-BLE/Res/260828_XIAO_nRF52840.pdf)
+
+**Firmware e protocolo BLE**
+
+- [6] [NORDIC SEMICONDUCTOR. nRF Connect SDK - Documentation](https://docs.nordicsemi.com/bundle/ncs-latest/page/nrf/index.html)
+
+- [7] [BLUETOOTH SIG. Core Specification Supplement - Advertising and Scan Response Data Format](https://www.bluetooth.com/specifications/specs/core-specification-supplement/)
+
+- [8] [KRAWCZYK, H.; BELLARE, M.; CANETTI, R. RFC 2104 - HMAC: Keyed-Hashing for Message Authentication](https://datatracker.ietf.org/doc/html/rfc2104)
+
+**Aplicativo**
+
+- [9] [APPLE. scanForPeripherals(withServices:options:)](https://developer.apple.com/documentation/corebluetooth/cbcentralmanager/scanforperipherals(withservices:options:))
+
+- [10] [APPLE. Core Bluetooth Background Processing for iOS Apps](https://developer.apple.com/library/archive/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/CoreBluetoothBackgroundProcessingForIOSApps/PerformingTasksWhileYourAppIsInTheBackground.html)
+
+**API e canais de alerta**
+
+- [11] [FASTAPI. First Steps - OpenAPI](https://fastapi.tiangolo.com/tutorial/first-steps/)
+
+- [12] [GOOGLE. Firebase Cloud Messaging - Documentation](https://firebase.google.com/docs/cloud-messaging)
+
+- [13] [TWILIO. SMS Pricing in Brazil for Text Messaging](https://www.twilio.com/en-us/sms/pricing/br)
+
+- [14] [GTI SMS. GTI SMS vs Zenvia: comparativo de plataformas de SMS no Brasil (2026)](https://gtisms.com/gti-sms-vs-zenvia/)
+
+**Mecânica**
+
+- [15] [MERCADO LIVRE. Pulseira 22mm Silicone Wawe Para Relogio Smartwatch C/ Pinos Cor Preta](https://www.mercadolivre.com.br/pulseira-22mm-silicone-wawe-para-relogio-smartwatch-c-pinos-cor-preta/p/MLB27101261?pdp_filters=seller_id%3A554440847#polycard_client=recommendations_pdp-seller_items-above&reco_backend=ranker-retsys-same-seller&reco_model=fallback_same-seller&reco_client=pdp-seller_items-above&reco_item_pos=0&reco_backend_type=low_level&reco_id=53201d97-38cf-43e9-8262-48ce6e3023e8&wid=MLB3449594979&sid=recos)

@@ -30,8 +30,8 @@ cp .env.example .env
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Swagger em <http://localhost:8000/docs>. Sem Firebase configurado a API sobe
-igual: os alertas saem no log em vez de virarem push (`"push": "console"` em
+Swagger em <http://localhost:8000/docs>, gerado automaticamente pelo FastAPI [1].
+Sem Firebase Cloud Messaging [2] configurado a API sobe igual: os alertas saem no log em vez de virarem push (`"push": "console"` em
 `/health`), o que permite desenvolver o app antes de existir conta no Firebase.
 
 ```bash
@@ -83,7 +83,7 @@ curl -X POST localhost:8000/v1/alerts -H "Authorization: Bearer $TOKEN" \
 todos vão reportar. A API deduplica por `(device_id, seq)` numa janela de 180 s:
 um alerta, uma notificação, mas aproveitando o GPS de quem quer que o tenha.
 
-**2. Assinatura.** Sem HMAC, qualquer rádio próximo forja um alerta de queda. A
+**2. Assinatura.** Sem HMAC [3], qualquer rádio próximo forja um alerta de queda. A
 pulseira assina o payload com uma chave gravada no firmware; o celular só
 repassa os bytes. Ligue com `SYSCARE_REQUIRE_HMAC=true` assim que o firmware
 implementar. Durante o desenvolvimento, deixe `false` e a API aceita payloads sem
@@ -100,7 +100,8 @@ python scripts/send_test_sms.py +5548991791826
 ```
 
 Sem credenciais, roda em **dry-run**: mostra o texto exato, quantos segmentos
-seriam cobrados e o custo estimado, sem enviar nada. Para o dispatcher também
+seriam cobrados e o custo estimado pela tabela do Twilio para o Brasil [4], sem
+enviar nada. Para o dispatcher também
 simular SMS num alerta de verdade, use `SYSCARE_SMS_PROVIDER=dryrun`.
 
 Para enviar **de verdade** é preciso conta **paga** num provedor, não existe SMS
@@ -114,7 +115,7 @@ SYSCARE_TWILIO_FROM_NUMBER=+1...
 ```
 
 **A conta trial do Twilio não serve para o SysCare.** Desde 2026 ela só envia
-modelos prontos do próprio Twilio (confirmação de pedido, lembrete de consulta):
+modelos prontos do próprio Twilio (confirmação de pedido, lembrete de consulta) [5]:
 texto personalizado, como o alerta de queda, é recusado com o erro `572006`
 ("Trial accounts can only use predefined SMS templates"), testado em 24/09/2026.
 Depois do upgrade, ainda valem duas armadilhas: liberar o Brasil em *Messaging →
@@ -174,3 +175,19 @@ tests/
   test_alerts.py     duplicação, falsificação, replay, ack/resolve, heartbeat
   test_sms.py        renderização GSM-7, contagem de segmentos, truncamento
 ```
+
+## Referências (links/datasheets/livros)
+
+- [1] [FASTAPI. First Steps - OpenAPI](https://fastapi.tiangolo.com/tutorial/first-steps/)
+
+- [2] [GOOGLE. Firebase Cloud Messaging - Documentation](https://firebase.google.com/docs/cloud-messaging)
+
+- [3] [KRAWCZYK, H.; BELLARE, M.; CANETTI, R. RFC 2104 - HMAC: Keyed-Hashing for Message Authentication](https://datatracker.ietf.org/doc/html/rfc2104)
+
+- [4] [TWILIO. SMS Pricing in Brazil for Text Messaging](https://www.twilio.com/en-us/sms/pricing/br)
+
+- [5] [TWILIO. Twilio trial account](https://www.twilio.com/docs/usage/trials)
+
+As referências usadas no levantamento de custos dos canais estão em
+[`docs/canais_de_alerta.md`](docs/canais_de_alerta.md), e as do protocolo BLE, em
+[`docs/ble_payload.md`](docs/ble_payload.md).

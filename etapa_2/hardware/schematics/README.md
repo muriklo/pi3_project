@@ -1,6 +1,6 @@
 # Esquemático
 
-A partir da definição dos componentes principais apresentada na [seleção de componentes](../README.md) — microcontrolador, acelerômetro e bateria —, foi desenvolvido o esquemático eletrônico da Pulseira SysCare utilizando o software **Altium Designer**. O projeto foi criado e armazenado na nuvem do **Altium 365**, o que permite o versionamento do projeto e o acesso compartilhado entre os integrantes da equipe. O projeto está disponível em:
+A partir da definição dos componentes principais apresentada na [seleção de componentes](../README.md) — microcontrolador, acelerômetro e bateria —, foi desenvolvido o esquemático eletrônico da Pulseira SysCare utilizando o software **Altium Designer**. O projeto foi criado e armazenado na nuvem do **Altium 365** [1], o que permite o versionamento do projeto e o acesso compartilhado entre os integrantes da equipe. O projeto está disponível em:
 
 - **Projeto no Altium 365:** https://artur-nilo-valle.365.altium.com/designs/BF7CEE4B-8527-4C6F-BEBC-60C0F28CAC33
 - **Esquemático (PDF):** [SysCare_schematic.PDF](./SysCare_schematic.PDF)
@@ -14,7 +14,7 @@ O objetivo desta etapa é consolidar, em um único documento eletrônico, as dec
 
 ## Módulo microcontrolador e alimentação
 
-A primeira etapa após a criação do projeto foi a seleção e a inserção dos componentes na biblioteca do projeto. Inicialmente, foi localizado e adicionado o módulo **XIAO nRF52840**, da Seeed Studio, representado no esquemático pelo componente **U1**. Em seguida, foi analisado o esquemático oficial do módulo, disponibilizado pelo fabricante [1], com o objetivo de identificar quais recursos já estão implementados internamente e quais precisariam ser adicionados à placa da pulseira.
+A primeira etapa após a criação do projeto foi a seleção e a inserção dos componentes na biblioteca do projeto. Inicialmente, foi localizado e adicionado o módulo **XIAO nRF52840**, da Seeed Studio, representado no esquemático pelo componente **U1**. Em seguida, foi analisado o esquemático oficial do módulo, disponibilizado pelo fabricante [2], com o objetivo de identificar quais recursos já estão implementados internamente e quais precisariam ser adicionados à placa da pulseira.
 
 Durante essa análise, verificou-se que o módulo já possui um **circuito de carregamento de bateria de lítio integrado**, acessível pelos pinos `BAT+` e `BAT-`, com a recarga realizada diretamente pela interface USB do próprio módulo. Essa constatação motivou uma alteração em relação à proposta inicial do projeto: originalmente havia sido considerado o uso de baterias fixas de lítio de 3 V, que exigiriam um sistema de troca de células e proteções adicionais. Com o circuito de carga já disponível no módulo, optou-se pela utilização de uma **bateria recarregável de polímero de lítio (modelo 541112, 3,7 V / 50 mAh)**, descrita na seleção de componentes. Essa decisão elimina a necessidade de um carregador externo dedicado, reduz a quantidade de componentes na placa e torna o dispositivo mais seguro e prático para o usuário, já que a recarga passa a ser feita pela própria porta USB.
 
@@ -33,11 +33,11 @@ Embora o módulo XIAO permita a gravação via USB por meio do bootloader, o ace
 
 ## Acelerômetro
 
-Definidos o módulo microcontrolador e a bateria, foi obtido o esquemático de aplicação do acelerômetro **IIM-42351** [2] e implementado o circuito correspondente, identificado no esquemático pelo componente **U2**.
+Definidos o módulo microcontrolador e a bateria, foi obtido o esquemático de aplicação do acelerômetro **IIM-42351** [3] e implementado o circuito correspondente, identificado no esquemático pelo componente **U2**.
 
 Como a equipe já dispunha de um **módulo avulso do acelerômetro**, optou-se por prever as **duas alternativas de montagem** no mesmo esquemático:
 
-1. **Montagem direta na placa:** o circuito integrado IIM-42351 (U2) é soldado diretamente à placa, juntamente com os capacitores de desacoplamento **C1 (1 µF)**, **C2 (100 nF)** e **C3 (100 nF)**, responsáveis pelo desacoplamento das alimentações `VDD` e `VDDIO`, conforme recomendado pelo fabricante. Os pinos reservados (`RESV`) foram tratados de acordo com a orientação do datasheet.
+1. **Montagem direta na placa:** o circuito integrado IIM-42351 (U2) é soldado diretamente à placa, juntamente com os capacitores de desacoplamento **C1 (1 µF)**, **C2 (100 nF)** e **C3 (100 nF)**, responsáveis pelo desacoplamento das alimentações `VDD` e `VDDIO`, conforme recomendado pelo fabricante [3]. Os pinos reservados (`RESV`) foram tratados de acordo com a orientação do datasheet.
 2. **Montagem por módulo:** o bloco *Accelerometer Module* disponibiliza os conectores **J7**, **J8**, **J9** e **J10**, do tipo PTH, que permitem encaixar o módulo já existente por meio de barras de pinos, sem a necessidade de soldar o componente na placa.
 
 Essa abordagem foi adotada para reduzir o risco da primeira montagem. Caso ocorra algum problema na soldagem do encapsulamento do IIM-42351, que possui dimensões reduzidas, o desenvolvimento do firmware pode prosseguir utilizando o módulo avulso, sem bloquear o cronograma do projeto. As duas alternativas de montagem são apresentadas na Figura 3, e o módulo avulso, na Figura 4.
@@ -105,8 +105,8 @@ A lista de materiais (*Bill of Materials* – BOM) foi exportada do Altium Desig
 
 ## Referências
 
-- [1] [SEEED STUDIO. Seeed Studio XIAO nRF52840 - Schematic](https://files.seeedstudio.com/wiki/XIAO-BLE/Res/260828_XIAO_nRF52840.pdf)
+- [1] [ALTIUM. Altium 365 - Cloud Platform for PCB Design](https://www.altium.com/altium-365)
 
-- [2] [TDK INVENSENSE. High-performance 3-Axis SmartIndustrial™ Accelerometer MEMS Device for Industrial Applications (IIM-42351)](https://product.tdk.com/system/files/dam/doc/product/sensor/mortion-inertial/accelero/data_sheet/ds-000441-iim-42351-typ-v1.2.pdf)
+- [2] [SEEED STUDIO. Seeed Studio XIAO nRF52840 - Schematic](https://files.seeedstudio.com/wiki/XIAO-BLE/Res/260828_XIAO_nRF52840.pdf)
 
-- [3] [ALTIUM. Altium 365 - Cloud Platform for PCB Design](https://www.altium.com/altium-365)
+- [3] [TDK INVENSENSE. High-performance 3-Axis SmartIndustrial™ Accelerometer MEMS Device for Industrial Applications (IIM-42351)](https://product.tdk.com/system/files/dam/doc/product/sensor/mortion-inertial/accelero/data_sheet/ds-000441-iim-42351-typ-v1.2.pdf)

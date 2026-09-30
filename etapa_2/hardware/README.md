@@ -6,7 +6,7 @@ Na etapa 2, a definição do hardware tem como objetivo detalhar a implementaç�
 
 Para a implementação do hardware, foram avaliadas diferentes plataformas de microcontroladores considerando os requisitos da aplicação, principalmente baixo consumo energético, conectividade Bluetooth Low Energy (BLE), capacidade de processamento, interfaces de comunicação com o acelerômetro e dimensões físicas compatíveis com a proposta da pulseira.
 
-A comparação entre as principais alternativas consideradas é apresentada na Tabela 1.
+A comparação entre as principais alternativas consideradas, elaborada a partir da documentação de cada fabricante [1-5], é apresentada na Tabela 1.
 
 <div align="center">
 
@@ -33,7 +33,7 @@ A comparação entre as principais alternativas consideradas é apresentada na T
   <p>Tabela 1 - Comparação entre os microcontroladores avaliados</p>
 </div>
 
-Entre as alternativas avaliadas, foi selecionado o **XIAO nRF52840** como plataforma para o desenvolvimento do primeiro protótipo. A escolha está relacionada não somente às características do microcontrolador nRF52840, mas principalmente à integração proporcionada pela placa XIAO, que reúne o microcontrolador, os recursos necessários para programação e interfaces de comunicação em uma plataforma de pequenas dimensões [1]. A placa é apresentada na Figura 1.
+Entre as alternativas avaliadas, foi selecionado o **XIAO nRF52840** como plataforma para o desenvolvimento do primeiro protótipo. A escolha está relacionada não somente às características do microcontrolador nRF52840, mas principalmente à integração proporcionada pela placa XIAO, que reúne o microcontrolador, os recursos necessários para programação e interfaces de comunicação em uma plataforma de pequenas dimensões [6]. A placa é apresentada na Figura 1.
 
 <div align="center"> 
   <img src="../img/xiaonrf52840.png" alt="Placa de desenvolvimento Seeed Studio XIAO nRF52840" width="60%"> 
@@ -52,7 +52,7 @@ Dessa forma, o XIAO nRF52840 foi escolhido para o primeiro protótipo por combin
 
 Para a seleção do acelerômetro, foram considerados principalmente o consumo de corrente, a presença de recursos de detecção de queda livre (Free-fall Detection), a disponibilidade de interrupções para comunicação com o microcontrolador, as interfaces de comunicação e a disponibilidade do componente para desenvolvimento do protótipo.
 
-A Tabela 2 apresenta a comparação entre alguns dos acelerômetros avaliados durante a seleção.
+A Tabela 2 apresenta a comparação entre alguns dos acelerômetros avaliados durante a seleção, com base nas folhas de dados dos fabricantes [7-10].
 
 <div align="center">
 
@@ -81,7 +81,7 @@ A Tabela 2 apresenta a comparação entre alguns dos acelerômetros avaliados du
 
 *Os valores apresentados são referentes às condições de operação indicadas na documentação de cada componente e devem ser considerados como referência para comparação, uma vez que o consumo depende do modo de operação e das configurações utilizadas.*
 
-Apesar de existirem alternativas com consumo significativamente inferior, como o ADXL362, LIS2DW12 e BMA400, foi selecionado o IIM-42351 [2] para o primeiro protótipo. Essa escolha ocorre principalmente devido à disponibilidade de um módulo do componente já disponível para a equipe, permitindo iniciar o desenvolvimento sem a necessidade de projetar inicialmente uma placa específica para o acelerômetro. O módulo é apresentado na Figura 2.
+Apesar de existirem alternativas com consumo significativamente inferior, como o ADXL362, LIS2DW12 e BMA400, foi selecionado o IIM-42351 [10] para o primeiro protótipo. Essa escolha ocorre principalmente devido à disponibilidade de um módulo do componente já disponível para a equipe, permitindo iniciar o desenvolvimento sem a necessidade de projetar inicialmente uma placa específica para o acelerômetro. O módulo é apresentado na Figura 2.
 
 <div align="center">
   <img src="../img/acc_module_top.jpeg" alt="Vista superior do módulo do acelerômetro" width="40%">
@@ -100,7 +100,7 @@ Portanto, a seleção do IIM-42351 representa uma decisão de desenvolvimento vo
 
 ## Seleção da bateria
 
-Para o primeiro protótipo da Pulseira SysCare, será utilizada uma bateria recarregável modelo 541112, com capacidade de 50 mAh, que estava disponível para utilização no projeto, apresentada na Figura 3 [3]. A escolha também é adequada às características do protótipo, principalmente devido às suas pequenas dimensões, baixo peso e possibilidade de recarga.
+Para o primeiro protótipo da Pulseira SysCare, será utilizada uma bateria recarregável modelo 541112, com capacidade de 50 mAh, que estava disponível para utilização no projeto, apresentada na Figura 3 [11]. A escolha também é adequada às características do protótipo, principalmente devido às suas pequenas dimensões, baixo peso e possibilidade de recarga.
 
 A bateria pode ser recarregada diretamente por meio da interface USB do XIAO nRF52840, eliminando a necessidade de um circuito externo dedicado para recarga durante esta etapa do desenvolvimento. Além disso, a capacidade disponível é suficiente para manter o sistema em funcionamento por aproximadamente 7 dias de forma ininterrupta, considerando o consumo do protótipo desenvolvido.
 
@@ -115,9 +115,25 @@ Dessa forma, a bateria atende aos requisitos do primeiro protótipo tanto em rel
 ## Referências (links/datasheets/livros)
 
 
-- [1] [ZEPHYR PROJECT. Seeed XIAO BLE. Zephyr Project Documentation, 2026](https://docs.zephyrproject.org/latest/boards/seeed/xiao_ble/doc/index.html)
+- [1] [SEEED STUDIO. Getting Started with Seeed Studio XIAO nRF52840 Series](https://wiki.seeedstudio.com/XIAO_BLE/)
 
-- [2] [High-performance 3-Axis SmartIndustrial™ Accelerometer MEMS Device for Industrial Applications](https://product.tdk.com/system/files/dam/doc/product/sensor/mortion-inertial/accelero/data_sheet/ds-000441-iim-42351-typ-v1.2.pdf)
+- [2] [STMICROELECTRONICS. STM32WB55RG - Datasheet](https://www.st.com/resource/en/datasheet/stm32wb55rg.pdf)
 
-- [3] [Bateria de polímero de lítio de 3.7v 50mah 541112 para fone de ouvido bluetooth](https://pt.aliexpress.com/item/1005010578056028.html?gatewayAdapt=glo2bra)
+- [3] [STMICROELECTRONICS. STM32WBA52CG - Product overview](https://www.st.com/en/microcontrollers-microprocessors/stm32wba52cg.html)
+
+- [4] [ESPRESSIF SYSTEMS. ESP32-C3 Series Datasheet](https://www.espressif.com/sites/default/files/documentation/esp32-c3_datasheet_en.pdf)
+
+- [5] [STMICROELECTRONICS. STM32G031x4/x6/x8 - Datasheet (DS12992)](https://www.st.com/resource/en/datasheet/stm32g031c6.pdf)
+
+- [6] [ZEPHYR PROJECT. Seeed XIAO BLE. Zephyr Project Documentation, 2026](https://docs.zephyrproject.org/latest/boards/seeed/xiao_ble/doc/index.html)
+
+- [7] [ANALOG DEVICES. ADXL362 - Micropower, 3-Axis, ±2 g/±4 g/±8 g Digital Output MEMS Accelerometer - Data Sheet](https://www.analog.com/media/en/technical-documentation/data-sheets/ADXL362.pdf)
+
+- [8] [STMICROELECTRONICS. LIS2DW12 - MEMS digital output motion sensor - Datasheet](https://www.st.com/resource/en/datasheet/lis2dw12.pdf)
+
+- [9] [BOSCH SENSORTEC. BMA400 - Data sheet](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bma400-ds000.pdf)
+
+- [10] [TDK INVENSENSE. High-performance 3-Axis SmartIndustrial™ Accelerometer MEMS Device for Industrial Applications (IIM-42351)](https://product.tdk.com/system/files/dam/doc/product/sensor/mortion-inertial/accelero/data_sheet/ds-000441-iim-42351-typ-v1.2.pdf)
+
+- [11] [ALIEXPRESS. Bateria de polímero de lítio de 3.7v 50mah 541112 para fone de ouvido bluetooth](https://pt.aliexpress.com/item/1005010578056028.html?gatewayAdapt=glo2bra)
 
