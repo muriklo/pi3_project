@@ -6,7 +6,9 @@ Na etapa 2, a definição do hardware tem como objetivo detalhar a implementaç�
 
 Para a implementação do hardware, foram avaliadas diferentes plataformas de microcontroladores considerando os requisitos da aplicação, principalmente baixo consumo energético, conectividade Bluetooth Low Energy (BLE), capacidade de processamento, interfaces de comunicação com o acelerômetro e dimensões físicas compatíveis com a proposta da pulseira.
 
-A comparação entre as principais alternativas consideradas é apresentada na Tabela abaixo.
+A comparação entre as principais alternativas consideradas é apresentada na Tabela 1.
+
+<div align="center">
 
 | **Característica** | **XIAO nRF52840** |   **STM32WB55**  | **STM32WBA52** |     **ESP32-C3**    | **STM32G031** |
 | :----------------- | :----------: | :--------------: | :------------: | :-----------------: | :-----------: |
@@ -25,12 +27,17 @@ A comparação entre as principais alternativas consideradas é apresentada na T
 | **FPU**            |       ✓      |         ✓        |        ✓       |          ✗          |       ✗       |
 | **Baixo consumo**  |       ✓      |         ✓        |        ✓       |          ✓          |       ✓       |
 
+</div>
 
-Entre as alternativas avaliadas, foi selecionado o **XIAO nRF52840** como plataforma para o desenvolvimento do primeiro protótipo. A escolha está relacionada não somente às características do microcontrolador nRF52840, mas principalmente à integração proporcionada pela placa XIAO, que reúne o microcontrolador, os recursos necessários para programação e interfaces de comunicação em uma plataforma de pequenas dimensões [1].
+<div align="center">
+  <p>Tabela 1 - Comparação entre os microcontroladores avaliados</p>
+</div>
+
+Entre as alternativas avaliadas, foi selecionado o **XIAO nRF52840** como plataforma para o desenvolvimento do primeiro protótipo. A escolha está relacionada não somente às características do microcontrolador nRF52840, mas principalmente à integração proporcionada pela placa XIAO, que reúne o microcontrolador, os recursos necessários para programação e interfaces de comunicação em uma plataforma de pequenas dimensões [1]. A placa é apresentada na Figura 1.
 
 <div align="center"> 
-  <img src="../img/xiaonrf52840.png" alt="" width="60%"> 
-  <p>Figura 1 - Placa de desenvolvimento da Nordic Semiconductor nRF52840 ARM Cortex-M4F</p> 
+  <img src="../img/xiaonrf52840.png" alt="Placa de desenvolvimento Seeed Studio XIAO nRF52840" width="60%"> 
+  <p>Figura 1 - Placa de desenvolvimento Seeed Studio XIAO nRF52840, baseada no nRF52840 (ARM Cortex-M4F) da Nordic Semiconductor</p> 
 </div>
 
 O XIAO nRF52840 apresenta dimensões reduzidas, conectividade Bluetooth Low Energy (BLE), interfaces de comunicação compatíveis com o acelerômetro e capacidade de processamento suficiente para executar o firmware responsável pelo monitoramento dos sensores e pela detecção de quedas. Essas características são compatíveis com os requisitos estabelecidos para o dispositivo vestível.
@@ -43,9 +50,11 @@ Dessa forma, o XIAO nRF52840 foi escolhido para o primeiro protótipo por combin
 
 ## Seleção do acelerômetro
 
-Para a seleção do acelerômetro, foram considerados principalmente o consumo de corrente, a presença de recursos de*detecção de queda livre (Free-fall Detection), a disponibilidade de interrupções para comunicação com o microcontrolador, as interfaces de comunicação e a disponibilidade do componente para desenvolvimento do protótipo.
+Para a seleção do acelerômetro, foram considerados principalmente o consumo de corrente, a presença de recursos de detecção de queda livre (Free-fall Detection), a disponibilidade de interrupções para comunicação com o microcontrolador, as interfaces de comunicação e a disponibilidade do componente para desenvolvimento do protótipo.
 
-A Tabela abaixo apresenta a comparação entre alguns dos acelerômetros avaliados durante a seleção.
+A Tabela 2 apresenta a comparação entre alguns dos acelerômetros avaliados durante a seleção.
+
+<div align="center">
 
 | **Característica**                 |   **ADXL362**   |    **LIS2DW12**    |    **BMA400**   |        **IIM-42351**       |
 | :--------------------------------- | :-------------: | :----------------: | :-------------: | :------------------------: |
@@ -64,14 +73,20 @@ A Tabela abaixo apresenta a comparação entre alguns dos acelerômetros avaliad
 | **Interrupção**                    |        ✓        |          ✓         |        ✓        |              ✓             |
 | **Disponibilidade para protótipo** |        —        |          —         |        —        |            **✓**           |
 
+</div>
+
+<div align="center">
+  <p>Tabela 2 - Comparação entre os acelerômetros avaliados</p>
+</div>
+
 *Os valores apresentados são referentes às condições de operação indicadas na documentação de cada componente e devem ser considerados como referência para comparação, uma vez que o consumo depende do modo de operação e das configurações utilizadas.*
 
-Apesar de existirem alternativas com consumo significativamente inferior, como o ADXL362, LIS2DW12 e BMA400, foi selecionado o IIM-42351 [2] para o primeiro protótipo. Essa escolha ocorre principalmente devido à disponibilidade de um módulo do componente já disponível para a equipe, permitindo iniciar o desenvolvimento sem a necessidade de projetar inicialmente uma placa específica para o acelerômetro.
+Apesar de existirem alternativas com consumo significativamente inferior, como o ADXL362, LIS2DW12 e BMA400, foi selecionado o IIM-42351 [2] para o primeiro protótipo. Essa escolha ocorre principalmente devido à disponibilidade de um módulo do componente já disponível para a equipe, permitindo iniciar o desenvolvimento sem a necessidade de projetar inicialmente uma placa específica para o acelerômetro. O módulo é apresentado na Figura 2.
 
 <div align="center">
   <img src="../img/acc_module_top.jpeg" alt="Vista superior do módulo do acelerômetro" width="40%">
   <img src="../img/acc_module_bottom.jpeg" alt="Vista inferior do módulo do acelerômetro" width="40%">
-  <p>Figura 2 - Módulo avulso do acelerômetro IIM-42351: vista superior (esquerda) e inferior (direita)</p>
+  <p>Figura 2 - Modelo 3D do módulo avulso do acelerômetro IIM-42351: vista superior (esquerda) e inferior (direita)</p>
 </div>
 
 Outro fator determinante é a familiaridade da equipe com o funcionamento do IIM-42351 e, principalmente, a disponibilidade do recurso de detecção de queda livre (Free-fall Detection). Esse recurso é particularmente relevante para a aplicação, pois a detecção de uma condição de queda pode ser realizada pelo próprio acelerômetro, gerando uma interrupção para que o microcontrolador realize o processamento posterior. Dessa forma, parte do processamento necessário para identificar uma possível queda pode ser realizada pelo próprio sensor, o que aumenta muito a economia de bateria.
@@ -85,7 +100,7 @@ Portanto, a seleção do IIM-42351 representa uma decisão de desenvolvimento vo
 
 ## Seleção da bateria
 
-Para o primeiro protótipo da Pulseira SysCare, será utilizada uma bateria recarregável modelo 541112, com capacidade de 50 mAh, que estava disponível para utilização no projeto, como vista na Figura 3 [3]. A escolha também é adequada às características do protótipo, principalmente devido às suas pequenas dimensões, baixo peso e possibilidade de recarga.
+Para o primeiro protótipo da Pulseira SysCare, será utilizada uma bateria recarregável modelo 541112, com capacidade de 50 mAh, que estava disponível para utilização no projeto, apresentada na Figura 3 [3]. A escolha também é adequada às características do protótipo, principalmente devido às suas pequenas dimensões, baixo peso e possibilidade de recarga.
 
 A bateria pode ser recarregada diretamente por meio da interface USB do XIAO nRF52840, eliminando a necessidade de um circuito externo dedicado para recarga durante esta etapa do desenvolvimento. Além disso, a capacidade disponível é suficiente para manter o sistema em funcionamento por aproximadamente 7 dias de forma ininterrupta, considerando o consumo do protótipo desenvolvido.
 

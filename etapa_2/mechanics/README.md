@@ -12,14 +12,14 @@ As dimensões externas adotadas para a estrutura inicial são apresentadas na Fi
 
 <div align="center">
   <img src="../img/cotas_do_dimensionamento_mecanico_do_dispositivo.png" alt="Cotas da estrutura mecânica inicial" width="55%">
-  <p>Figura 1 - Cotas definidas para a estrutura mecânica inicial da Pulseira SysCare.</p>
+  <p>Figura 1 - Cotas definidas para a estrutura mecânica inicial da Pulseira SysCare</p>
 </div>
 
 A partir das dimensões estabelecidas, foi desenvolvido o primeiro modelo tridimensional da estrutura mecânica. O resultado da geometria inicial é apresentado na Figura 2.
 
 <div align="center">
   <img src="../img/estrutura_mecanica_inicial.png" alt="Estrutura mecânica inicial" width="55%">
-  <p>Figura 2 - Modelo tridimensional da estrutura mecânica inicial da Pulseira SysCare.</p>
+  <p>Figura 2 - Modelo tridimensional da estrutura mecânica inicial da Pulseira SysCare</p>
 </div>
 
 ### Definição do espaço interno
@@ -30,7 +30,7 @@ Para isso, foi realizado um corte no modelo tridimensional, permitindo visualiza
 
 <div align="center">
   <img src="../img/cotas_do_espaco_interior_do_dispositivo.png" alt="Cotas do espaço interno do dispositivo" width="55%">
-  <p>Figura 3 - Corte da estrutura para definição das dimensões internas da carcaça.</p>
+  <p>Figura 3 - Corte da estrutura para definição das dimensões internas da carcaça</p>
 </div>
 
 Com base na geometria analisada, foram definidos três diâmetros de referência para a estrutura: o diâmetro externo de 42 mm, o diâmetro interno da carcaça de 37 mm e o diâmetro interno útil de 35 mm, destinado à região de acomodação dos componentes eletrônicos.
@@ -39,7 +39,7 @@ A Figura 4 apresenta a localização das dimensões definidas para os diâmetros
 
 <div align="center">
   <img src="../img/cotas_diametros_internos_externos_e_util.png" alt="Dimensões dos diâmetros da carcaça" width="55%">
-  <p>Figura 4 - Dimensões dos diâmetros externo, interno e da região útil da carcaça da Pulseira SysCare.</p>
+  <p>Figura 4 - Dimensões dos diâmetros externo, interno e da região útil da carcaça da Pulseira SysCare</p>
 </div>
 
 O diâmetro interno de 37 mm corresponde ao espaço interno delimitado pela estrutura da carcaça, enquanto o diâmetro útil de 35 mm define a região de referência destinada à distribuição dos componentes eletrônicos. A diferença entre essas dimensões resulta em uma margem radial de aproximadamente 1 mm, utilizada como região de separação entre a área de acomodação dos componentes e a estrutura interna da carcaça.
