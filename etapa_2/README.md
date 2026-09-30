@@ -143,7 +143,7 @@ O projeto mecânico, que cobria os requisitos dimensionais, ergonômicos e de fa
   <p>Figura 4 - Dimensões dos diâmetros externo, interno e da região útil da carcaça da Pulseira SysCare</p>
 </div>
 
-A carcaça é fixada a uma pulseira comercial de silicone de 18 mm, apresentada na Figura 5, por meio de pinos de mola (*spring bars*), escolhidos pela simplicidade construtiva, pelo pequeno volume e pela facilidade de montagem. A distância inicial de 2,5 mm entre a extremidade da garra e o centro do furo do pino será ajustada após a validação com a pulseira física.
+A carcaça é fixada a uma pulseira comercial de silicone de 18 mm, apresentada na Figura 5[REFERENCIAR], por meio de pinos de mola (*spring bars*), escolhidos pela simplicidade construtiva, pelo pequeno volume e pela facilidade de montagem. A distância inicial de 2,5 mm entre a extremidade da garra e o centro do furo do pino será ajustada após a validação com a pulseira física.
 
 <div align="center"> 
   <img src="./img/pulseira_da_estrutura_mecanica.png" alt="Pulseira comercial de silicone de 18 mm" width="65%"> 
@@ -156,12 +156,12 @@ A carcaça será fabricada por impressão 3D com o filamento disponível no IFSC
 
 | Componente                           | Massa estimada (g) |
 | ------------------------------------ | -----------------: |
-| Estrutura da pulseira impressa em 3D |                  X |
-| Bateria                              |                  X |
-| Acelerômetro IIM-42351               |                  X |
+| Estrutura da pulseira impressa em 3D |                  7 |
+| Bateria                              |                  2 |
+| Acelerômetro IIM-42351               |                  1 |
 | Microcontrolador XIAO nRF52840       |                4,7 |
-| PCI                                  |                  X |
-| **Massa total estimada**             |              **X** |
+| PCI                                  |                  7 |
+| **Massa total estimada**             |              **21,7** |
 
 </div>
 
@@ -180,7 +180,10 @@ A carcaça será fabricada por impressão 3D com o filamento disponível no IFSC
 
 ## Referências
 
+FAZER TODAS AS REFERENCIASSSS
 
-- [1] []()
+- [XX] [High-performance 3-Axis SmartIndustrial™ Accelerometer MEMS Device for Industrial Applications](https://product.tdk.com/system/files/dam/doc/product/sensor/mortion-inertial/accelero/data_sheet/ds-000441-iim-42351-typ-v1.2.pdf)
+
+- [XX] [Pulseira 22mm Silicone Wawe Para Relogio Smartwatch C/ Pinos Cor Preta - Mercado Livre](https://www.mercadolivre.com.br/pulseira-22mm-silicone-wawe-para-relogio-smartwatch-c-pinos-cor-preta/p/MLB27101261?pdp_filters=seller_id%3A554440847#polycard_client=recommendations_pdp-seller_items-above&reco_backend=ranker-retsys-same-seller&reco_model=fallback_same-seller&reco_client=pdp-seller_items-above&reco_item_pos=0&reco_backend_type=low_level&reco_id=53201d97-38cf-43e9-8262-48ce6e3023e8&wid=MLB3449594979&sid=recos)
 
 
