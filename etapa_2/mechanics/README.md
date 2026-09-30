@@ -114,7 +114,7 @@ Essas dimensões constituem a referência para as próximas etapas do desenvolvi
 
 ##  Definição do Material da Pulseira SysCare
 
-A partir dos estudos realizados na Etapa 1, foi definida a utilização de manufatura aditiva por impressão 3D para a fabricação da carcaça da Pulseira SysCare. Dessa forma, a seleção do material na Etapa 2 considera as propriedades mecânicas necessárias ao protótipo, a disponibilidade do processo de fabricação no IFSC e os requisitos relacionados ao contato prolongado com a pele.
+A partir dos estudos realizados na Etapa 1, foi definida a utilização de manufatura aditiva por impressão 3D ABS para a fabricação da carcaça da Pulseira SysCare. Dessa forma, a seleção do material na Etapa 2 considera as propriedades mecânicas necessárias ao protótipo, a disponibilidade do processo de fabricação no IFSC e os requisitos relacionados ao contato prolongado com a pele.
 
 Para o protótipo, será utilizado o filamento disponível no IFSC, selecionado de acordo com suas características mecânicas e sua adequação ao processo de impressão empregado. A utilização de um material já disponível para fabricação permite reduzir custos e simplificar a produção das primeiras versões da carcaça, possibilitando que alterações dimensionais e geométricas sejam realizadas durante o processo de desenvolvimento.
 
@@ -133,17 +133,25 @@ Após a definição dos principais componentes eletrônicos e das dimensões da 
 
 A massa total do dispositivo pode ser obtida pela soma das massas individuais dos principais elementos que compõem a pulseira, conforme apresentado na Tabela 2. Essa estimativa permite avaliar se a solução proposta apresenta características adequadas para utilização no pulso, além de auxiliar no dimensionamento e na avaliação da estrutura mecânica.
 
+Na figura 7 pode ser visualizado a quantidade de filamento usado para fazer tanto a parte principal da pulseira, quanto o suporte da  parte inferior em contato com a pele, gerando então 7 gramas no total.
+
+<div align="center">
+  <img src="../img/peso_peca_principal.png" alt="Exemplo de pulseira de 18 mm" width="50%">
+  <img src="../img/peso_peca_secundaria.png" alt="Vista Superior" width="50%">
+  <p>Figura 7 - Quantidade de filamento e peso utilizado para produção da pulseira</p>
+</div>
+
 
 <div align="center">
 
 | Componente                           | Massa estimada (g) |
 | ------------------------------------ | -----------------: |
-| Estrutura da pulseira impressa em 3D |                  X |
-| Bateria                              |                  X |
-| Acelerômetro IIM-42351               |                  X |
+| Estrutura da pulseira impressa em 3D |                  7 |
+| Bateria                              |                  2 |
+| Acelerômetro IIM-42351               |                  1 |
 | Microcontrolador XIAO nRF52840       |                4,7 |
-| PCI                                  |                  X |
-| **Massa total estimada**             |              **X** |
+| PCI                                  |                  7 |
+| **Massa total estimada**             |              **21,7** |
 
 </div>
 
