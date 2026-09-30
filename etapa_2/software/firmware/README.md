@@ -36,6 +36,8 @@ Dessa forma, o acelerômetro é responsável pela detecção inicial e geração
 
 ### Configuração inicial proposta
 
+A configuração inicial proposta para o acelerômetro é apresentada na Tabela 1.
+
 <div align="center">
 
 | Parâmetro | Configuração |
@@ -52,14 +54,14 @@ Dessa forma, o acelerômetro é responsável pela detecção inicial e geração
 </div>
 
 <div align="center">
-  <p>Tabela 1 - Proposta inicial de configuração</p>
+  <p>Tabela 1 - Proposta inicial de configuração do acelerômetro</p>
 </div>
 
 Essa configuração é particularmente interessante para o primeiro protótipo porque permite utilizar a funcionalidade de detecção de queda do próprio acelerômetro em Low Power a partir de 25 Hz, contribuindo para reduzir o consumo energético da pulseira. O XIAO nRF52840 permanece responsável pelo processamento do evento apenas quando uma interrupção é gerada.
 
 ## Arquitetura do firmware
 
-Para detalhar a implementação do firmware da Pulseira SysCare, foi elaborado um diagrama de blocos relacionando os principais módulos de software, os periféricos internos do XIAO nRF52840 e os componentes externos do sistema. O diagrama apresenta também as principais interconexões utilizadas, incluindo a comunicação SPI entre o microcontrolador e o acelerômetro IIM-42351 e a linha de interrupção utilizada para sinalizar eventos de detecção.
+Para detalhar a implementação do firmware da Pulseira SysCare, foi elaborado o diagrama de blocos apresentado na Figura 1, relacionando os principais módulos de software, os periféricos internos do XIAO nRF52840 e os componentes externos do sistema. O diagrama apresenta também as principais interconexões utilizadas, incluindo a comunicação SPI entre o microcontrolador e o acelerômetro IIM-42351 e a linha de interrupção utilizada para sinalizar eventos de detecção.
 
 A arquitetura foi organizada sobre o Zephyr RTOS / nRF Connect SDK, sendo dividida em módulos responsáveis pela detecção e confirmação de quedas, tratamento de interrupções, comunicação com o acelerômetro, gerenciamento de energia, armazenamento de dados, montagem dos pacotes e comunicação BLE.
 
@@ -67,7 +69,7 @@ Na detecção de quedas, o acelerômetro IIM-42351 realiza a detecção inicial 
 
 <div align="center">
     <img src="../../img/diagrama_de_blocos_hardware.png" alt="Diagrama de blocos da arquitetura de hardware e firmware da Pulseira SysCare" width="65%">
-    <p>Figura 1 - Diagrama de blocos da arquitetura de hardware e firmware da Pulseira SysCare.</p>
+    <p>Figura 1 - Diagrama de blocos da arquitetura de <i>hardware</i> e <i>firmware</i> da Pulseira SysCare</p>
 </div>
 
 

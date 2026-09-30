@@ -5,7 +5,7 @@ A partir da definição dos componentes principais apresentada na [seleção de 
 - **Projeto no Altium 365:** https://artur-nilo-valle.365.altium.com/designs/BF7CEE4B-8527-4C6F-BEBC-60C0F28CAC33
 - **Esquemático (PDF):** [SysCare_schematic.PDF](./SysCare_schematic.PDF)
 
-O objetivo desta etapa é consolidar, em um único documento eletrônico, as decisões tomadas durante a seleção dos componentes e detalhar como cada bloco funcional do sistema é interligado. Como o primeiro protótipo é voltado à validação da arquitetura, o esquemático foi elaborado priorizando a flexibilidade de montagem: sempre que possível, foram previstas alternativas de montagem (SMD ou PTH) e pontos de acesso que facilitam a depuração e a caracterização do consumo energético.
+O objetivo desta etapa é consolidar, em um único documento eletrônico, as decisões tomadas durante a seleção dos componentes e detalhar como cada bloco funcional do sistema é interligado. Como o primeiro protótipo é voltado à validação da arquitetura, o esquemático foi elaborado priorizando a flexibilidade de montagem: sempre que possível, foram previstas alternativas de montagem (SMD ou PTH) e pontos de acesso que facilitam a depuração e a caracterização do consumo energético. O esquemático completo é apresentado na Figura 1.
 
 <div align="center">
   <img src="../../img/schematics_all.png" alt="Esquemático completo da Pulseira SysCare" width="90%">
@@ -18,7 +18,7 @@ A primeira etapa após a criação do projeto foi a seleção e a inserção dos
 
 Durante essa análise, verificou-se que o módulo já possui um **circuito de carregamento de bateria de lítio integrado**, acessível pelos pinos `BAT+` e `BAT-`, com a recarga realizada diretamente pela interface USB do próprio módulo. Essa constatação motivou uma alteração em relação à proposta inicial do projeto: originalmente havia sido considerado o uso de baterias fixas de lítio de 3 V, que exigiriam um sistema de troca de células e proteções adicionais. Com o circuito de carga já disponível no módulo, optou-se pela utilização de uma **bateria recarregável de polímero de lítio (modelo 541112, 3,7 V / 50 mAh)**, descrita na seleção de componentes. Essa decisão elimina a necessidade de um carregador externo dedicado, reduz a quantidade de componentes na placa e torna o dispositivo mais seguro e prático para o usuário, já que a recarga passa a ser feita pela própria porta USB.
 
-A bateria é conectada à placa pelos conectores **J2** e **J3**. Entre o terminal positivo da bateria e o pino `BAT+` do módulo foram previstos o resistor **R1 (0 Ω)** e o conector **J1 (SHUNT)**, ligados em paralelo. Esse arranjo permite que, durante os testes, o resistor de 0 Ω seja substituído por um resistor de shunt, ou que o jumper seja removido para a inserção de um amperímetro em série com a alimentação, viabilizando a **medição do consumo real do protótipo**. Como a autonomia é um dos requisitos centrais do projeto, a possibilidade de medir a corrente consumida sem modificar a placa foi considerada importante para a etapa de validação. Em operação normal, o jumper permanece inserido e a alimentação segue pelo caminho de menor resistência.
+A bateria é conectada à placa pelos conectores **J2** e **J3**, conforme a Figura 2. Entre o terminal positivo da bateria e o pino `BAT+` do módulo foram previstos o resistor **R1 (0 Ω)** e o conector **J1 (SHUNT)**, ligados em paralelo. Esse arranjo permite que, durante os testes, o resistor de 0 Ω seja substituído por um resistor de shunt, ou que o jumper seja removido para a inserção de um amperímetro em série com a alimentação, viabilizando a **medição do consumo real do protótipo**. Como a autonomia é um dos requisitos centrais do projeto, a possibilidade de medir a corrente consumida sem modificar a placa foi considerada importante para a etapa de validação. Em operação normal, o jumper permanece inserido e a alimentação segue pelo caminho de menor resistência.
 
 <div align="center">
   <img src="../../img/schematics_batt_circuit.jpeg" alt="Circuito de alimentação e conexão da bateria" width="70%">
@@ -40,7 +40,7 @@ Como a equipe já dispunha de um **módulo avulso do acelerômetro**, optou-se p
 1. **Montagem direta na placa:** o circuito integrado IIM-42351 (U2) é soldado diretamente à placa, juntamente com os capacitores de desacoplamento **C1 (1 µF)**, **C2 (100 nF)** e **C3 (100 nF)**, responsáveis pelo desacoplamento das alimentações `VDD` e `VDDIO`, conforme recomendado pelo fabricante. Os pinos reservados (`RESV`) foram tratados de acordo com a orientação do datasheet.
 2. **Montagem por módulo:** o bloco *Accelerometer Module* disponibiliza os conectores **J7**, **J8**, **J9** e **J10**, do tipo PTH, que permitem encaixar o módulo já existente por meio de barras de pinos, sem a necessidade de soldar o componente na placa.
 
-Essa abordagem foi adotada para reduzir o risco da primeira montagem. Caso ocorra algum problema na soldagem do encapsulamento do IIM-42351, que possui dimensões reduzidas, o desenvolvimento do firmware pode prosseguir utilizando o módulo avulso, sem bloquear o cronograma do projeto.
+Essa abordagem foi adotada para reduzir o risco da primeira montagem. Caso ocorra algum problema na soldagem do encapsulamento do IIM-42351, que possui dimensões reduzidas, o desenvolvimento do firmware pode prosseguir utilizando o módulo avulso, sem bloquear o cronograma do projeto. As duas alternativas de montagem são apresentadas na Figura 3, e o módulo avulso, na Figura 4.
 
 <div align="center">
   <img src="../../img/schematics_acc_mounting_options.png" alt="Circuito do acelerômetro IIM-42351 e conectores do módulo" width="80%">
@@ -63,7 +63,7 @@ Para a interface com o usuário definida na etapa inicial do projeto, foram impl
 
 O LED é controlado pelo sinal `LED_RED` através do resistor limitador **R2 (10 kΩ)**, dimensionado priorizando o baixo consumo, uma vez que o LED é utilizado apenas para a indicação de estados do sistema. Assim como no caso do acelerômetro, foram previstas **duas opções de montagem** para o LED: o componente SMD **LED1 (UR502DC)** e o componente PTH **LED2 (19-217/R6C-AL1M2VY/3T)**, possibilitando a montagem com o componente que estiver disponível no momento da fabricação do protótipo.
 
-O botão **SW1 (1-1825910-4)** é responsável pelo acionamento manual do alerta de emergência. O circuito utiliza o resistor de *pull-up* **R3 (10 kΩ)**, que mantém o sinal `BUTTON` em nível alto enquanto o botão não é pressionado, o resistor **R4 (100 Ω)** para limitação de corrente e proteção do GPIO, e o capacitor **C4 (100 nF)**, que realiza a filtragem do repique mecânico dos contatos (*debounce*) em hardware, reduzindo a necessidade de tratamento do repique por software.
+O botão **SW1 (1-1825910-4)** é responsável pelo acionamento manual do alerta de emergência. O circuito utiliza o resistor de *pull-up* **R3 (10 kΩ)**, que mantém o sinal `BUTTON` em nível alto enquanto o botão não é pressionado, o resistor **R4 (100 Ω)** para limitação de corrente e proteção do GPIO, e o capacitor **C4 (100 nF)**, que realiza a filtragem do repique mecânico dos contatos (*debounce*) em hardware, reduzindo a necessidade de tratamento do repique por software. O circuito da interface com o usuário é apresentado na Figura 5.
 
 <div align="center">
   <img src="../../img/schematics_user_interface.png" alt="Circuito da interface com o usuário" width="70%">
@@ -76,7 +76,7 @@ O esquemático desenvolvido consolida a arquitetura definida na etapa de seleç�
 
 ## Lista de materiais
 
-A lista de materiais (*Bill of Materials* – BOM) foi exportada do Altium Designer e está disponível na planilha [Bill of Materials-PROJETO PI3.xlsx](./Bill%20of%20Materials-PROJETO%20PI3.xlsx). A coluna **Montar** indica quais componentes serão efetivamente soldados no primeiro protótipo: como o acelerômetro será utilizado na forma de módulo avulso, o IIM-42351 (U2) e seus capacitores de desacoplamento não serão montados, assim como as opções alternativas de montagem.
+A lista de materiais (*Bill of Materials* – BOM) foi exportada do Altium Designer, é apresentada na Tabela 1 e está disponível na planilha [Bill of Materials-PROJETO PI3.xlsx](./Bill%20of%20Materials-PROJETO%20PI3.xlsx). A coluna **Montar** indica quais componentes serão efetivamente soldados no primeiro protótipo: como o acelerômetro será utilizado na forma de módulo avulso, o IIM-42351 (U2) e seus capacitores de desacoplamento não serão montados, assim como as opções alternativas de montagem.
 
 <div align="center">
 
