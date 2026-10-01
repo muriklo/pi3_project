@@ -188,6 +188,3 @@ tests/
 
 - [5] [TWILIO. Twilio trial account](https://www.twilio.com/docs/usage/trials)
 
-As referências usadas no levantamento de custos dos canais estão em
-[`docs/canais_de_alerta.md`](docs/canais_de_alerta.md), e as do protocolo BLE, em
-[`docs/ble_payload.md`](docs/ble_payload.md).
