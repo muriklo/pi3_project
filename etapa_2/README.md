@@ -100,11 +100,20 @@ A pulseira não mantém conexão com o celular: ela transmite anúncios BLE (*ad
 
 O aplicativo foi desenvolvido em Flutter e atende a dois papéis. O **receptor**, exclusivo do Android devido às restrições do iOS à varredura BLE em segundo plano, escuta a pulseira, dispara o alarme local e repassa o evento à API. O **responsável**, disponível em Android e iOS, recebe a notificação, confirma o atendimento e gerencia as pulseiras e os demais responsáveis. O código é dividido em cinco camadas, com as regras do protocolo isoladas em um pacote Dart puro, testado com os mesmos vetores de bytes gerados pela API.
 
-A principal decisão da arquitetura é que o alarme local precede qualquer acesso à rede, como mostra a Figura 3. A sirene toca assim que o anúncio é classificado como emergência; em seguida, o aplicativo envia SMS aos responsáveis pelo plano do próprio celular, obtém a localização e envia o evento à API por meio de uma fila persistente, que não descarta eventos em caso de falha de rede. O protótipo foi instalado em um celular Android físico, e o envio de SMS foi validado de ponta a ponta.
+A principal decisão da arquitetura é que o alarme local precede qualquer acesso à rede, como mostra a Figura 3. A sirene toca assim que o anúncio é classificado como emergência; em seguida, o aplicativo envia SMS aos responsáveis pelo plano do próprio celular, obtém a localização e envia o evento à API por meio de uma fila persistente, que não descarta eventos em caso de falha de rede.
 
 <div align="center">
   <img src="./img/app_fluxo_alerta.svg" alt="Fluxo do alerta no aplicativo" width="95%">
   <p>Figura 3 - Sequência do alerta no aplicativo, do anúncio à confirmação</p>
+</div>
+
+O protótipo foi instalado em um celular Android físico, e o envio de SMS foi validado de ponta a ponta, como mostra a Figura 4: a tela Saúde do sistema confirma as pré-condições do alarme, e o botão **Simular queda** fez o SMS de teste chegar ao telefone do responsável com o link do mapa.
+
+<div align="center">
+  <img src="./img/app_print_inicio.jpg" alt="Tela Início do aplicativo com a escuta ligada" width="30%">
+  <img src="./img/app_print_saude.jpg" alt="Tela Saúde do sistema com as pré-condições do alarme" width="30%">
+  <img src="./img/app_print_sms.jpg" alt="SMS de teste recebido pelo responsável" width="30%">
+  <p>Figura 4 - Protótipo do aplicativo em um celular Android: tela Início, tela Saúde do sistema e SMS de teste recebido pelo responsável</p>
 </div>
 
 > 📁 **Documentação do Aplicativo:** [Aplicativo](./software/app/README.md)
@@ -119,7 +128,7 @@ A API é um servidor em Python (FastAPI) que recebe os eventos repassados pelo a
 
 ## Desenvolvimento mecânico
 
-O projeto mecânico, que cobria os requisitos dimensionais, ergonômicos e de fabricação na Etapa 1, foi definido e prototipado em uma carcaça compacta, com 42 mm de largura e 52 mm de comprimento total, incluindo as garras de fixação. O diâmetro interno é de 37 mm, e a região útil de 35 mm, com cerca de 962,11 mm², é a referência para o posicionamento da PCI, da bateria e do acelerômetro, como mostra a Figura 4. As dimensões estão resumidas na Tabela 4.
+O projeto mecânico, que cobria os requisitos dimensionais, ergonômicos e de fabricação na Etapa 1, foi definido e prototipado em uma carcaça compacta, com 42 mm de largura e 52 mm de comprimento total, incluindo as garras de fixação. O diâmetro interno é de 37 mm, e a região útil de 35 mm, com cerca de 962,11 mm², é a referência para o posicionamento da PCI, da bateria e do acelerômetro, como mostra a Figura 5. As dimensões estão resumidas na Tabela 4.
 
 <div align="center">
 
@@ -140,17 +149,17 @@ O projeto mecânico, que cobria os requisitos dimensionais, ergonômicos e de fa
 
 <div align="center">
   <img src="./img/cotas_diametros_internos_externos_e_util.png" alt="Dimensões dos diâmetros da carcaça" width="55%">
-  <p>Figura 4 - Dimensões dos diâmetros externo, interno e da região útil da carcaça da Pulseira SysCare</p>
+  <p>Figura 5 - Dimensões dos diâmetros externo, interno e da região útil da carcaça da Pulseira SysCare</p>
 </div>
 
-A carcaça é fixada a uma pulseira comercial de silicone de 18 mm, apresentada na Figura 5[REFERENCIAR], por meio de pinos de mola (*spring bars*), escolhidos pela simplicidade construtiva, pelo pequeno volume e pela facilidade de montagem. A distância inicial de 2,5 mm entre a extremidade da garra e o centro do furo do pino será ajustada após a validação com a pulseira física.
+A carcaça é fixada a uma pulseira comercial de silicone de 18 mm, apresentada na Figura 6[REFERENCIAR], por meio de pinos de mola (*spring bars*), escolhidos pela simplicidade construtiva, pelo pequeno volume e pela facilidade de montagem. A distância inicial de 2,5 mm entre a extremidade da garra e o centro do furo do pino será ajustada após a validação com a pulseira física.
 
 <div align="center"> 
   <img src="./img/pulseira_da_estrutura_mecanica.png" alt="Pulseira comercial de silicone de 18 mm" width="65%"> 
-  <p>Figura 5 - Pulseira de silicone Wawe de 18 mm</p> 
+  <p>Figura 6 - Pulseira de silicone Wawe de 18 mm</p> 
 </div>
 
-A carcaça será fabricada por impressão 3D com o filamento disponível no IFSC, o que permite alterar a geometria ao longo do desenvolvimento. Em versões futuras, o material será reavaliado quanto ao contato prolongado com a pele. A estimativa de massa do conjunto, apresentada na Tabela 5, será completada após a fabricação da carcaça e da PCI. A Figura 6 apresenta o modelo 3D da pulseira com a PCI integrada.
+A carcaça será fabricada por impressão 3D com o filamento disponível no IFSC, o que permite alterar a geometria ao longo do desenvolvimento. Em versões futuras, o material será reavaliado quanto ao contato prolongado com a pele. A estimativa de massa do conjunto, apresentada na Tabela 5, será completada após a fabricação da carcaça e da PCI. A Figura 7 apresenta o modelo 3D da pulseira com a PCI integrada.
 
 <div align="center">
 
@@ -171,7 +180,7 @@ A carcaça será fabricada por impressão 3D com o filamento disponível no IFSC
 
 <div align="center"> 
   <img src="./img/prototipo_mecanico.png" alt="Modelo 3D da pulseira com a PCI integrada" width="75%"> 
-  <p>Figura 6 - Projeto 3D com protótipo da PCI integrada</p> 
+  <p>Figura 7 - Projeto 3D com protótipo da PCI integrada</p> 
 </div>
 
 > 📁 **Documentação de Mecânica:** dimensionamento, fixação, material e massa em [Mecânica](./mechanics/README.md)
