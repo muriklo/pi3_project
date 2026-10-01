@@ -155,7 +155,7 @@ O projeto mecânico, que cobria os requisitos dimensionais, ergonômicos e de fa
 A carcaça é fixada a uma pulseira comercial de silicone de 18 mm, apresentada na Figura 6 [15], por meio de pinos de mola (*spring bars*), escolhidos pela simplicidade construtiva, pelo pequeno volume e pela facilidade de montagem. A distância inicial de 2,5 mm entre a extremidade da garra e o centro do furo do pino será ajustada após a validação com a pulseira física.
 
 <div align="center"> 
-  <img src="./img/pulseira_da_estrutura_mecanica.png" alt="Pulseira comercial de silicone de 18 mm" width="65%"> 
+  <img src="./img/pulseira_da_estrutura_mecanica.png" alt="Pulseira comercial de silicone de 18 mm" width="45%"> 
   <p>Figura 6 - Pulseira de silicone Wawe de 18 mm</p> 
 </div>
 
