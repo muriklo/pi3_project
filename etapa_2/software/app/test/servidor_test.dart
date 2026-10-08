@@ -12,6 +12,12 @@ void main() {
     expect(normalizarServidor('https://api.syscare.exemplo:443/'), 'https://api.syscare.exemplo:443');
   });
 
+  test('endereco copiado do navegador perde caminho e fragmento', () {
+    expect(normalizarServidor('http://172.20.10.2:8000/docs#/'), 'http://172.20.10.2:8000');
+    expect(normalizarServidor('172.20.10.2:8000/health?x=1'), 'http://172.20.10.2:8000');
+    expect(normalizarServidor('172.20.10.2/docs'), 'http://172.20.10.2:8000');
+  });
+
   test('campo vazio volta ao padrao do build', () {
     expect(normalizarServidor(''), urlApi);
   });

@@ -9,17 +9,18 @@ const String urlApi = String.fromEnvironment(
   defaultValue: 'http://10.0.2.2:8000',
 );
 
-/// Aceita o que a pessoa digitar no campo Servidor: "192.168.1.20" vira
-/// "http://192.168.1.20:8000" (a porta padrao da API).
+/// Aceita o que a pessoa digitar ou colar no campo Servidor e devolve so
+/// esquema, maquina e porta: "192.168.1.20" e
+/// "http://192.168.1.20:8000/docs#/" viram "http://192.168.1.20:8000".
 String normalizarServidor(String texto) {
-  var url = texto.trim();
-  if (url.isEmpty) return urlApi;
-  if (!url.startsWith(RegExp(r'https?://'))) url = 'http://$url';
-  while (url.endsWith('/')) {
-    url = url.substring(0, url.length - 1);
-  }
+  final limpo = texto.trim();
+  if (limpo.isEmpty) return urlApi;
+  final esquema = RegExp(r'^https?://').firstMatch(limpo)?.group(0) ?? 'http://';
+  // Caminho, consulta e fragmento (/docs, ?x=1, #/) ficam de fora: as rotas da
+  // API sao montadas a partir da raiz do servidor.
+  final autoridade = limpo.substring(limpo.startsWith(esquema) ? esquema.length : 0).split(RegExp(r'[/?#]')).first;
   // Olha o texto, nao o Uri: o Uri esconde a porta quando ela e a padrao do
   // esquema (443 no https) e o codigo acharia que nao ha porta nenhuma.
-  final autoridade = url.replaceFirst(RegExp(r'^https?://'), '').split('/').first;
-  return RegExp(r':\d+$').hasMatch(autoridade) ? url : '$url:8000';
+  final comPorta = RegExp(r':\d+$').hasMatch(autoridade) ? autoridade : '$autoridade:8000';
+  return '$esquema$comPorta';
 }

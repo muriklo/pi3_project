@@ -171,10 +171,11 @@ protótipo.
 #define SYSCARE_EVT_HEARTBEAT 0x05  /* repete o seq atual; impact_dg = 0 */
 
 static uint8_t adv_payload[14];
+static uint8_t adv_mfg_buf[2 + sizeof(adv_payload)];   /* Company ID + payload */
 
-/* bytes 0..9 = dados, 10..13 = HMAC truncado */
-static void syscare_build_payload(uint8_t event, uint16_t seq,
-                                  uint8_t batt, uint8_t impact_dg)
+/* bytes 0..9 = dados, 10..13 = HMAC truncado. Retorna 0 se deu certo. */
+static int syscare_build_payload(uint8_t event, uint16_t seq,
+                                 uint8_t batt, uint8_t impact_dg)
 {
     adv_payload[0] = SYSCARE_PROTO_VER;
     memcpy(&adv_payload[1], device_ble_id, 4);   /* gravado em fábrica */
@@ -184,9 +185,19 @@ static void syscare_build_payload(uint8_t event, uint16_t seq,
     adv_payload[8] = batt;
     adv_payload[9] = impact_dg;
 
+    /* Sem HMAC válido o pacote não vai ao ar: a API recusaria o alerta. */
+    const mbedtls_md_info_t *md = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
     uint8_t mac[32];
-    /* mbedtls_md_hmac(SHA256, shared_secret, 16, adv_payload, 10, mac) */
+    if (md == NULL ||
+        mbedtls_md_hmac(md, shared_secret, 16, adv_payload, 10, mac) != 0) {
+        return -EIO;
+    }
     memcpy(&adv_payload[10], mac, 4);
+
+    adv_mfg_buf[0] = SYSCARE_COMPANY_ID & 0xFF;   /* little-endian */
+    adv_mfg_buf[1] = SYSCARE_COMPANY_ID >> 8;
+    memcpy(&adv_mfg_buf[2], adv_payload, sizeof(adv_payload));
+    return 0;
 }
 
 static const struct bt_data ad[] = {
@@ -194,16 +205,22 @@ static const struct bt_data ad[] = {
     BT_DATA(BT_DATA_MANUFACTURER_DATA, adv_mfg_buf, sizeof(adv_mfg_buf)),
 };
 
-/* repouso: não-conectável, 2000 ms */
-#define ADV_IDLE  BT_LE_ADV_PARAM(BT_LE_ADV_OPT_USE_IDENTITY, \
-                                  BT_GAP_ADV_SLOW_INT_MIN, BT_GAP_ADV_SLOW_INT_MAX, NULL)
+/* repouso: não-conectável, 2000 ms — 0x0C80 = 3200 * 0,625 ms.
+ * (BT_GAP_ADV_SLOW_INT_MIN/MAX valem 1,0–1,2 s, não 2 s.) */
+#define ADV_IDLE  BT_LE_ADV_PARAM(BT_LE_ADV_OPT_USE_IDENTITY, 0x0C80, 0x0CD0, NULL)
 
 /* emergência: 100 ms — 0x00A0 = 160 * 0,625 ms */
 #define ADV_ALERT BT_LE_ADV_PARAM(BT_LE_ADV_OPT_USE_IDENTITY, 0x00A0, 0x00B0, NULL)
 ```
 
-Trocar de intervalo é `bt_le_adv_stop()` seguido de `bt_le_adv_start()` com o
+O `bt_le_adv_start()` copia os dados para o controlador: alterar o
+`adv_mfg_buf` depois não muda o que vai ao ar. Para trocar só os dados (novo
+evento, bateria), monte o pacote de novo e chame `bt_le_adv_update_data()`.
+Para trocar de intervalo, `bt_le_adv_stop()` seguido de `bt_le_adv_start()` com o
 outro parâmetro.
+
+Uma versão completa e comentada deste esqueleto, que anuncia o heartbeat, está
+em [`firmware/teste_ble/src/main.c`](../../firmware/teste_ble/src/main.c).
 
 ## 8. Teste sem hardware
 
