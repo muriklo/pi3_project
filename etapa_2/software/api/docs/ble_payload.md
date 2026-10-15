@@ -95,9 +95,11 @@ firmware. Cada anúncio leva `HMAC-SHA256(chave, bytes[0..9])[:4]`.
 Quatro bytes dão 1 chance em 4,3 bilhões de acerto às cegas. Como o `seq` também
 precisa avançar, um atacante não consegue nem forçar bruta por repetição.
 
-No nRF52840 há o CryptoCell (CC310); em nRF52832 use a implementação em software
-do mbedTLS que já vem no nRF Connect SDK — um HMAC-SHA256 sobre 10 bytes é
-irrelevante frente ao custo do rádio.
+No firmware, o HMAC sai da API PSA Crypto do nRF Connect SDK (`psa_mac_compute`).
+No NCS 3.x o `mbedtls_md_hmac()` deixou de ser API pública. O driver padrão
+(Oberon) é em software e serve tanto ao nRF52832 quanto ao nRF52840 (que também
+tem o CryptoCell CC310) — um HMAC-SHA256 sobre 10 bytes é irrelevante frente ao
+custo do rádio.
 
 ## 4. Anti-replay e deduplicação
 
@@ -185,11 +187,13 @@ static int syscare_build_payload(uint8_t event, uint16_t seq,
     adv_payload[8] = batt;
     adv_payload[9] = impact_dg;
 
-    /* Sem HMAC válido o pacote não vai ao ar: a API recusaria o alerta. */
-    const mbedtls_md_info_t *md = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+    /* Sem HMAC válido o pacote não vai ao ar: a API recusaria o alerta.
+     * hmac_key = shared_secret importada uma vez com psa_import_key()
+     * (tipo PSA_KEY_TYPE_HMAC, uso PSA_KEY_USAGE_SIGN_MESSAGE). */
     uint8_t mac[32];
-    if (md == NULL ||
-        mbedtls_md_hmac(md, shared_secret, 16, adv_payload, 10, mac) != 0) {
+    size_t mac_len;
+    if (psa_mac_compute(hmac_key, PSA_ALG_HMAC(PSA_ALG_SHA_256),
+                        adv_payload, 10, mac, sizeof(mac), &mac_len) != PSA_SUCCESS) {
         return -EIO;
     }
     memcpy(&adv_payload[10], mac, 4);
@@ -220,7 +224,9 @@ Para trocar de intervalo, `bt_le_adv_stop()` seguido de `bt_le_adv_start()` com 
 outro parâmetro.
 
 Uma versão completa e comentada deste esqueleto, que anuncia o heartbeat, está
-em [`firmware/teste_ble/src/main.c`](../../firmware/teste_ble/src/main.c).
+em [`firmware/teste_ble/`](../../firmware/teste_ble/) — `src/main.c`, com o
+`prj.conf` das opções de Bluetooth e PSA Crypto. Compila no NCS v3.4.1 para a
+placa `xiao_ble`.
 
 ## 8. Teste sem hardware
 
