@@ -31,7 +31,7 @@
 #include <zephyr/bluetooth/bluetooth.h>
 #include <zephyr/bluetooth/hci.h>
 
-#include <mbedtls/md.h>
+#include <psa/crypto.h>
 
 #include <errno.h>
 #include <string.h>
@@ -73,6 +73,15 @@ static const uint8_t shared_secret[16] = {
 };
 
 
+/*
+ * Chave importada no PSA Crypto.
+ *
+ * No NCS 3.x o mbedtls_md_hmac() deixou de ser API pública; o caminho
+ * suportado (que também existe no NCS 2.x) é o PSA.
+ */
+static psa_key_id_t hmac_key;
+
+
 /* =========================================================
  * Payload
  * ========================================================= */
@@ -111,6 +120,49 @@ static uint8_t adv_mfg_buf[16];
 // │    2 bytes   │          14 bytes            │
 // └──────────────┴──────────────────────────────┘
 
+/* =========================================================
+ * Criptografia
+ * ========================================================= */
+
+static int syscare_crypto_init(void)
+{
+    psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
+    psa_status_t status;
+
+    status = psa_crypto_init();
+
+    if (status != PSA_SUCCESS) {
+        printk("Erro: psa_crypto_init (%d)\n", status);
+        return -EIO;
+    }
+
+
+    /*
+     * Chave HMAC de 128 bits, só para assinar
+     */
+    psa_set_key_usage_flags(&attr, PSA_KEY_USAGE_SIGN_MESSAGE);
+    psa_set_key_algorithm(&attr, PSA_ALG_HMAC(PSA_ALG_SHA_256));
+    psa_set_key_type(&attr, PSA_KEY_TYPE_HMAC);
+    psa_set_key_bits(&attr, 8 * sizeof(shared_secret));
+
+    status = psa_import_key(
+        &attr,
+        shared_secret,
+        sizeof(shared_secret),
+        &hmac_key
+    );
+
+    psa_reset_key_attributes(&attr);
+
+    if (status != PSA_SUCCESS) {
+        printk("Erro: psa_import_key (%d)\n", status);
+        return -EIO;
+    }
+
+    return 0;
+}
+
+
 /*
  * bytes 0..9 = dados, 10..13 = HMAC truncado.
  *
@@ -120,9 +172,8 @@ static uint8_t adv_mfg_buf[16];
 static int syscare_build_payload(uint8_t event, uint16_t seq, uint8_t batt, uint8_t impact_dg)
 {
     uint8_t mac[32];
-    int err;
-
-    const mbedtls_md_info_t *md_info;
+    size_t mac_len;
+    psa_status_t status;
 
     adv_payload[0] = SYSCARE_PROTO_VER;
 
@@ -141,24 +192,18 @@ static int syscare_build_payload(uint8_t event, uint16_t seq, uint8_t batt, uint
     /*
      * HMAC-SHA256 sobre os bytes 0..9
      */
-    md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
-
-    if (md_info == NULL) {
-        printk("Erro: SHA256 indisponivel\n");
-        return -ENOTSUP;
-    }
-
-    err = mbedtls_md_hmac(
-        md_info,
-        shared_secret,
-        sizeof(shared_secret),
+    status = psa_mac_compute(
+        hmac_key,
+        PSA_ALG_HMAC(PSA_ALG_SHA_256),
         adv_payload,
         10,
-        mac
+        mac,
+        sizeof(mac),
+        &mac_len
     );
 
-    if (err) {
-        printk("Erro: HMAC falhou (%d)\n", err);
+    if (status != PSA_SUCCESS) {
+        printk("Erro: HMAC falhou (%d)\n", status);
         return -EIO;
     }
 
@@ -301,6 +346,17 @@ int main(void)
 
 
     /* -----------------------------------------------------
+     * Inicializa criptografia
+     * ----------------------------------------------------- */
+
+    err = syscare_crypto_init();
+
+    if (err) {
+        return 0;
+    }
+
+
+    /* -----------------------------------------------------
      * Monta primeiro heartbeat
      * ----------------------------------------------------- */
 
@@ -372,6 +428,12 @@ int main(void)
         }
 
         syscare_build_mfg_data();
+
+        /*
+         * O console da XIAO é a USB: o que sai antes de abrir o terminal se
+         * perde, então o payload é repetido a cada heartbeat.
+         */
+        syscare_print_payload();
 
 
         /*
