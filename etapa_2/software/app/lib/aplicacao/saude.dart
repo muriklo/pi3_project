@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:universal_ble/universal_ble.dart' show AvailabilityState;
 
 import 'providers.dart';
+import 'push.dart';
 import 'receptor.dart';
 
 /// Uma pre-condicao do receptor. Em emergencia, a falha silenciosa e o pior
@@ -49,6 +50,8 @@ final saudeProvider = FutureProvider.autoDispose<List<ItemSaude>>((ref) async {
   final contatosSms =
       ref.read(preferenciasProvider).contatosSms.values.fold<int>(0, (n, lista) => n + lista.length);
   final escutando = varredura == EstadoVarredura.escutando;
+  final push = ref.read(pushProvider);
+  final pushRegistrado = push.ativo && ref.read(preferenciasProvider).pushId != null;
 
   final itens = <ItemSaude>[
     ItemSaude(
@@ -97,6 +100,22 @@ final saudeProvider = FutureProvider.autoDispose<List<ItemSaude>>((ref) async {
               await alarme.pedirNotificacoes();
               atualizar();
             },
+    ),
+    ItemSaude(
+      'Alertas de longe (push)',
+      pushRegistrado,
+      !push.ativo
+          ? 'Este app foi gerado sem o Firebase: só alarma quando este celular ouve a pulseira.'
+          : !pushRegistrado
+              ? 'Ainda não registrado no servidor: alertas de outros celulares não chegam aqui.'
+              : 'Recebe os alertas das pulseiras de que você é responsável, mesmo longe delas.',
+      rotuloAcao: push.ativo && !pushRegistrado ? 'Registrar' : null,
+      acao: push.ativo && !pushRegistrado
+          ? () async {
+              await ref.read(registroPushProvider).registrar();
+              atualizar();
+            }
+          : null,
     ),
     ItemSaude(
       'SMS pelo celular',
