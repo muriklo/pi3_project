@@ -27,6 +27,37 @@ _SCOPES = ["https://www.googleapis.com/auth/firebase.messaging"]
 _TIMEOUT = httpx.Timeout(10.0)
 
 
+def build_fcm_payload(target: str, message: NotificationMessage) -> dict:
+    """Corpo do `messages:send`.
+
+    No Android a mensagem vai SO com `data`: com o bloco `notification`, o
+    sistema mostraria um aviso comum com o app em segundo plano, que toca uma
+    vez e some. Sem ele, o proprio app recebe a mensagem e dispara o mesmo
+    alarme do radio (sirene repetindo, tela cheia), e deixa de alarmar se este
+    celular ja estiver tocando pelo mesmo evento. No iOS o texto vai no `aps`.
+    """
+    return {
+        "message": {
+            "token": target,
+            "data": {**message.data, "title": message.title, "body": message.body},
+            "android": {
+                # 'high' fura o Doze; alerta de queda nao pode esperar a
+                # janela de manutencao do Android.
+                "priority": "high",
+            },
+            "apns": {
+                "headers": {"apns-priority": "10"},
+                "payload": {
+                    "aps": {
+                        "alert": {"title": message.title, "body": message.body},
+                        "sound": {"critical": 1, "name": "sirene.caf", "volume": 1.0},
+                    }
+                },
+            },
+        }
+    }
+
+
 class FcmChannel(NotificationChannel):
     name = "push"
 
@@ -69,32 +100,7 @@ class FcmChannel(NotificationChannel):
         url = (
             f"https://fcm.googleapis.com/v1/projects/{self._project_id}/messages:send"
         )
-        payload = {
-            "message": {
-                "token": target,
-                "notification": {"title": message.title, "body": message.body},
-                "data": message.data,
-                "android": {
-                    # 'high' furam o Doze; alerta de queda nao pode esperar
-                    # a janela de manutencao do Android.
-                    "priority": "high",
-                    "notification": {
-                        "channel_id": "syscare_emergencia",
-                        "sound": "sirene",
-                        "default_vibrate_timings": False,
-                        "vibrate_timings": ["0.5s", "0.3s", "0.5s", "0.3s", "0.5s"],
-                    },
-                },
-                "apns": {
-                    "headers": {"apns-priority": "10"},
-                    "payload": {
-                        "aps": {
-                            "sound": {"critical": 1, "name": "sirene.caf", "volume": 1.0}
-                        }
-                    },
-                },
-            }
-        }
+        payload = build_fcm_payload(target, message)
 
         try:
             token = self._access_token()

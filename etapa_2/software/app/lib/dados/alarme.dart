@@ -107,4 +107,8 @@ class Alarme {
       );
 
   Future<void> silenciar(int id) => _plugin.cancel(id: id);
+
+  /// A notificacao [id] continua na barra: a sirene insistente toca ate sair.
+  Future<bool> tocando(int id) async =>
+      (await _plugin.getActiveNotifications()).any((n) => n.id == id);
 }

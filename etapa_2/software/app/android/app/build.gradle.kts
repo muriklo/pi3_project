@@ -1,7 +1,34 @@
+import groovy.json.JsonSlurper
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+/**
+ * Push (FCM) sem o plugin google-services: le o google-services.json, se
+ * existir, e gera os mesmos quatro recursos que o plugin geraria; o Firebase
+ * se inicializa a partir deles. Sem o arquivo o app compila e roda igual, so
+ * sem push. O arquivo nao vai para o git (.gitignore).
+ */
+fun recursosDoFirebase(arquivo: File, pacote: String): Map<String, String> {
+    if (!arquivo.exists()) return emptyMap()
+    val json = JsonSlurper().parse(arquivo) as Map<*, *>
+    val projeto = json["project_info"] as Map<*, *>
+    val cliente = (json["client"] as List<*>).map { it as Map<*, *> }.firstOrNull {
+        val info = it["client_info"] as Map<*, *>
+        (info["android_client_info"] as Map<*, *>)["package_name"] == pacote
+    } ?: throw GradleException(
+        "google-services.json nao tem o app $pacote. No console do Firebase, " +
+            "registre um app Android com esse nome de pacote e baixe o arquivo de novo."
+    )
+    return mapOf(
+        "google_app_id" to (cliente["client_info"] as Map<*, *>)["mobilesdk_app_id"] as String,
+        "google_api_key" to ((cliente["api_key"] as List<*>)[0] as Map<*, *>)["current_key"] as String,
+        "gcm_defaultSenderId" to projeto["project_number"] as String,
+        "project_id" to projeto["project_id"] as String,
+    )
 }
 
 android {
@@ -32,6 +59,14 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        for ((nome, valor) in recursosDoFirebase(file("google-services.json"), applicationId!!)) {
+            resValue("string", nome, valor)
+        }
+    }
+
+    buildFeatures {
+        resValues = true
     }
 
     buildTypes {
