@@ -30,12 +30,17 @@ class VarreduraBle {
 
   /// Varredura com filtro no radio: sem filtro, o Android 8.1+ pausa a
   /// varredura com a tela apagada.
+  ///
+  /// `legacy: true` porque a pulseira usa o advertising legado (31 bytes, so
+  /// PHY 1M). Sem ele o universal_ble liga `setLegacy(false)` e divide a escuta
+  /// com o PHY Coded, e a propria biblioteca avisa que assim anuncios legados
+  /// podem nao chegar.
   Future<void> iniciar() => UniversalBle.startScan(
         scanFilter: ScanFilter(
           withManufacturerData: [ManufacturerDataFilter(companyIdentifier: companyId)],
         ),
         platformConfig: PlatformConfig(
-          android: AndroidOptions(scanMode: AndroidScanMode.lowLatency),
+          android: AndroidOptions(scanMode: AndroidScanMode.lowLatency, legacy: true),
         ),
       );
 
