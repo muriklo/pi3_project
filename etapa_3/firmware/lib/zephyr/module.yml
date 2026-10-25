@@ -1,0 +1,12 @@
+# SysCare - modulo Zephyr compartilhado entre os apps da etapa 3
+#
+# Contem os componentes reutilizaveis (bindings, HAL, drivers, servicos).
+# Um app usa o modulo com, antes do find_package(Zephyr):
+#   list(APPEND ZEPHYR_EXTRA_MODULES <caminho>/lib)
+
+name: syscare
+build:
+  cmake: .
+  kconfig: Kconfig
+  settings:
+    dts_root: .

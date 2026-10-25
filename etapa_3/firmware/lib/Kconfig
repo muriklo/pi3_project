@@ -1,0 +1,8 @@
+# SysCare - Kconfig do modulo compartilhado
+#
+# Cada componente (hal, drivers, services) entra aqui com
+# rsource "<pasta>/Kconfig" conforme for criado.
+
+menu "SysCare"
+
+endmenu
