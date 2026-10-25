@@ -203,7 +203,17 @@ O *heartbeat* chega a cada 2 s. O aplicativo guarda **uma amostra por pulseira a
 
 ### 5.6 *Push*
 
-O aplicativo cria o canal de notificação `syscare_emergencia` e inclui o som `sirene`, que são os identificadores que a API já envia no *push* de alta prioridade. O som usa o fluxo de áudio de alarme do Android, o mesmo do despertador, que continua ativo com o celular no modo silencioso. O campo `alert_id` do *push* abre diretamente a tela de Alerta. Se o *push* chega para um alerta que este mesmo celular já está exibindo por ter ouvido o anúncio, ele não alarma pela segunda vez.
+O *push* é a Camada 2: leva o alerta ao responsável que está longe da pulseira e, por isso, não ouve o anúncio. A API o envia pelo Firebase Cloud Messaging [14] a cada celular registrado pelos responsáveis da pulseira.
+
+| Aspecto | Definição |
+|---|---|
+| Registro | Depois do login e a cada abertura do aplicativo, o celular registra seu *token* com `POST /v1/auth/push-tokens`, e de novo quando o Firebase o troca; ao sair, o remove da API e do Firebase |
+| Formato | No Android a mensagem chega só com dados, sem o bloco de notificação. Assim é o próprio aplicativo, mesmo fechado, que dispara o alarme: a mesma sirene insistente do alarme local, no canal `syscare_emergencia`, com o fluxo de áudio de alarme e em tela cheia. Bateria baixa vira um aviso comum, sem sirene |
+| Repetição | A mensagem traz o `ble_id` e o `seq` do anúncio de origem. Se o celular já ouviu esse evento pelo rádio, a sirene local já está tocando e o *push* é ignorado |
+| Atendimento | A notificação abre a tela de Alerta do servidor, com "Silenciar sirene", "Estou indo" e "Encerrar"; os dois últimos também calam a sirene do *push* |
+| Configuração | O Firebase é opcional na compilação. Com o arquivo `android/app/google-services.json` o *push* é ativado; sem ele, o aplicativo funciona igual, só sem *push*, e a tela Saúde do sistema mostra isso |
+
+Para ativar o *push*: no console do Firebase, criar o projeto e registrar um app Android com o pacote `br.edu.ifsc.syscare_app`; baixar o `google-services.json` para `android/app/`; e, em Configurações do projeto → Contas de serviço, gerar a chave privada e apontar a variável `SYSCARE_FCM_CREDENTIALS_FILE` da API para ela. Nenhum dos dois arquivos vai para o repositório.
 
 ### 5.7 SMS pelo celular (Camada 3)
 
@@ -254,7 +264,7 @@ A ordem da Figura 4 é a principal decisão desta arquitetura: **o alarme local 
 | Protocolo | Decodificação, classificação e deduplicação, testadas com vetores da API | Verificação da assinatura no celular (avaliar) |
 | Alarme local | Canal de alarme e tela cheia | Testes em aparelhos de vários fabricantes |
 | API | Sessão, pulseiras, responsáveis, envio com fila, histórico, confirmação e encerramento | Renovação de sessão; pendências da Seção 9 |
-| *Push* | Canal e som do alarme já idênticos aos do *push*; recepção pendente da criação do projeto Firebase | Recepção do *push*; projeto Firebase definitivo; iOS |
+| *Push* | Recepção no Android com a sirene do alarme local, ativada pelo `google-services.json` do projeto Firebase | Parar a sirene dos demais quando alguém confirma; iOS |
 | Chave do firmware | Exibida uma vez no cadastro e gravada manualmente | Provisionamento por conexão BLE |
 | SMS pelo celular | Enviado em toda emergência a todos os responsáveis com telefone | Ligação automática ao primeiro responsável (avaliar) |
 
@@ -321,6 +331,8 @@ Além dos testes automatizados, o protótipo foi instalado em um celular Android
 - [12] [APPLE. Core Bluetooth Background Processing for iOS Apps](https://developer.apple.com/library/archive/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/CoreBluetoothBackgroundProcessingForIOSApps/PerformingTasksWhileYourAppIsInTheBackground.html)
 
 - [13] [FASTAPI. First Steps - OpenAPI](https://fastapi.tiangolo.com/tutorial/first-steps/)
+
+- [14] [GOOGLE. Receive messages in Flutter apps - Firebase Cloud Messaging](https://firebase.google.com/docs/cloud-messaging/flutter/receive)
 
 <div align="center">
 

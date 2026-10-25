@@ -1,0 +1,236 @@
+# Protocolo BLE do SysCare — advertising e orçamento de energia
+
+Este documento é o contrato entre **firmware (nRF Connect SDK)**, **app (Flutter)** e
+**API**. A implementação de referência do lado servidor está em
+[`app/ble.py`](../app/ble.py) e [`app/security.py`](../app/security.py).
+
+## 1. Por que broadcast (e não conexão)
+
+Uma conexão BLE exige *scan* → *connect* → *discovery de serviços* → *pareamento*.
+Na prática são centenas de milissegundos a alguns segundos, com o rádio ligado o
+tempo todo, e a conexão precisa ser mantida (eventos de *connection interval*
+periódicos) mesmo quando nada acontece.
+
+O advertising não-conectável, ao contrário, é o modo mais barato do BLE: o rádio
+liga por ~1–3 ms, transmite em três canais e desliga. Para um evento único e
+urgente como uma queda, é a escolha certa — e ainda alcança **qualquer** celular
+próximo ao mesmo tempo, não só um pareado.
+
+O preço é que broadcast **não tem confirmação nem autenticação nativas**. As
+seções 3 e 4 resolvem isso.
+
+## 2. Formato do anúncio
+
+AD type `0xFF` (Manufacturer Specific Data), Company ID `0xFFFF` — reservado pela
+Bluetooth SIG para desenvolvimento e testes, adequado para um projeto acadêmico.
+
+```
+AD structure:  [len=0x11][type=0xFF][CID lo=0xFF][CID hi=0xFF][ payload de 14 bytes ]
+```
+
+Total: 2 + 14 = 16 bytes de dados + 2 de cabeçalho = **18 bytes**, folgados dentro
+dos 31 bytes do advertising legado. Não é preciso *scan response* nem *extended
+advertising* do BLE 5 — o que também mantém a compatibilidade com celulares antigos.
+
+### Payload (14 bytes, little-endian)
+
+| Offset | Bytes | Campo | Descrição |
+|---|---|---|---|
+| 0 | 1 | `version` | Versão do protocolo. Hoje `0x01`. |
+| 1–4 | 4 | `ble_id` | Identificador único da pulseira, gravado em fábrica. |
+| 5 | 1 | `event_type` | `0x00` teste · `0x01` queda · `0x02` botão de pânico · `0x03` imobilidade · `0x04` bateria baixa · `0x05` heartbeat |
+| 6–7 | 2 | `seq` | Contador `uint16` monotônico, incrementado a cada evento. O heartbeat **repete** o valor atual, sem incrementar. |
+| 8 | 1 | `battery_pct` | Bateria em % (0–100). |
+| 9 | 1 | `impact_dg` | Pico de aceleração em décimos de g (satura em 25,5 g). |
+| 10–13 | 4 | `signature` | HMAC-SHA256 truncado sobre os bytes 0–9. |
+
+Os bytes 0–9 são exatamente o que entra no HMAC — ver `build_signed_payload()`.
+
+### Heartbeat (`event_type = 0x05`)
+
+Revisão de 23/09/2026 (etapa 2). A versão da etapa 1 previa um anúncio de
+presença a cada 2 s, mas não dava a ele um código próprio. Isso deixava dois
+problemas em aberto:
+
+1. **O app não distinguiria presença de emergência.** Se o heartbeat repetisse o
+   último evento, um celular que acabou de abrir o app ouviria "queda, seq 42" e
+   tocaria a sirene por uma queda antiga — e a sirene toca antes de qualquer
+   verificação no servidor, por projeto.
+2. **O `seq` não serve para identificar heartbeats.** Ele só avança em eventos,
+   gravado em flash a cada um. Incrementá-lo a cada 2 s daria a volta no
+   contador de 16 bits em ~36 h e gravaria a flash 43 mil vezes por dia.
+
+A regra adotada:
+
+| Campo | No heartbeat |
+|---|---|
+| `event_type` | `0x05` |
+| `seq` | O valor do **último evento**, sem incrementar. |
+| `battery_pct` | Leitura atual. |
+| `impact_dg` | `0`. |
+| `signature` | HMAC normal sobre os bytes 0–9. |
+
+O app **nunca** trata `0x05` como alerta: agrega os heartbeats e envia em lote
+para `POST /v1/telemetry`. A API recusa `0x05` em `POST /v1/alerts` (`422`) e
+deduplica a telemetria por janela de tempo (`SYSCARE_TELEMETRY_BUCKET_SECONDS`,
+60 s por padrão), não por `seq`.
+
+Efeito colateral útil: se o `seq` de um heartbeat for **maior** que o último
+alerta que a API recebeu, a pulseira emitiu um evento que nenhum celular ouviu.
+
+A versão do protocolo continua `0x01`: nenhum firmware foi gravado com a
+revisão anterior.
+
+## 3. Autenticação: por que o HMAC é obrigatório
+
+Sem assinatura, **qualquer** celular com um app de BLE genérico consegue anunciar
+`event_type=0x01` com o `ble_id` de uma pulseira alheia e disparar um alerta falso
+de queda. Num sistema de emergência, alerta falso repetido treina o cuidador a
+ignorar o alerta — é uma falha de segurança que vira falha de segurança do paciente.
+
+A pulseira guarda uma chave simétrica de 16 bytes, gerada pela API no cadastro
+(`POST /v1/devices` devolve `shared_secret` **uma única vez**) e gravada no
+firmware. Cada anúncio leva `HMAC-SHA256(chave, bytes[0..9])[:4]`.
+
+Quatro bytes dão 1 chance em 4,3 bilhões de acerto às cegas. Como o `seq` também
+precisa avançar, um atacante não consegue nem forçar bruta por repetição.
+
+No firmware, o HMAC sai da API PSA Crypto do nRF Connect SDK (`psa_mac_compute`).
+No NCS 3.x o `mbedtls_md_hmac()` deixou de ser API pública. O driver padrão
+(Oberon) é em software e serve tanto ao nRF52832 quanto ao nRF52840 (que também
+tem o CryptoCell CC310) — um HMAC-SHA256 sobre 10 bytes é irrelevante frente ao
+custo do rádio.
+
+## 4. Anti-replay e deduplicação
+
+**Replay.** O `seq` nunca retrocede. A API guarda o último aceito em
+`Device.last_seq` e rejeita com `409` qualquer valor menor (com margem de 1000
+para o *wrap-around* natural do contador de 16 bits). Assim, gravar um anúncio de
+queda no ar e retransmiti-lo depois não funciona.
+
+**Duplicação.** O anúncio de emergência é repetido por dezenas de segundos e pode
+ser ouvido por vários celulares — todos vão chamar `POST /v1/alerts`. A API
+deduplica por `(device_id, seq)` dentro de `SYSCARE_DEDUP_WINDOW_SECONDS` (180 s
+por padrão) e responde `duplicate: true` sem notificar de novo. O segundo relato
+ainda é útil: se ele traz GPS e o primeiro não trazia, a localização é
+aproveitada.
+
+**O `seq` deve sobreviver ao reset.** Grave-o em flash/NVS a cada evento (são
+poucos por dia, não desgasta a memória). Se o contador zerar num reset, os
+eventos seguintes cairão na regra anti-replay. O heartbeat não incrementa o
+`seq`, então não gera gravação em flash.
+
+## 5. Intervalos de advertising e orçamento de energia
+
+É **aqui** que se ganha ou se perde autonomia — não na escolha da linguagem da API.
+
+| Estado | Intervalo | Duração | Observação |
+|---|---|---|---|
+| Repouso (heartbeat) | 2000 ms | contínuo | `event_type 0x05`. Prova de presença e bateria. |
+| **Emergência** | **100 ms** | 30 s | Máxima chance de o celular ouvir na primeira varredura. |
+| Emergência (sustentada) | 500 ms | +5 min | Cobre o caso de o cuidador chegar depois. |
+| Pós-confirmação | volta a 2000 ms | — | Ver seção 6. |
+
+Ordem de grandeza (nRF52832, TX 0 dBm, 3 canais, ~1,5 ms por evento de anúncio,
+pico ~5 mA): a 2000 ms o advertising fica em torno de alguns µA de média — bem
+abaixo do consumo do acelerômetro em modo *wake-on-motion*. A 100 ms sobe para
+dezenas de µA, mas só por 30 segundos. **O advertising de repouso não é o que
+domina o consumo; o acelerômetro e o algoritmo de detecção é que dominam.**
+
+Meça de verdade com o Power Profiler Kit II antes de fechar o número no relatório
+da Etapa 4 — os valores acima são para dimensionar, não para citar.
+
+Duas economias que valem mais que ajustar o intervalo:
+- **`BT_LE_ADV_OPT_USE_IDENTITY` desligado / endereço aleatório resolvível**: sem
+  impacto de energia, mas evita rastrear o usuário pelo endereço MAC fixo.
+- **TX power**: −4 dBm em vez de +4 dBm corta consumo do rádio e ainda cobre uma
+  casa. Só suba a potência se os testes de alcance exigirem.
+
+## 6. O que o broadcast não resolve: confirmação e dados brutos
+
+Broadcast é unidirecional — a pulseira **não sabe** se alguém ouviu. Duas
+consequências de projeto:
+
+1. **A pulseira precisa de feedback local.** Buzzer/vibração dizendo "alerta
+   enviado", e um botão de cancelar dentro de ~10 s antes de anunciar (mata o
+   falso positivo na origem, antes de incomodar ninguém).
+2. **Para confirmar de fato**, adote o padrão *broadcast + connect*: durante a
+   emergência, a pulseira anuncia **também** como conectável. O app, depois de
+   tratar o alerta, conecta e (a) confirma o recebimento, para a pulseira parar o
+   anúncio agressivo e economizar bateria; (b) baixa a janela de aceleração de
+   ±5 s em torno do impacto, para análise posterior do algoritmo.
+
+O item (b) é o que dá material para calibrar o detector na Etapa 4: cruzando a
+janela de sinal com o desfecho registrado em `POST /v1/alerts/{id}/resolve`
+(`false_positive` vs `resolved`), vocês montam um dataset rotulado do próprio
+protótipo.
+
+## 7. Esqueleto do firmware (nRF Connect SDK / Zephyr)
+
+```c
+#define SYSCARE_COMPANY_ID   0xFFFF
+#define SYSCARE_PROTO_VER    0x01
+#define SYSCARE_EVT_HEARTBEAT 0x05  /* repete o seq atual; impact_dg = 0 */
+
+static uint8_t adv_payload[14];
+static uint8_t adv_mfg_buf[2 + sizeof(adv_payload)];   /* Company ID + payload */
+
+/* bytes 0..9 = dados, 10..13 = HMAC truncado. Retorna 0 se deu certo. */
+static int syscare_build_payload(uint8_t event, uint16_t seq,
+                                 uint8_t batt, uint8_t impact_dg)
+{
+    adv_payload[0] = SYSCARE_PROTO_VER;
+    memcpy(&adv_payload[1], device_ble_id, 4);   /* gravado em fábrica */
+    adv_payload[5] = event;
+    adv_payload[6] = seq & 0xFF;
+    adv_payload[7] = seq >> 8;
+    adv_payload[8] = batt;
+    adv_payload[9] = impact_dg;
+
+    /* Sem HMAC válido o pacote não vai ao ar: a API recusaria o alerta.
+     * hmac_key = shared_secret importada uma vez com psa_import_key()
+     * (tipo PSA_KEY_TYPE_HMAC, uso PSA_KEY_USAGE_SIGN_MESSAGE). */
+    uint8_t mac[32];
+    size_t mac_len;
+    if (psa_mac_compute(hmac_key, PSA_ALG_HMAC(PSA_ALG_SHA_256),
+                        adv_payload, 10, mac, sizeof(mac), &mac_len) != PSA_SUCCESS) {
+        return -EIO;
+    }
+    memcpy(&adv_payload[10], mac, 4);
+
+    adv_mfg_buf[0] = SYSCARE_COMPANY_ID & 0xFF;   /* little-endian */
+    adv_mfg_buf[1] = SYSCARE_COMPANY_ID >> 8;
+    memcpy(&adv_mfg_buf[2], adv_payload, sizeof(adv_payload));
+    return 0;
+}
+
+static const struct bt_data ad[] = {
+    BT_DATA_BYTES(BT_DATA_FLAGS, BT_LE_AD_NO_BREDR),
+    BT_DATA(BT_DATA_MANUFACTURER_DATA, adv_mfg_buf, sizeof(adv_mfg_buf)),
+};
+
+/* repouso: não-conectável, 2000 ms — 0x0C80 = 3200 * 0,625 ms.
+ * (BT_GAP_ADV_SLOW_INT_MIN/MAX valem 1,0–1,2 s, não 2 s.) */
+#define ADV_IDLE  BT_LE_ADV_PARAM(BT_LE_ADV_OPT_USE_IDENTITY, 0x0C80, 0x0CD0, NULL)
+
+/* emergência: 100 ms — 0x00A0 = 160 * 0,625 ms */
+#define ADV_ALERT BT_LE_ADV_PARAM(BT_LE_ADV_OPT_USE_IDENTITY, 0x00A0, 0x00B0, NULL)
+```
+
+O `bt_le_adv_start()` copia os dados para o controlador: alterar o
+`adv_mfg_buf` depois não muda o que vai ao ar. Para trocar só os dados (novo
+evento, bateria), monte o pacote de novo e chame `bt_le_adv_update_data()`.
+Para trocar de intervalo, `bt_le_adv_stop()` seguido de `bt_le_adv_start()` com o
+outro parâmetro.
+
+Uma versão completa e comentada deste esqueleto, que anuncia o heartbeat, está
+em [`firmware/teste_ble/`](../../firmware/teste_ble/) — `src/main.c`, com o
+`prj.conf` das opções de Bluetooth e PSA Crypto. Compila no NCS v3.4.1 para a
+placa `xiao_ble`.
+
+## 8. Teste sem hardware
+
+O arquivo [`tests/test_alerts.py`](../tests/test_alerts.py) tem
+`build_raw_payload()`, que monta e assina o payload em Python exatamente como o
+firmware deve fazer. Use-o para validar a API antes de a pulseira existir — e,
+depois, para conferir byte a byte se o firmware está assinando certo.
