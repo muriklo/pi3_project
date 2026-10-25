@@ -22,6 +22,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
 #include <zephyr/sys/util.h>
+#include <zephyr/logging/log.h>
 
 #include <zephyr/bluetooth/bluetooth.h>
 #include <zephyr/bluetooth/hci.h>
@@ -126,33 +127,33 @@ static uint8_t adv_mfg_buf[16];
  * ========================================================= */
 
 static int syscare_build_payload(
-    uint8_t event,
-    uint16_t seq,
-    uint8_t batt,
-    uint8_t impact_dg,
-    uint16_t fall_id)
+                                uint8_t event,
+                                uint16_t seq,
+                                uint8_t batt,
+                                uint8_t impact_dg,
+                                uint16_t fall_id)
 {
     memset(adv_payload, 0, sizeof(adv_payload));
 
-    /* Byte 0: versao do protocolo */
+    // Byte 0: versao do protocolo=
     adv_payload[0] = SYSCARE_PROTO_VER;
 
-    /* Bytes 1 a 4: identificador da pulseira */
+    // Bytes 1 a 4: identificador da pulseira
     memcpy(&adv_payload[1],
            device_ble_id,
            sizeof(device_ble_id));
 
-    /* Byte 5: tipo do evento */
+    // Byte 5: tipo do evento 
     adv_payload[5] = event;
 
-    /* Bytes 6 e 7: sequencia little-endian */
+    // Bytes 6 e 7: sequencia little-endian 
     adv_payload[6] = (uint8_t)(seq & 0xFF);
     adv_payload[7] = (uint8_t)((seq >> 8) & 0xFF);
 
-    /* Byte 8: bateria */
+    // Byte 8: bateria 
     adv_payload[8] = batt;
 
-    /* Byte 9: impacto */
+    // Byte 9: impacto 
     adv_payload[9] = impact_dg;
 
     /*
@@ -182,15 +183,26 @@ static int syscare_build_payload(
  * Impressao do payload (so para imprimir na tela)
  * ========================================================= */
 
+// static void syscare_print_payload(void)
+// {
+//     printk("Payload SysCare:");
+
+//     for (size_t i = 0; i < sizeof(adv_payload); i++) {
+//         printk(" %02X", adv_payload[i]);
+//     }
+
+//     printk("\n");
+// }
+
+LOG_MODULE_REGISTER(syscare, LOG_LEVEL_INF);
+
 static void syscare_print_payload(void)
 {
-    printk("Payload SysCare:");
-
-    for (size_t i = 0; i < sizeof(adv_payload); i++) {
-        printk(" %02X", adv_payload[i]);
-    }
-
-    printk("\n");
+    LOG_HEXDUMP_INF(
+        adv_payload,
+        sizeof(adv_payload),
+        "Payload SysCare"
+    );
 }
 
 /* =========================================================
