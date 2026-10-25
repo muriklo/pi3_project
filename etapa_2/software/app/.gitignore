@@ -46,3 +46,7 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Firebase: cada um baixa o seu no console (push FCM, Secao 5.6 do README)
+/android/app/google-services.json
+/ios/Runner/GoogleService-Info.plist

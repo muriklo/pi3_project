@@ -1,0 +1,12 @@
+name: syscare_protocol
+description: >-
+  Protocolo BLE do SysCare no app: decodificacao dos 14 bytes do anuncio,
+  classificacao e deduplicacao. Dart puro, sem dependencia de Flutter.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+
+dev_dependencies:
+  test: ^1.25.0

@@ -110,6 +110,13 @@ class PreferenciasReceptor {
         jsonEncode(contatos.map((bleId, lista) => MapEntry(bleId, [for (final c in lista) c.paraJson()]))),
       );
 
+  static const _push = 'push_token_id';
+
+  /// Id do token FCM deste celular na API, para remove-lo no logout.
+  String? get pushId => _prefs.getString(_push);
+
+  Future<void> salvarPushId(String? id) => id == null ? _prefs.remove(_push) : _prefs.setString(_push, id);
+
   Future<void> limpar() async {
     await _prefs.remove(_escutar);
     await _prefs.remove(_pulseiras);

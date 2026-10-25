@@ -33,6 +33,10 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 Swagger em <http://localhost:8000/docs>, gerado automaticamente pelo FastAPI [1].
 Sem Firebase Cloud Messaging [2] configurado a API sobe igual: os alertas saem no log em vez de virarem push (`"push": "console"` em
 `/health`), o que permite desenvolver o app antes de existir conta no Firebase.
+Para ativar o push: no console do Firebase, em Configurações do projeto → Contas de serviço,
+gere a chave privada e aponte `SYSCARE_FCM_CREDENTIALS_FILE` para o JSON baixado (fora do
+repositório). No Android o push vai só com dados, para o app tocar a mesma sirene do alarme local
+(Seção 5.6 do [README do app](../app/README.md)).
 
 ```bash
 pytest -q

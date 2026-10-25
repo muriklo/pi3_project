@@ -71,6 +71,10 @@ def build_message(alert: Alert, device: Device) -> NotificationMessage:
         else str(alert.event_type),
         "occurred_at": alert.occurred_at.isoformat(),
         "wearer_name": who,
+        # O celular que ouviu o anuncio ja esta tocando: com (ble_id, seq) o app
+        # reconhece o proprio evento e nao alarma duas vezes.
+        "ble_id": device.ble_id,
+        "seq": str(alert.seq),
         "escalation_round": str(alert.escalation_round),
         "click_action": "FLUTTER_NOTIFICATION_CLICK",
     }

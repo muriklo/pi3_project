@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../aplicacao/providers.dart';
+import '../../aplicacao/push.dart';
 import '../../aplicacao/receptor.dart';
 import '../../dominio/modelos.dart';
 import '../comum.dart';
@@ -25,6 +26,7 @@ class AlertaTela extends ConsumerWidget {
     final alertaId = id ?? local?.alertaId;
     final remoto = alertaId == null ? null : ref.watch(alertaProvider(alertaId));
     final alerta = remoto?.value;
+    final sirenePush = alertaId != null && (ref.watch(sirenePushProvider(alertaId)).value ?? false);
 
     // App reaberto pela notificacao depois de ter sido encerrado: o alarme
     // continua tocando, mas o estado dele se perdeu com o processo.
@@ -57,7 +59,7 @@ class AlertaTela extends ConsumerWidget {
               ErroCarregar(erro: remoto.error!, tentarDeNovo: () => ref.invalidate(alertaProvider(alertaId!))),
             if (alerta != null) _SituacaoServidor(alerta),
             const SizedBox(height: 24),
-            ..._acoes(context, ref, local, alerta, alertaId, cores),
+            ..._acoes(context, ref, local, alerta, alertaId, sirenePush, cores),
           ],
         ),
       ),
@@ -70,6 +72,7 @@ class AlertaTela extends ConsumerWidget {
     AlarmeLocal? local,
     Alerta? alerta,
     String? alertaId,
+    bool sirenePush,
     ColorScheme cores,
   ) {
     final receptor = ref.read(receptorProvider.notifier);
@@ -79,11 +82,22 @@ class AlertaTela extends ConsumerWidget {
       ref.invalidate(alertasProvider);
     }
 
+    // A sirene que veio pelo push, e nao pelo radio deste celular.
+    Future<void> silenciarPush() async {
+      if (alertaId == null) return;
+      await ref.read(alarmeProvider).silenciar(idDoAlerta(alertaId));
+      ref.invalidate(sirenePushProvider(alertaId));
+    }
+
+    final sireneLocal = local != null && !local.silenciado;
     return [
-      if (local != null && !local.silenciado) ...[
+      if (sireneLocal || sirenePush) ...[
         FilledButton.icon(
           style: FilledButton.styleFrom(backgroundColor: corEmergencia),
-          onPressed: () => receptor.silenciar(local.chave),
+          onPressed: () async {
+            if (sireneLocal) await receptor.silenciar(local.chave);
+            await silenciarPush();
+          },
           icon: const Icon(Icons.volume_off),
           label: const Text('Silenciar sirene'),
         ),
@@ -100,6 +114,7 @@ class AlertaTela extends ConsumerWidget {
           onPressed: () => executar(context, () async {
             await api.confirmar(alerta.id);
             if (local != null) await receptor.silenciar(local.chave);
+            await silenciarPush();
             recarregar();
           }, sucesso: 'Os outros responsáveis foram avisados de que você está indo.'),
           icon: const Icon(Icons.directions_run),
@@ -115,6 +130,7 @@ class AlertaTela extends ConsumerWidget {
             final ok = await executar(context, () => api.encerrar(alerta.id, falsoAlarme: falsoAlarme));
             if (!ok) return;
             if (local != null) await receptor.dispensar(local.chave);
+            await silenciarPush();
             recarregar();
             if (context.mounted && local != null) Navigator.of(context).maybePop();
           },
