@@ -44,3 +44,34 @@
 &uart0 {
 	status = "disabled";	/* P1.11 (D6) = ACC_VDD; o console e USB CDC */
 };
+
+&i2c1 {
+	status = "disabled";	/* P0.04 (D4) = ACC_INT2 */
+};
+
+/* =========================================================
+ * Acelerometro no barramento SPI (spi2 = xiao_spi)
+ *
+ * SCK/MOSI/MISO: pinos padrao da placa (D8/D10/D9).
+ * ========================================================= */
+
+&xiao_spi {
+	cs-gpios = <&xiao_d 0 GPIO_ACTIVE_LOW>;		/* D0 */
+
+	accel: iim42351@0 {
+		compatible = "invensense,iim42351";
+		reg = <0>;				/* indice no cs-gpios */
+		spi-max-frequency = <1000000>;		/* 1 MHz com fios; ate 8 MHz no spi2 */
+		spi-cpol;				/* modo 3 */
+		spi-cpha;
+
+		int1-gpios = <&xiao_d 2 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;	/* D2 */
+		int2-gpios = <&xiao_d 4 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;	/* D4 */
+
+		vdd-supply = <&acc_vdd>;
+		vddio-supply = <&acc_vddio>;
+
+		accel-hz = <100>;
+		accel-fs = <4>;
+	};
+};
