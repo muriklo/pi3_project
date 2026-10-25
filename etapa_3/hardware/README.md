@@ -13,8 +13,10 @@ O layout da PCB foi desenvolvido considerando a disposição dos componentes ele
 Esta etapa é importante para organizar os componentes e definir as trilhas de cobre que realizarão as conexões elétricas entre eles.
 
 <div align="center">
-  <img src="../img/" alt="" width="70%">
-  <p>Figura 1 - Layout Projetado</p>
+  <img src="../img/schematics_all.png" alt="" width="70%">
+  <img src="../img/pcb_sch_2d.png" alt="" width="70%">
+  <img src="../img/pcb_sch.png" alt="" width="70%">
+  <p>Figura 1 - Layout Projetado da Pulseira Syscare</p>
 </div>
 
 ## 3. Fabricação da PCB
@@ -59,9 +61,7 @@ O lixamento foi realizado para preparar o tamanho correto e cortes laterais para
   <p>Figura 5 - Adequação da placa por lixamento</p>
 </div>
 
-## 4. Próximas etapas
+## 4. 
 
-Após a fabricação da PCB, as próximas atividades envolvem a inspeção das trilhas, a verificação da continuidade elétrica e a preparação para a montagem dos componentes eletrônicos.
 
-As etapas posteriores deverão ser documentadas conforme o avanço do desenvolvimento do hardware.
 
