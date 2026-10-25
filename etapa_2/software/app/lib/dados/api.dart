@@ -112,6 +112,14 @@ class ApiSysCare {
         usuario: Usuario.deJson(j['user'] as Map<String, dynamic>),
       );
 
+  /// Registra o token FCM deste celular. Devolve o id, usado no logout.
+  Future<String> registrarPush(String token, String plataforma) => _chamar(
+        () => _dio.post('/v1/auth/push-tokens', data: {'token': token, 'platform': plataforma}),
+        (j) => (j as Map)['id'] as String,
+      );
+
+  Future<void> removerPush(String id) => _chamar(() => _dio.delete('/v1/auth/push-tokens/$id'), (_) {});
+
   // --------------------------------------------------------- pulseiras ----
   Future<List<Pulseira>> pulseiras() => _chamar(
         () => _dio.get('/v1/devices'),

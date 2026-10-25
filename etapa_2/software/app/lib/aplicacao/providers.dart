@@ -8,10 +8,12 @@ import '../dados/api.dart';
 import '../dados/armazenamento.dart';
 import '../dados/fila_envio.dart';
 import '../dados/localizacao.dart';
+import '../dados/push.dart';
 import '../dados/sms_celular.dart';
 import '../dados/varredura_ble.dart';
 import '../dominio/modelos.dart';
 import 'envio.dart';
+import 'push.dart';
 import 'receptor.dart';
 import 'telemetria.dart';
 
@@ -32,6 +34,9 @@ final varreduraProvider = Provider((ref) => VarreduraBle());
 final localizacaoProvider = Provider((ref) => Localizacao());
 final smsCelularProvider = Provider((ref) => SmsCelular());
 final agregadorProvider = Provider((ref) => AgregadorTelemetria());
+
+/// Sobrescrito em main.dart com o Firebase iniciado; o padrao fica inativo.
+final pushProvider = Provider((ref) => PushFirebase());
 
 /// Endereco da API: o padrao do build, ou o digitado na tela de entrada.
 final servidorProvider = NotifierProvider<ServidorControle, String>(ServidorControle.new);
@@ -76,11 +81,14 @@ class SessaoControle extends Notifier<SessaoSalva?> {
     await ref.read(cofreProvider).salvar(sessao);
     state = sessao;
     unawaited(ref.read(rotinasProvider).drenarFila());
+    unawaited(ref.read(registroPushProvider).registrar());
   }
 
   /// Saida pedida pelo usuario: para a escuta e esquece as pulseiras.
   Future<void> sair() async {
     await ref.read(receptorProvider.notifier).desligar();
+    // Antes de apagar a sessao: o DELETE do token precisa dela.
+    await ref.read(registroPushProvider).remover();
     await ref.read(preferenciasProvider).limpar();
     await ref.read(cofreProvider).apagar();
     state = null;
