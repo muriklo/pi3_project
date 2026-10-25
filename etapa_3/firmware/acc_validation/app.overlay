@@ -1,0 +1,46 @@
+/*
+ * SysCare - Overlay do devicetree para a XIAO nRF52840
+ *
+ * Unico lugar da pinagem e da alimentacao do acelerometro.
+ * Pode ser editado pelo editor visual do nRF Connect.
+ *
+ * Sinais usam o conector da placa (xiao_d): <&xiao_d 2 ...> = pino D2.
+ * A alimentacao usa &gpio0/&gpio1 direto, porque o conector so repassa
+ * os 6 bits baixos das flags e apagaria o NRF_GPIO_DRIVE_H0H1.
+ */
+
+#include <zephyr/dt-bindings/gpio/nordic-nrf-gpio.h>
+
+/* =========================================================
+ * Alimentacao do acelerometro
+ *
+ * Mesmo padrao que a XIAO Sense usa para o IMU dela.
+ * regulator-boot-on: ligados no boot, antes do SPI
+ * (ver CONFIG_REGULATOR_FIXED_INIT_PRIORITY no prj.conf).
+ * ========================================================= */
+
+/ {
+	acc_vdd: acc-vdd {
+		compatible = "regulator-fixed";
+		regulator-name = "ACC_VDD";
+		enable-gpios = <&gpio1 11 (GPIO_ACTIVE_HIGH | NRF_GPIO_DRIVE_H0H1)>;	/* D6 */
+		regulator-boot-on;
+		startup-delay-us = <3000>;
+	};
+
+	acc_vddio: acc-vddio {
+		compatible = "regulator-fixed";
+		regulator-name = "ACC_VDDIO";
+		enable-gpios = <&gpio0 29 (GPIO_ACTIVE_HIGH | NRF_GPIO_DRIVE_H0H1)>;	/* D3 */
+		regulator-boot-on;
+		startup-delay-us = <3000>;
+	};
+};
+
+/* =========================================================
+ * Perifericos da placa que ocupam pinos do acelerometro
+ * ========================================================= */
+
+&uart0 {
+	status = "disabled";	/* P1.11 (D6) = ACC_VDD; o console e USB CDC */
+};
