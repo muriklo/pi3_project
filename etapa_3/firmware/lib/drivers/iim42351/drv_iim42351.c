@@ -5,13 +5,15 @@
  * "invensense,iim42351") e confere em tempo de compilacao as premissas
  * de hardware.
  *
- * Fase 1: esqueleto do componente.
+ * Fase 1: esqueleto do componente + mapa de registradores.
  */
 
 #define DT_DRV_COMPAT invensense_iim42351
 
 #include <zephyr/devicetree.h>
 #include <zephyr/sys/util.h>
+
+#include "drv_iim42351_reg.h"
 
 /* =========================================================
  * Premissas de hardware conferidas no build
