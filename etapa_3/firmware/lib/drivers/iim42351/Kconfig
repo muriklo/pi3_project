@@ -1,0 +1,11 @@
+# SysCare - driver do acelerometro IIM-42351
+
+menuconfig SYSCARE_IIM42351
+	bool "Driver do acelerometro IIM-42351"
+	default y
+	depends on DT_HAS_INVENSENSE_IIM42351_ENABLED
+	select SPI
+	help
+	  Driver proprio do SysCare para o acelerometro IIM-42351 (SPI).
+	  E habilitado automaticamente quando o devicetree tem um no com
+	  compatible "invensense,iim42351" e status "okay".
