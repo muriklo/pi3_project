@@ -16,6 +16,9 @@ typedef struct {
     int (*init)(acc_event_cb_t cb);
     int (*config)(acc_config_t *cfg);
     int (*read)(acc_sample_t *sample);
+    int (*buffer_start)(uint16_t watermark);
+    int (*buffer_read)(acc_sample_t *buf, size_t max, size_t *count);
+    int (*buffer_stop)(void);
 } acc_ops_t;
 
 #if defined(CONFIG_SYSCARE_IIM42351)
@@ -26,6 +29,9 @@ static const acc_ops_t ops = {
     .init = drv_iim42351_init,
     .config = drv_iim42351_config,
     .read = drv_iim42351_read,
+    .buffer_start = drv_iim42351_buffer_start,
+    .buffer_read = drv_iim42351_buffer_read,
+    .buffer_stop = drv_iim42351_buffer_stop,
 };
 
 #else
@@ -57,4 +63,31 @@ int srv_accelerometer_read(acc_sample_t *sample)
     }
 
     return ops.read(sample);
+}
+
+int srv_accelerometer_buffer_start(uint16_t watermark)
+{
+    if (ops.buffer_start == NULL) {
+        return -ENOTSUP;
+    }
+
+    return ops.buffer_start(watermark);
+}
+
+int srv_accelerometer_buffer_read(acc_sample_t *buf, size_t max, size_t *count)
+{
+    if (ops.buffer_read == NULL) {
+        return -ENOTSUP;
+    }
+
+    return ops.buffer_read(buf, max, count);
+}
+
+int srv_accelerometer_buffer_stop(void)
+{
+    if (ops.buffer_stop == NULL) {
+        return -ENOTSUP;
+    }
+
+    return ops.buffer_stop();
 }

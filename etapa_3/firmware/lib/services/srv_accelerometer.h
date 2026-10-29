@@ -9,6 +9,9 @@
 #ifndef SRV_ACCELEROMETER_H_
 #define SRV_ACCELEROMETER_H_
 
+#include <stddef.h>
+#include <stdint.h>
+
 #include "acc_types.h"
 
 /*
@@ -26,5 +29,19 @@ int srv_accelerometer_config(acc_config_t *cfg);
 
 /* Le uma amostra em mg; -EAGAIN enquanto ainda nao ha amostra valida */
 int srv_accelerometer_read(acc_sample_t *sample);
+
+/*
+ * Liga a leitura em buffer (FIFO do sensor). watermark: quantas amostras
+ * acumular antes de gerar o evento ACC_EVENT_FIFO_WATERMARK (0 = sem
+ * evento). Se o hardware nao tiver pino de interrupcao, nao ha evento:
+ * chamar srv_accelerometer_buffer_read periodicamente.
+ */
+int srv_accelerometer_buffer_start(uint16_t watermark);
+
+/* Le ate max amostras do buffer; count recebe quantas foram lidas */
+int srv_accelerometer_buffer_read(acc_sample_t *buf, size_t max, size_t *count);
+
+/* Desliga a leitura em buffer */
+int srv_accelerometer_buffer_stop(void);
 
 #endif /* SRV_ACCELEROMETER_H_ */
