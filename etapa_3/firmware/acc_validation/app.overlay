@@ -66,7 +66,11 @@
 		spi-cpha;
 
 		int1-gpios = <&xiao_d 2 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;	/* D2 */
-		int2-gpios = <&xiao_d 4 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;	/* D4 */
+		/*
+		 * INT2 sem fio no momento: sem esta propriedade, o watermark da
+		 * FIFO vai para o INT1. Descomentar quando o INT2 for ligado.
+		 */
+		/* int2-gpios = <&xiao_d 4 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>; */	/* D4 */
 
 		vdd-supply = <&acc_vdd>;
 		vddio-supply = <&acc_vddio>;
