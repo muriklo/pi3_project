@@ -5,6 +5,7 @@
 
 menu "SysCare"
 
+rsource "hal/Kconfig"
 rsource "drivers/Kconfig"
 
 endmenu
