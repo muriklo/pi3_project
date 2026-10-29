@@ -10,6 +10,25 @@
 
 #include <stdint.h>
 
+/* Modo de operacao */
+typedef enum {
+    ACC_MODE_OFF,
+    ACC_MODE_LOW_POWER,
+    ACC_MODE_LOW_NOISE,
+} acc_mode_t;
+
+/*
+ * Configuracao. Na chamada vai o pedido; na volta, o que foi aplicado:
+ * o driver usa o menor valor suportado que atende o pedido.
+ * odr_hz e inteiro: frequencias fracionarias aparecem truncadas
+ * (ex.: 12 = 12,5 Hz, 6 = 6,25 Hz), como no devicetree.
+ */
+typedef struct {
+    uint8_t range_g;        /* fundo de escala: +-range_g */
+    uint16_t odr_hz;        /* taxa de amostragem */
+    acc_mode_t mode;
+} acc_config_t;
+
 /* Eventos detectados pelo sensor */
 typedef enum {
     ACC_EVENT_FREEFALL,

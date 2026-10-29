@@ -77,8 +77,109 @@ static const struct iim42351_config cfg = {
     .vddio = SUPPLY_OR_NULL(vddio_supply),
 };
 
+/* Configuracao inicial (accel-mode: indice 0 = "low-noise", 1 = "low-power") */
+#define DT_ACC_MODE                                                     \
+    ((DT_INST_ENUM_IDX(0, accel_mode) == 0) ? ACC_MODE_LOW_NOISE : ACC_MODE_LOW_POWER)
+
 static acc_event_cb_t event_cb;
 static bool initialized;
+static uint8_t cur_fs_sel;
+static acc_mode_t cur_mode = ACC_MODE_OFF;
+
+/* =========================================================
+ * Traducao dos valores genericos para os codigos do IIM-42351
+ * ========================================================= */
+
+/* Fundos de escala suportados, do menor para o maior (14.31) */
+static const struct {
+    uint8_t range_g;
+    uint8_t fs_sel;
+} fs_table[] = {
+    { 2,  IIM42351_ACCEL_FS_SEL_2G },
+    { 4,  IIM42351_ACCEL_FS_SEL_4G },
+    { 8,  IIM42351_ACCEL_FS_SEL_8G },
+    { 16, IIM42351_ACCEL_FS_SEL_16G },
+};
+
+/* ODRs suportados, do menor para o maior, e os modos em que valem (14.31) */
+#define ODR_LP  BIT(0)
+#define ODR_LN  BIT(1)
+
+static const struct {
+    uint16_t hz;            /* truncado: 1 = 1,5625 Hz, 12 = 12,5 Hz */
+    uint8_t code;
+    uint8_t modes;
+} odr_table[] = {
+    { 1,    IIM42351_ACCEL_ODR_1_5625HZ, ODR_LP },
+    { 3,    IIM42351_ACCEL_ODR_3_125HZ,  ODR_LP },
+    { 6,    IIM42351_ACCEL_ODR_6_25HZ,   ODR_LP },
+    { 12,   IIM42351_ACCEL_ODR_12_5HZ,   ODR_LP | ODR_LN },
+    { 25,   IIM42351_ACCEL_ODR_25HZ,     ODR_LP | ODR_LN },
+    { 50,   IIM42351_ACCEL_ODR_50HZ,     ODR_LP | ODR_LN },
+    { 100,  IIM42351_ACCEL_ODR_100HZ,    ODR_LP | ODR_LN },
+    { 200,  IIM42351_ACCEL_ODR_200HZ,    ODR_LP | ODR_LN },
+    { 500,  IIM42351_ACCEL_ODR_500HZ,    ODR_LP | ODR_LN },
+    { 1000, IIM42351_ACCEL_ODR_1000HZ,   ODR_LN },
+    { 2000, IIM42351_ACCEL_ODR_2000HZ,   ODR_LN },
+    { 4000, IIM42351_ACCEL_ODR_4000HZ,   ODR_LN },
+    { 8000, IIM42351_ACCEL_ODR_8000HZ,   ODR_LN },
+};
+
+/* Menor fundo de escala >= o pedido (ou o maior) */
+static size_t pick_fs(uint8_t range_g)
+{
+    for (size_t i = 0; i < ARRAY_SIZE(fs_table); i++) {
+        if (fs_table[i].range_g >= range_g) {
+            return i;
+        }
+    }
+
+    return ARRAY_SIZE(fs_table) - 1;
+}
+
+/* Menor ODR >= o pedido entre os validos no modo (ou o maior do modo) */
+static size_t pick_odr(uint16_t hz, acc_mode_t mode)
+{
+    /* Desligado: usa a tabela do LN, so para deixar um valor valido */
+    uint8_t need = (mode == ACC_MODE_LOW_POWER) ? ODR_LP : ODR_LN;
+    size_t last = 0;
+
+    for (size_t i = 0; i < ARRAY_SIZE(odr_table); i++) {
+        if (!(odr_table[i].modes & need)) {
+            continue;
+        }
+        last = i;
+        if (odr_table[i].hz >= hz) {
+            return i;
+        }
+    }
+
+    return last;
+}
+
+static uint8_t accel_mode_code(acc_mode_t mode)
+{
+    switch (mode) {
+    case ACC_MODE_LOW_POWER:
+        return IIM42351_ACCEL_MODE_LP;
+    case ACC_MODE_LOW_NOISE:
+        return IIM42351_ACCEL_MODE_LN;
+    default:
+        return IIM42351_ACCEL_MODE_OFF;
+    }
+}
+
+static const char *mode_name(acc_mode_t mode)
+{
+    switch (mode) {
+    case ACC_MODE_LOW_POWER:
+        return "low-power";
+    case ACC_MODE_LOW_NOISE:
+        return "low-noise";
+    default:
+        return "off";
+    }
+}
 
 /* =========================================================
  * Alimentacao
@@ -135,11 +236,48 @@ static int power_on(void)
 }
 
 /* =========================================================
+ * Configuracao
+ * ========================================================= */
+
+static int apply_config(acc_config_t *cfg)
+{
+    size_t fs;
+    size_t odr;
+    int err;
+
+    if (cfg == NULL || cfg->mode > ACC_MODE_LOW_NOISE) {
+        return -EINVAL;
+    }
+
+    fs = pick_fs(cfg->range_g);
+    odr = pick_odr(cfg->odr_hz, cfg->mode);
+
+    err = iim42351_setup_accel(fs_table[fs].fs_sel, odr_table[odr].code,
+                               accel_mode_code(cfg->mode));
+    if (err) {
+        return err;
+    }
+
+    cur_fs_sel = fs_table[fs].fs_sel;
+    cur_mode = cfg->mode;
+
+    cfg->range_g = fs_table[fs].range_g;
+    cfg->odr_hz = odr_table[odr].hz;
+
+    return 0;
+}
+
+/* =========================================================
  * API
  * ========================================================= */
 
 int drv_iim42351_init(acc_event_cb_t cb)
 {
+    acc_config_t initial = {
+        .range_g = DT_INST_PROP(0, accel_fs),
+        .odr_hz = DT_INST_PROP(0, accel_hz),
+        .mode = DT_ACC_MODE,
+    };
     int err;
 
     if (initialized) {
@@ -163,8 +301,26 @@ int drv_iim42351_init(acc_event_cb_t cb)
         return err;
     }
 
+    err = apply_config(&initial);
+    if (err) {
+        LOG_ERR("Falha ao aplicar a config inicial (%d)", err);
+        return err;
+    }
+
+    LOG_INF("Config inicial (devicetree): +-%u g, %u Hz, %s",
+            initial.range_g, initial.odr_hz, mode_name(initial.mode));
+
     event_cb = cb;
     initialized = true;
 
     return 0;
+}
+
+int drv_iim42351_config(acc_config_t *cfg)
+{
+    if (!initialized) {
+        return -ENODEV;
+    }
+
+    return apply_config(cfg);
 }
