@@ -55,5 +55,11 @@
   "C_Cpp_Runner.useLeakSanitizer": false,
   "C_Cpp_Runner.showCompilationTime": false,
   "C_Cpp_Runner.useLinkTimeOptimization": false,
-  "C_Cpp_Runner.msvcSecureNoWarnings": false
+  "C_Cpp_Runner.msvcSecureNoWarnings": false,
+  "nrf-connect.applications": [
+    "${workspaceFolder}\\etapa_3\\firmware",
+    "${workspaceFolder}\\etapa_3\\accel_trig",
+    "${workspaceFolder}\\etapa_3\\firmware\\acc_validation"
+  ],
+  "cmake.sourceDirectory": "C:/Projetos/2026-2/PI3/Projeto/pi3_project/etapa_3/firmware"
 }
