@@ -7,6 +7,7 @@
  */
 
 #include <errno.h>
+#include <stdbool.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
@@ -104,6 +105,48 @@ int iim42351_setup_init(void)
      */
 
     LOG_INF("IIM-42351 inicializado");
+
+    return 0;
+}
+
+int iim42351_setup_accel(uint8_t fs_sel, uint8_t odr_code, uint8_t accel_mode)
+{
+    uint8_t pwr;
+    bool was_off;
+    int err;
+
+    err = iim42351_reg_read(IIM42351_REG_PWR_MGMT0, &pwr, 1);
+    if (err) {
+        return err;
+    }
+
+    /* ACCEL_MODE 0 e 1 desligam o acelerometro (14.30) */
+    was_off = FIELD_GET(IIM42351_ACCEL_MODE, pwr) < IIM42351_ACCEL_MODE_LP;
+
+    /* ACCEL_CONFIG0: o bit 4 e reservado, por isso a mascara */
+    err = iim42351_reg_update(IIM42351_REG_ACCEL_CONFIG0,
+                              IIM42351_ACCEL_FS_SEL | IIM42351_ACCEL_ODR,
+                              FIELD_PREP(IIM42351_ACCEL_FS_SEL, fs_sel) |
+                              FIELD_PREP(IIM42351_ACCEL_ODR, odr_code));
+    if (err) {
+        return err;
+    }
+
+    /*
+     * Modo LP: o ACCEL_LP_CLK_SEL fica no padrao do reset (0, oscilador
+     * wake-up), que e o usado nas sequencias do datasheet; o INTF_CONFIG1
+     * nao pode ser escrito com o sensor ligado (13.6).
+     */
+    err = iim42351_reg_update(IIM42351_REG_PWR_MGMT0, IIM42351_ACCEL_MODE,
+                              FIELD_PREP(IIM42351_ACCEL_MODE, accel_mode));
+    if (err) {
+        return err;
+    }
+
+    /* Saindo de OFF: nenhuma escrita de registrador por 200 us (14.30) */
+    if (was_off && accel_mode != IIM42351_ACCEL_MODE_OFF) {
+        k_usleep(IIM42351_ACCEL_START_US);
+    }
 
     return 0;
 }
