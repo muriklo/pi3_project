@@ -28,6 +28,12 @@ int iim42351_setup_init(void);
 int iim42351_setup_accel(uint8_t fs_sel, uint8_t odr_code, uint8_t accel_mode);
 
 /*
+ * Pinos INT1/INT2 do sensor: latched, push-pull, ativo alto (14.3).
+ * So mexe nos pinos indicados. Exige o acelerometro desligado (13.6).
+ */
+int iim42351_setup_int_pins(bool int1, bool int2);
+
+/*
  * Liga a FIFO em modo stream com o pacote 1 (acel + temp, 8 bytes) e
  * contagem em pacotes. watermark: nivel em pacotes (0 = sem watermark);
  * int_src_reg/int_src_bit: registrador e bit INT_SOURCE que rotea o

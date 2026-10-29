@@ -28,6 +28,7 @@
 #include "drv_iim42351_bus.h"
 #include "drv_iim42351_reg.h"
 #include "drv_iim42351_setup.h"
+#include "drv_iim42351_trigger.h"
 #include "hal_spi.h"
 
 LOG_MODULE_REGISTER(iim42351, CONFIG_SYSCARE_IIM42351_LOG_LEVEL);
@@ -322,6 +323,12 @@ int drv_iim42351_init(acc_event_cb_t cb)
         return err;
     }
 
+    /* Antes de ligar o acelerometro: INT_CONFIG so muda com ele desligado */
+    err = iim42351_trigger_init(cb);
+    if (err) {
+        return err;
+    }
+
     err = apply_config(&initial);
     if (err) {
         LOG_ERR("Falha ao aplicar a config inicial (%d)", err);
@@ -405,6 +412,10 @@ int drv_iim42351_buffer_start(uint16_t watermark)
 
     fifo_int_reg = 0;
     fifo_int_bit = 0;
+
+    if (watermark > 0 && iim42351_trigger_fifo_route(&fifo_int_reg, &fifo_int_bit) != 0) {
+        LOG_WRN("Sem pino de interrupcao no devicetree: ler a FIFO por polling");
+    }
 
     err = iim42351_setup_fifo_start(watermark, fifo_int_reg, fifo_int_bit);
     if (err) {
