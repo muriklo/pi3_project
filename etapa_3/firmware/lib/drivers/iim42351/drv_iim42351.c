@@ -82,10 +82,22 @@ static const struct iim42351_config cfg = {
 #define DT_ACC_MODE                                                     \
     ((DT_INST_ENUM_IDX(0, accel_mode) == 0) ? ACC_MODE_LOW_NOISE : ACC_MODE_LOW_POWER)
 
-static acc_event_cb_t event_cb;
 static bool initialized;
 static uint8_t cur_fs_sel;
 static acc_mode_t cur_mode = ACC_MODE_OFF;
+
+/*
+ * FIFO: pacotes que cabem nela (um fica reservado para a escrita, 6.3),
+ * maior watermark aceito e quantos pacotes o driver le por transacao SPI
+ */
+#define FIFO_PACKETS        (IIM42351_FIFO_SIZE / IIM42351_FIFO_PACKET1_SIZE)
+#define FIFO_WATERMARK_MAX  (FIFO_PACKETS - 2)
+#define FIFO_CHUNK_PACKETS  32
+
+static bool fifo_on;
+static uint16_t fifo_int_reg;       /* INT_SOURCE que rotea o watermark (0 = nenhum) */
+static uint8_t fifo_int_bit;
+static uint32_t fifo_discarded;     /* pacotes invalidos descartados desde o start */
 
 /* =========================================================
  * Traducao dos valores genericos para os codigos do IIM-42351
@@ -319,7 +331,6 @@ int drv_iim42351_init(acc_event_cb_t cb)
     LOG_INF("Config inicial (devicetree): +-%u g, %u Hz, %s",
             initial.range_g, initial.odr_hz, mode_name(initial.mode));
 
-    event_cb = cb;
     initialized = true;
 
     return 0;
@@ -368,6 +379,170 @@ int drv_iim42351_read(acc_sample_t *sample)
     sample->x_mg = raw_to_mg(raw[0]);
     sample->y_mg = raw_to_mg(raw[1]);
     sample->z_mg = raw_to_mg(raw[2]);
+
+    return 0;
+}
+
+/* =========================================================
+ * FIFO
+ * ========================================================= */
+
+int drv_iim42351_buffer_start(uint16_t watermark)
+{
+    int err;
+
+    if (!initialized) {
+        return -ENODEV;
+    }
+
+    if (fifo_on) {
+        return -EALREADY;
+    }
+
+    if (watermark > FIFO_WATERMARK_MAX) {
+        return -EINVAL;
+    }
+
+    fifo_int_reg = 0;
+    fifo_int_bit = 0;
+
+    err = iim42351_setup_fifo_start(watermark, fifo_int_reg, fifo_int_bit);
+    if (err) {
+        return err;
+    }
+
+    fifo_discarded = 0;
+    fifo_on = true;
+
+    return 0;
+}
+
+/* Le o FIFO_COUNTL antes do H: e a leitura do L que trava os 16 bits (14.16, 14.17) */
+static int fifo_count(uint16_t *packets)
+{
+    uint8_t high;
+    uint8_t low;
+    int err;
+
+    err = iim42351_reg_read(IIM42351_REG_FIFO_COUNTL, &low, 1);
+    if (err) {
+        return err;
+    }
+
+    err = iim42351_reg_read(IIM42351_REG_FIFO_COUNTH, &high, 1);
+    if (err) {
+        return err;
+    }
+
+    *packets = ((uint16_t)high << 8) | low;
+
+    return 0;
+}
+
+/*
+ * Pacote 1 (6.1): header, X, Y, Z (big-endian) e temperatura.
+ * Retorna 1 com amostra valida, 0 para descartar, -ENODATA se a FIFO
+ * acabou (header com HEADER_MSG).
+ */
+static int fifo_parse(const uint8_t *pkt, acc_sample_t *s)
+{
+    int16_t raw[3];
+
+    if (pkt[0] & IIM42351_FIFO_HEADER_MSG) {
+        return -ENODATA;
+    }
+
+    if (FIELD_GET(IIM42351_FIFO_HEADER_PACKET_FORMAT, pkt[0]) != IIM42351_FIFO_HEADER_FORMAT_P1) {
+        return 0;
+    }
+
+    for (size_t i = 0; i < ARRAY_SIZE(raw); i++) {
+        raw[i] = (int16_t)sys_get_be16(&pkt[1 + 2 * i]);
+        if (raw[i] == IIM42351_INVALID_SAMPLE) {
+            return 0;
+        }
+    }
+
+    s->x_mg = raw_to_mg(raw[0]);
+    s->y_mg = raw_to_mg(raw[1]);
+    s->z_mg = raw_to_mg(raw[2]);
+
+    return 1;
+}
+
+int drv_iim42351_buffer_read(acc_sample_t *buf, size_t max, size_t *count)
+{
+    uint8_t raw[FIFO_CHUNK_PACKETS * IIM42351_FIFO_PACKET1_SIZE];
+    uint16_t available;
+    size_t to_read;
+    size_t n = 0;
+    int err;
+
+    if (!initialized || !fifo_on) {
+        return -ENODEV;
+    }
+
+    if (buf == NULL || count == NULL) {
+        return -EINVAL;
+    }
+
+    *count = 0;
+
+    err = fifo_count(&available);
+    if (err) {
+        return err;
+    }
+
+    /* Nunca le mais pacotes do que cabem no buffer de quem chama */
+    to_read = MIN((size_t)available, max);
+
+    while (to_read > 0) {
+        size_t chunk = MIN(to_read, (size_t)FIFO_CHUNK_PACKETS);
+
+        err = iim42351_reg_read(IIM42351_REG_FIFO_DATA, raw,
+                                chunk * IIM42351_FIFO_PACKET1_SIZE);
+        if (err) {
+            break;
+        }
+
+        for (size_t i = 0; i < chunk; i++) {
+            int ret = fifo_parse(&raw[i * IIM42351_FIFO_PACKET1_SIZE], &buf[n]);
+
+            if (ret == -ENODATA) {
+                to_read = chunk;    /* FIFO vazia: encerra depois deste bloco */
+                break;
+            }
+
+            if (ret == 1) {
+                n++;
+            } else {
+                fifo_discarded++;
+            }
+        }
+
+        to_read -= chunk;
+    }
+
+    *count = n;
+
+    return err;
+}
+
+int drv_iim42351_buffer_stop(void)
+{
+    int err;
+
+    if (!initialized || !fifo_on) {
+        return -ENODEV;
+    }
+
+    err = iim42351_setup_fifo_stop(fifo_int_reg, fifo_int_bit);
+    if (err) {
+        return err;
+    }
+
+    fifo_on = false;
+    LOG_INF("FIFO parada: %u pacotes invalidos descartados", (unsigned int)fifo_discarded);
 
     return 0;
 }

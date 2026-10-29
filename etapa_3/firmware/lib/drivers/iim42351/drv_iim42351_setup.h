@@ -8,6 +8,7 @@
 #ifndef DRV_IIM42351_SETUP_H_
 #define DRV_IIM42351_SETUP_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 
 /*
@@ -25,5 +26,17 @@ int iim42351_setup_init(void);
  * sem escritas exigido pelo PWR_MGMT0 (14.30).
  */
 int iim42351_setup_accel(uint8_t fs_sel, uint8_t odr_code, uint8_t accel_mode);
+
+/*
+ * Liga a FIFO em modo stream com o pacote 1 (acel + temp, 8 bytes) e
+ * contagem em pacotes. watermark: nivel em pacotes (0 = sem watermark);
+ * int_src_reg/int_src_bit: registrador e bit INT_SOURCE que rotea o
+ * watermark para o pino (int_src_reg 0 = sem interrupcao).
+ * Desliga o acelerometro durante a configuracao (13.6) e restaura o modo.
+ */
+int iim42351_setup_fifo_start(uint16_t watermark, uint16_t int_src_reg, uint8_t int_src_bit);
+
+/* Desfaz o iim42351_setup_fifo_start (mesmos int_src_reg/int_src_bit) */
+int iim42351_setup_fifo_stop(uint16_t int_src_reg, uint8_t int_src_bit);
 
 #endif /* DRV_IIM42351_SETUP_H_ */

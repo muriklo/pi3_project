@@ -38,13 +38,14 @@ typedef struct {
 
 /* Eventos detectados pelo sensor */
 typedef enum {
-    ACC_EVENT_FREEFALL,
+    ACC_EVENT_FREEFALL,         /* queda livre */
+    ACC_EVENT_FIFO_WATERMARK,   /* FIFO chegou ao nivel pedido: hora de ler */
 } acc_event_type_t;
 
 typedef struct {
     acc_event_type_t type;
-    uint16_t duration_ms;   /* duracao da queda */
-    uint16_t height_cm;     /* altura estimada */
+    uint16_t duration_ms;   /* ACC_EVENT_FREEFALL: duracao da queda */
+    uint16_t height_cm;     /* ACC_EVENT_FREEFALL: altura estimada */
 } acc_event_t;
 
 /* Chamado fora de interrupcao (workqueue) quando ocorre um evento */
