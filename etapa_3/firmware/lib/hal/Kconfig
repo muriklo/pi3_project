@@ -1,0 +1,16 @@
+# SysCare - HAL (camada de abstracao do hardware)
+#
+# Os simbolos sao ocultos: cada driver seleciona o que usa.
+
+config SYSCARE_HAL
+	bool
+	help
+	  Habilitado quando algum componente da HAL e usado.
+
+config SYSCARE_HAL_SPI
+	bool
+	select SYSCARE_HAL
+	select SPI
+	help
+	  HAL SPI generica sobre spi_dt_spec. Selecionada pelos drivers que
+	  usam SPI.
