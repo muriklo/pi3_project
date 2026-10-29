@@ -1,0 +1,10 @@
+# SysCare - servicos
+
+config SYSCARE_SRV_ACCELEROMETER
+	bool "Servico do acelerometro"
+	default y
+	depends on SYSCARE_IIM42351
+	help
+	  API generica do acelerometro (srv_accelerometer_*), que chama o
+	  driver do modelo habilitado. Para outro modelo: acrescentar o driver
+	  aqui no "depends on" e a tabela dele no srv_accelerometer.c.

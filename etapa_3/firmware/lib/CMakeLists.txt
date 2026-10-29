@@ -9,3 +9,4 @@ zephyr_include_directories(include)
 
 add_subdirectory_ifdef(CONFIG_SYSCARE_HAL hal)
 add_subdirectory(drivers)
+add_subdirectory_ifdef(CONFIG_SYSCARE_SRV_ACCELEROMETER services)
