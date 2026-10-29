@@ -29,4 +29,11 @@ int drv_iim42351_init(acc_event_cb_t cb);
  */
 int drv_iim42351_config(acc_config_t *cfg);
 
+/*
+ * Le uma amostra dos tres eixos, em mg.
+ * Retorna 0, -EAGAIN (ainda sem amostra valida, logo depois de ligar),
+ * -ENODATA (acelerometro desligado), -ENODEV, -EINVAL ou erro do SPI.
+ */
+int drv_iim42351_read(acc_sample_t *sample);
+
 #endif /* DRV_IIM42351_H_ */
