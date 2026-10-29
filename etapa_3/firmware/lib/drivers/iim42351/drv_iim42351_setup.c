@@ -151,6 +151,25 @@ int iim42351_setup_accel(uint8_t fs_sel, uint8_t odr_code, uint8_t accel_mode)
     return 0;
 }
 
+int iim42351_setup_int_pins(bool int1, bool int2)
+{
+    uint8_t bits = 0;
+
+    if (int1) {
+        bits |= IIM42351_INT1_MODE | IIM42351_INT1_DRIVE_CIRCUIT | IIM42351_INT1_POLARITY;
+    }
+
+    if (int2) {
+        bits |= IIM42351_INT2_MODE | IIM42351_INT2_DRIVE_CIRCUIT | IIM42351_INT2_POLARITY;
+    }
+
+    if (bits == 0) {
+        return 0;
+    }
+
+    return iim42351_reg_update(IIM42351_REG_INT_CONFIG, bits, bits);
+}
+
 /* =========================================================
  * FIFO (secao 6). Fora ODR, fundo de escala e modo, os registradores
  * so podem mudar com o acelerometro desligado (13.6).
