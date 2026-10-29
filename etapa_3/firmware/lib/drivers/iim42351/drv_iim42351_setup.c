@@ -150,3 +150,140 @@ int iim42351_setup_accel(uint8_t fs_sel, uint8_t odr_code, uint8_t accel_mode)
 
     return 0;
 }
+
+/* =========================================================
+ * FIFO (secao 6). Fora ODR, fundo de escala e modo, os registradores
+ * so podem mudar com o acelerometro desligado (13.6).
+ * ========================================================= */
+
+static int accel_pause(uint8_t *saved_mode)
+{
+    uint8_t pwr;
+    int err;
+
+    err = iim42351_reg_read(IIM42351_REG_PWR_MGMT0, &pwr, 1);
+    if (err) {
+        return err;
+    }
+
+    *saved_mode = FIELD_GET(IIM42351_ACCEL_MODE, pwr);
+
+    return iim42351_reg_update(IIM42351_REG_PWR_MGMT0, IIM42351_ACCEL_MODE,
+                               FIELD_PREP(IIM42351_ACCEL_MODE, IIM42351_ACCEL_MODE_OFF));
+}
+
+static int accel_resume(uint8_t saved_mode)
+{
+    int err;
+
+    err = iim42351_reg_update(IIM42351_REG_PWR_MGMT0, IIM42351_ACCEL_MODE,
+                              FIELD_PREP(IIM42351_ACCEL_MODE, saved_mode));
+    if (err) {
+        return err;
+    }
+
+    if (saved_mode >= IIM42351_ACCEL_MODE_LP) {
+        k_usleep(IIM42351_ACCEL_START_US);
+    }
+
+    return 0;
+}
+
+int iim42351_setup_fifo_start(uint16_t watermark, uint16_t int_src_reg, uint8_t int_src_bit)
+{
+    const uint8_t cfg1_mask = IIM42351_FIFO_RESUME_PARTIAL_RD | IIM42351_FIFO_WM_GT_TH |
+                              IIM42351_FIFO_HIRES_EN | IIM42351_FIFO_TMST_FSYNC_EN |
+                              IIM42351_FIFO_TEMP_EN | IIM42351_FIFO_PACKET_EN;
+    uint8_t mode;
+    int err;
+
+    err = accel_pause(&mode);
+    if (err) {
+        return err;
+    }
+
+    /* FIFO_COUNT em pacotes, nao em bytes (14.28) */
+    err = iim42351_reg_update(IIM42351_REG_INTF_CONFIG0, IIM42351_FIFO_COUNT_REC,
+                              IIM42351_FIFO_COUNT_REC);
+    if (err) {
+        return err;
+    }
+
+    /*
+     * Pacote 1 (6.4); leitura parcial retomavel, porque o driver le no
+     * maximo o que cabe no buffer de quem chama; watermark reemitido a
+     * cada amostra enquanto a FIFO estiver acima do nivel (sem isso ele
+     * "dispara uma vez so", 14.38).
+     */
+    err = iim42351_reg_update(IIM42351_REG_FIFO_CONFIG1, cfg1_mask,
+                              IIM42351_FIFO_RESUME_PARTIAL_RD | IIM42351_FIFO_WM_GT_TH |
+                              FIELD_PREP(IIM42351_FIFO_PACKET_EN, IIM42351_FIFO_PACKET_EN_P1));
+    if (err) {
+        return err;
+    }
+
+    if (watermark > 0) {
+        /* Nivel antes de rotear a interrupcao (14.39 e 14.40) */
+        err = iim42351_reg_write(IIM42351_REG_FIFO_CONFIG2, watermark & 0xFF);
+        if (!err) {
+            err = iim42351_reg_update(IIM42351_REG_FIFO_CONFIG3, IIM42351_FIFO_WM_HI,
+                                      FIELD_PREP(IIM42351_FIFO_WM_HI, watermark >> 8));
+        }
+        if (!err && int_src_reg != 0) {
+            err = iim42351_reg_update(int_src_reg, int_src_bit, int_src_bit);
+        }
+        if (err) {
+            return err;
+        }
+    }
+
+    err = iim42351_reg_update(IIM42351_REG_FIFO_CONFIG, IIM42351_FIFO_MODE,
+                              FIELD_PREP(IIM42351_FIFO_MODE, IIM42351_FIFO_MODE_STREAM));
+    if (err) {
+        return err;
+    }
+
+    err = iim42351_reg_write(IIM42351_REG_SIGNAL_PATH_RESET, IIM42351_FIFO_FLUSH);
+    if (err) {
+        return err;
+    }
+
+    return accel_resume(mode);
+}
+
+int iim42351_setup_fifo_stop(uint16_t int_src_reg, uint8_t int_src_bit)
+{
+    uint8_t mode;
+    int err;
+
+    err = accel_pause(&mode);
+    if (err) {
+        return err;
+    }
+
+    if (int_src_reg != 0) {
+        err = iim42351_reg_update(int_src_reg, int_src_bit, 0);
+        if (err) {
+            return err;
+        }
+    }
+
+    err = iim42351_reg_update(IIM42351_REG_FIFO_CONFIG, IIM42351_FIFO_MODE,
+                              FIELD_PREP(IIM42351_FIFO_MODE, IIM42351_FIFO_MODE_BYPASS));
+    if (err) {
+        return err;
+    }
+
+    err = iim42351_reg_update(IIM42351_REG_FIFO_CONFIG1, IIM42351_FIFO_PACKET_EN,
+                              FIELD_PREP(IIM42351_FIFO_PACKET_EN, IIM42351_FIFO_PACKET_EN_NONE));
+    if (err) {
+        return err;
+    }
+
+    err = iim42351_reg_write(IIM42351_REG_SIGNAL_PATH_RESET, IIM42351_FIFO_FLUSH);
+    if (err) {
+        return err;
+    }
+
+    return accel_resume(mode);
+}
