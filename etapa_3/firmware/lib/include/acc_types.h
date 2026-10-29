@@ -29,6 +29,13 @@ typedef struct {
     acc_mode_t mode;
 } acc_config_t;
 
+/* Amostra em mg */
+typedef struct {
+    int16_t x_mg;
+    int16_t y_mg;
+    int16_t z_mg;
+} acc_sample_t;
+
 /* Eventos detectados pelo sensor */
 typedef enum {
     ACC_EVENT_FREEFALL,

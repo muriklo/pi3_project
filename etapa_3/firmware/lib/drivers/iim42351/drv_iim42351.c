@@ -21,6 +21,7 @@
 #include <zephyr/drivers/regulator.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/sys/byteorder.h>
 #include <zephyr/sys/util.h>
 
 #include "drv_iim42351.h"
@@ -181,6 +182,14 @@ static const char *mode_name(acc_mode_t mode)
     }
 }
 
+/* Converte a leitura crua para mg conforme o fundo de escala atual */
+static int16_t raw_to_mg(int16_t raw)
+{
+    int32_t sens = IIM42351_SENSITIVITY_LSB_PER_G(cur_fs_sel);
+
+    return (int16_t)(((int32_t)raw * 1000) / sens);
+}
+
 /* =========================================================
  * Alimentacao
  * ========================================================= */
@@ -323,4 +332,42 @@ int drv_iim42351_config(acc_config_t *cfg)
     }
 
     return apply_config(cfg);
+}
+
+int drv_iim42351_read(acc_sample_t *sample)
+{
+    uint8_t buf[6];
+    int16_t raw[3];
+    int err;
+
+    if (!initialized) {
+        return -ENODEV;
+    }
+
+    if (sample == NULL) {
+        return -EINVAL;
+    }
+
+    if (cur_mode == ACC_MODE_OFF) {
+        return -ENODATA;
+    }
+
+    /* Burst de ACCEL_DATA_X1 a ACCEL_DATA_Z0, big-endian (14.7 a 14.12) */
+    err = iim42351_reg_read(IIM42351_REG_ACCEL_DATA_X1, buf, sizeof(buf));
+    if (err) {
+        return err;
+    }
+
+    for (size_t i = 0; i < ARRAY_SIZE(raw); i++) {
+        raw[i] = (int16_t)sys_get_be16(&buf[2 * i]);
+        if (raw[i] == IIM42351_INVALID_SAMPLE) {
+            return -EAGAIN;
+        }
+    }
+
+    sample->x_mg = raw_to_mg(raw[0]);
+    sample->y_mg = raw_to_mg(raw[1]);
+    sample->z_mg = raw_to_mg(raw[2]);
+
+    return 0;
 }
