@@ -14,3 +14,11 @@ config SYSCARE_HAL_SPI
 	help
 	  HAL SPI generica sobre spi_dt_spec. Selecionada pelos drivers que
 	  usam SPI.
+
+config SYSCARE_HAL_GPIO
+	bool
+	select SYSCARE_HAL
+	select GPIO
+	help
+	  HAL GPIO (entrada com interrupcao) sobre gpio_dt_spec. Selecionada
+	  pelos drivers que usam pinos de interrupcao.
