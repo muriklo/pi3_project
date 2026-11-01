@@ -15,6 +15,7 @@
 
 #include <errno.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
@@ -99,6 +100,15 @@ static bool fifo_on;
 static uint16_t fifo_int_reg;       /* INT_SOURCE que rotea o watermark (0 = nenhum) */
 static uint8_t fifo_int_bit;
 static uint32_t fifo_discarded;     /* pacotes invalidos descartados desde o start */
+
+/* Queda livre: ligada, e o INT_SOURCE que rotea o evento */
+static bool ff_on;
+static uint16_t ff_int_reg;
+static uint8_t ff_int_bit;
+
+/* Alturas (cm) de cada codigo de FF_MIN/MAX_DURATION_CM (18.11) */
+static const uint16_t ff_min_cm[] = { IIM42351_FF_MIN_DURATION_CM_LIST };
+static const uint16_t ff_max_cm[] = { IIM42351_FF_MAX_DURATION_CM_LIST };
 
 /* =========================================================
  * Traducao dos valores genericos para os codigos do IIM-42351
@@ -349,6 +359,11 @@ int drv_iim42351_config(acc_config_t *cfg)
         return -ENODEV;
     }
 
+    /* A queda livre exige a configuracao fixa da secao 8.5 */
+    if (ff_on) {
+        return -EBUSY;
+    }
+
     return apply_config(cfg);
 }
 
@@ -404,6 +419,11 @@ int drv_iim42351_buffer_start(uint16_t watermark)
 
     if (fifo_on) {
         return -EALREADY;
+    }
+
+    /* Ligar a FIFO desliga o acelerometro por um instante e interromperia o DMP */
+    if (ff_on) {
+        return -EBUSY;
     }
 
     if (watermark > FIFO_WATERMARK_MAX) {
@@ -554,6 +574,115 @@ int drv_iim42351_buffer_stop(void)
 
     fifo_on = false;
     LOG_INF("FIFO parada: %u pacotes invalidos descartados", (unsigned int)fifo_discarded);
+
+    return 0;
+}
+
+/* =========================================================
+ * Queda livre (APEX)
+ * ========================================================= */
+
+/* Indice do valor da tabela mais proximo (empate: o menor) */
+static uint8_t pick_nearest(const uint16_t *table, size_t n, uint16_t value)
+{
+    uint8_t best = 0;
+
+    for (size_t i = 1; i < n; i++) {
+        if (abs((int)table[i] - (int)value) < abs((int)table[best] - (int)value)) {
+            best = (uint8_t)i;
+        }
+    }
+
+    return best;
+}
+
+/*
+ * Pedido generico -> codigos do IIM-42351, e devolve em cfg o que foi
+ * aplicado. Limiares: low-g (n + 1) * 31,25 mg e high-g (n + 1) * 250 mg,
+ * n de 0 a 31 (18.6, 18.7); debounce de 0 a 3 s (18.11).
+ */
+static void ff_translate(acc_freefall_config_t *cfg, struct iim42351_ff_codes *codes)
+{
+    uint32_t lowg = DIV_ROUND_CLOSEST((uint32_t)cfg->lowg_mg * 1000U,
+                                      IIM42351_LOWG_PEAK_TH_STEP_UG);
+    uint32_t highg = DIV_ROUND_CLOSEST((uint32_t)cfg->highg_mg, IIM42351_HIGHG_PEAK_TH_STEP_MG);
+    uint32_t debounce = DIV_ROUND_CLOSEST((uint32_t)cfg->debounce_ms, 1000U);
+
+    codes->lowg_peak = (uint8_t)(CLAMP(lowg, 1U, 32U) - 1U);
+    codes->highg_peak = (uint8_t)(CLAMP(highg, 1U, 32U) - 1U);
+    codes->min_cm = pick_nearest(ff_min_cm, ARRAY_SIZE(ff_min_cm), cfg->min_height_cm);
+    codes->max_cm = pick_nearest(ff_max_cm, ARRAY_SIZE(ff_max_cm), cfg->max_height_cm);
+    codes->debounce = (uint8_t)MIN(debounce, 3U);
+
+    cfg->lowg_mg = (uint16_t)DIV_ROUND_CLOSEST((codes->lowg_peak + 1U) *
+                                               IIM42351_LOWG_PEAK_TH_STEP_UG, 1000U);
+    cfg->highg_mg = (uint16_t)((codes->highg_peak + 1U) * IIM42351_HIGHG_PEAK_TH_STEP_MG);
+    cfg->min_height_cm = ff_min_cm[codes->min_cm];
+    cfg->max_height_cm = ff_max_cm[codes->max_cm];
+    cfg->debounce_ms = (uint16_t)(codes->debounce * 1000U);
+}
+
+int drv_iim42351_freefall_enable(acc_freefall_config_t *cfg)
+{
+    struct iim42351_ff_codes codes;
+    int err;
+
+    if (!initialized) {
+        return -ENODEV;
+    }
+
+    if (cfg == NULL) {
+        return -EINVAL;
+    }
+
+    if (ff_on) {
+        return -EALREADY;
+    }
+
+    /* A FIFO desligaria o acelerometro por um instante e interromperia o DMP */
+    if (fifo_on) {
+        return -EBUSY;
+    }
+
+    /* O evento so chega por um pino de interrupcao */
+    if (iim42351_trigger_freefall_route(&ff_int_reg, &ff_int_bit) != 0) {
+        LOG_ERR("Queda livre exige int1-gpios ou int2-gpios no devicetree");
+        return -ENOTSUP;
+    }
+
+    ff_translate(cfg, &codes);
+
+    err = iim42351_setup_freefall_enable(&codes, ff_int_reg, ff_int_bit);
+    if (err) {
+        return err;
+    }
+
+    /* A sequencia da 8.5 deixa o acelerometro em LP, 500 Hz, +-16 g */
+    cur_fs_sel = IIM42351_ACCEL_FS_SEL_16G;
+    cur_mode = ACC_MODE_LOW_POWER;
+    ff_on = true;
+
+    LOG_INF("Queda livre: low-g %u mg, high-g %u mg, %u a %u cm, debounce %u ms",
+            cfg->lowg_mg, cfg->highg_mg, cfg->min_height_cm, cfg->max_height_cm,
+            cfg->debounce_ms);
+
+    return 0;
+}
+
+int drv_iim42351_freefall_disable(void)
+{
+    int err;
+
+    if (!initialized || !ff_on) {
+        return -ENODEV;
+    }
+
+    err = iim42351_setup_freefall_disable(ff_int_reg, ff_int_bit);
+    if (err) {
+        return err;
+    }
+
+    ff_on = false;
 
     return 0;
 }
