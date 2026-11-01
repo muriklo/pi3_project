@@ -5,13 +5,14 @@
  * Projeto so com o acelerometro; os componentes reutilizaveis
  * (bindings, HAL, driver, servico) ficam no modulo ../lib.
  *
- * Fase 4: leitura em buffer pela FIFO
+ * Fase 5: deteccao de queda livre
  *   1. Espera o terminal abrir na USB, para os logs do init aparecerem
- *   2. Configura +-4 g / 500 Hz e liga a FIFO com watermark
- *   3. Captura 3 s: acorda pelo evento de watermark (pino de interrupcao)
- *      ou, sem ele, por tempo
- *   4. Mostra a taxa medida (esperado ~500 Hz) e despeja as amostras em
- *      CSV (idx,x_mg,y_mg,z_mg) entre as linhas CSV_INICIO e CSV_FIM
+ *   2. Liga a deteccao de queda livre e mostra os parametros aplicados
+ *   3. A cada queda, mostra a duracao e a altura estimada
+ *
+ * Teste: soltar a placa sobre uma almofada de alturas conhecidas
+ * (20 cm, 50 cm, 1 m) e comparar; sacudir, balancar o braco e bater na
+ * mesa nao devem gerar eventos.
  */
 
 #include <errno.h>
@@ -25,31 +26,14 @@
 
 #include "srv_accelerometer.h"
 
-#define CAPTURE_ODR_HZ      500
-#define CAPTURE_SECONDS     3
-#define CAPTURE_SAMPLES     (CAPTURE_ODR_HZ * CAPTURE_SECONDS)
+#define STATUS_PERIOD   K_SECONDS(10)
 
-/* 100 amostras = 200 ms a 500 Hz (a FIFO enche em ~0,5 s) */
-#define WATERMARK           100
+/* Eventos vindos do callback (workqueue do sistema) para o main */
+K_MSGQ_DEFINE(event_q, sizeof(acc_event_t), 8, 4);
 
-/* Sem evento de watermark, le a FIFO a cada 250 ms */
-#define WAIT_TIMEOUT        K_MSEC(250)
-
-/* Pausa entre linhas do CSV, para nao estourar o buffer do log/USB */
-#define CSV_LINE_PAUSE_MS   2
-
-#define STATUS_PERIOD       K_SECONDS(5)
-
-static acc_sample_t capture[CAPTURE_SAMPLES];
-
-static K_SEM_DEFINE(fifo_sem, 0, 1);
-
-/* Chamado na workqueue do sistema quando a FIFO chega ao watermark */
 static void on_acc_event(const acc_event_t *evt)
 {
-    if (evt->type == ACC_EVENT_FIFO_WATERMARK) {
-        k_sem_give(&fifo_sem);
-    }
+    (void)k_msgq_put(&event_q, evt, K_NO_WAIT);
 }
 
 /*
@@ -74,34 +58,17 @@ static void wait_for_terminal(void)
     }
 }
 
-static void print_csv(size_t n)
-{
-    printk("CSV_INICIO\n");
-    printk("idx,x_mg,y_mg,z_mg\n");
-
-    for (size_t i = 0; i < n; i++) {
-        printk("%u,%d,%d,%d\n", (unsigned int)i,
-               capture[i].x_mg, capture[i].y_mg, capture[i].z_mg);
-        k_msleep(CSV_LINE_PAUSE_MS);
-    }
-
-    printk("CSV_FIM\n");
-}
-
 int main(void)
 {
-    acc_config_t cfg = {
-        .range_g = 4,
-        .odr_hz = CAPTURE_ODR_HZ,
-        .mode = ACC_MODE_LOW_NOISE,
+    acc_freefall_config_t ff = {
+        .lowg_mg = 500,
+        .highg_mg = 3000,
+        .min_height_cm = 13,
+        .max_height_cm = 201,
+        .debounce_ms = 1000,
     };
-    size_t n = 0;
-    size_t n_first = 0;
-    int64_t t_first = 0;
-    int64_t t_last = 0;
-    uint32_t by_event = 0;
-    uint32_t by_timeout = 0;
-    uint32_t rate_hz = 0;
+    acc_event_t evt;
+    uint32_t falls = 0;
     int err;
 
     wait_for_terminal();
@@ -109,7 +76,7 @@ int main(void)
     printk("\n");
     printk("=================================\n");
     printk("  SysCare - acc_validation\n");
-    printk("  Fase 4: leitura pela FIFO\n");
+    printk("  Fase 5: queda livre\n");
     printk("=================================\n");
 
     err = srv_accelerometer_init(on_acc_event);
@@ -120,62 +87,32 @@ int main(void)
         }
     }
 
-    err = srv_accelerometer_config(&cfg);
-    printk("Config: +-%u g, %u Hz (err %d)\n", cfg.range_g, cfg.odr_hz, err);
+    printk("Pedido:   low-g %u mg, high-g %u mg, %u a %u cm, debounce %u ms\n",
+           ff.lowg_mg, ff.highg_mg, ff.min_height_cm, ff.max_height_cm, ff.debounce_ms);
 
-    err = srv_accelerometer_buffer_start(WATERMARK);
+    err = srv_accelerometer_freefall_enable(&ff);
     if (err) {
         while (1) {
-            printk("srv_accelerometer_buffer_start: erro %d\n", err);
+            printk("srv_accelerometer_freefall_enable: erro %d\n", err);
             k_sleep(STATUS_PERIOD);
         }
     }
 
-    printk("Capturando %u amostras (%u s)...\n", CAPTURE_SAMPLES, CAPTURE_SECONDS);
+    printk("Aplicado: low-g %u mg, high-g %u mg, %u a %u cm, debounce %u ms\n",
+           ff.lowg_mg, ff.highg_mg, ff.min_height_cm, ff.max_height_cm, ff.debounce_ms);
+    printk("Aguardando quedas...\n");
 
-    while (n < CAPTURE_SAMPLES) {
-        size_t got = 0;
-
-        if (k_sem_take(&fifo_sem, WAIT_TIMEOUT) == 0) {
-            by_event++;
-        } else {
-            by_timeout++;
-        }
-
-        err = srv_accelerometer_buffer_read(&capture[n], CAPTURE_SAMPLES - n, &got);
-        if (err) {
-            printk("srv_accelerometer_buffer_read: erro %d\n", err);
-            break;
-        }
-
-        if (got == 0) {
+    while (1) {
+        if (k_msgq_get(&event_q, &evt, STATUS_PERIOD) != 0) {
+            printk("(aguardando quedas; %u detectadas ate agora)\n", (unsigned int)falls);
             continue;
         }
 
-        /* A taxa e medida a partir da 1a leitura, que esvazia a FIFO */
-        if (t_first == 0) {
-            t_first = k_uptime_get();
-            n_first = n + got;
+        if (evt.type == ACC_EVENT_FREEFALL) {
+            falls++;
+            printk(">>> QUEDA LIVRE #%u: duracao %u ms, altura estimada ~%u cm\n",
+                   (unsigned int)falls, evt.duration_ms, evt.height_cm);
         }
-
-        n += got;
-        t_last = k_uptime_get();
-    }
-
-    srv_accelerometer_buffer_stop();
-
-    if (t_last > t_first) {
-        rate_hz = (uint32_t)(((n - n_first) * 1000) / (size_t)(t_last - t_first));
-    }
-
-    print_csv(n);
-
-    while (1) {
-        printk("Capturadas %u amostras; taxa medida %u Hz (esperado ~%u)\n",
-               (unsigned int)n, (unsigned int)rate_hz, CAPTURE_ODR_HZ);
-        printk("Leituras acordadas por evento: %u, por tempo: %u\n",
-               (unsigned int)by_event, (unsigned int)by_timeout);
-        k_sleep(STATUS_PERIOD);
     }
 
     return 0;

@@ -19,6 +19,8 @@ typedef struct {
     int (*buffer_start)(uint16_t watermark);
     int (*buffer_read)(acc_sample_t *buf, size_t max, size_t *count);
     int (*buffer_stop)(void);
+    int (*freefall_enable)(acc_freefall_config_t *cfg);
+    int (*freefall_disable)(void);
 } acc_ops_t;
 
 #if defined(CONFIG_SYSCARE_IIM42351)
@@ -32,6 +34,8 @@ static const acc_ops_t ops = {
     .buffer_start = drv_iim42351_buffer_start,
     .buffer_read = drv_iim42351_buffer_read,
     .buffer_stop = drv_iim42351_buffer_stop,
+    .freefall_enable = drv_iim42351_freefall_enable,
+    .freefall_disable = drv_iim42351_freefall_disable,
 };
 
 #else
@@ -90,4 +94,22 @@ int srv_accelerometer_buffer_stop(void)
     }
 
     return ops.buffer_stop();
+}
+
+int srv_accelerometer_freefall_enable(acc_freefall_config_t *cfg)
+{
+    if (ops.freefall_enable == NULL) {
+        return -ENOTSUP;
+    }
+
+    return ops.freefall_enable(cfg);
+}
+
+int srv_accelerometer_freefall_disable(void)
+{
+    if (ops.freefall_disable == NULL) {
+        return -ENOTSUP;
+    }
+
+    return ops.freefall_disable();
 }
