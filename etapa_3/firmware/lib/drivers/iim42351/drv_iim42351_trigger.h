@@ -30,6 +30,12 @@ int iim42351_trigger_init(acc_event_cb_t cb);
  */
 int iim42351_trigger_fifo_route(uint16_t *reg, uint8_t *bit);
 
+/*
+ * Registrador e bit INT_SOURCE para rotear a queda livre: INT1 se existir
+ * no devicetree, senao INT2. -ENOTSUP sem nenhum pino.
+ */
+int iim42351_trigger_freefall_route(uint16_t *reg, uint8_t *bit);
+
 #else
 
 static inline int iim42351_trigger_init(acc_event_cb_t cb)
@@ -39,6 +45,13 @@ static inline int iim42351_trigger_init(acc_event_cb_t cb)
 }
 
 static inline int iim42351_trigger_fifo_route(uint16_t *reg, uint8_t *bit)
+{
+    ARG_UNUSED(reg);
+    ARG_UNUSED(bit);
+    return -ENOTSUP;
+}
+
+static inline int iim42351_trigger_freefall_route(uint16_t *reg, uint8_t *bit)
 {
     ARG_UNUSED(reg);
     ARG_UNUSED(bit);
