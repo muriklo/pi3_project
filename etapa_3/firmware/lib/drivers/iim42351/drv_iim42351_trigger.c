@@ -14,6 +14,7 @@
 #define DT_DRV_COMPAT invensense_iim42351
 
 #include <errno.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #include <zephyr/devicetree.h>
@@ -35,6 +36,10 @@ static hal_gpio_dev_t int2 = HAL_GPIO_DEV_DT_OR_NONE(DT_DRV_INST(0), int2_gpios)
 
 static acc_event_cb_t event_cb;
 static struct k_work irq_work;
+
+/* Reexecucoes seguidas da work com o pino ainda ativo (protecao contra laco) */
+#define IRQ_RERUN_MAX   8
+static uint8_t irq_reruns;
 
 /* Contexto de interrupcao: so agenda o trabalho */
 static void on_int_pin(void *user)
@@ -72,6 +77,11 @@ static void notify_freefall(void)
     notify(&evt);
 }
 
+static bool pin_active(const hal_gpio_dev_t *pin)
+{
+    return hal_gpio_is_present(pin) && hal_gpio_get(pin) > 0;
+}
+
 static void irq_work_handler(struct k_work *work)
 {
     uint8_t status;
@@ -93,6 +103,20 @@ static void irq_work_handler(struct k_work *work)
         const acc_event_t evt = { .type = ACC_EVENT_FIFO_WATERMARK };
 
         notify(&evt);
+    }
+
+    /*
+     * Pino dividido: se outro evento travou o pino enquanto os status eram
+     * lidos, ele continua ativo e nao havera nova borda. Trata de novo.
+     */
+    if (pin_active(&int1) || pin_active(&int2)) {
+        if (irq_reruns++ < IRQ_RERUN_MAX) {
+            k_work_submit(&irq_work);
+        } else {
+            LOG_WRN("Pino de interrupcao preso em nivel ativo");
+        }
+    } else {
+        irq_reruns = 0;
     }
 }
 
