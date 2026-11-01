@@ -36,6 +36,18 @@ typedef struct {
     int16_t z_mg;
 } acc_sample_t;
 
+/*
+ * Parametros da deteccao de queda livre. Na chamada vai o pedido; na
+ * volta, o que foi aplicado (o driver usa o valor suportado mais proximo).
+ */
+typedef struct {
+    uint16_t lowg_mg;           /* abaixo disto: inicio da queda (sem gravidade) */
+    uint16_t highg_mg;          /* acima disto: impacto, fim da queda */
+    uint16_t min_height_cm;     /* quedas menores sao ignoradas */
+    uint16_t max_height_cm;     /* quedas maiores sao ignoradas */
+    uint16_t debounce_ms;       /* depois do impacto, ignora novos eventos (quiques) */
+} acc_freefall_config_t;
+
 /* Eventos detectados pelo sensor */
 typedef enum {
     ACC_EVENT_FREEFALL,         /* queda livre */

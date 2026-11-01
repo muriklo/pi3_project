@@ -59,4 +59,19 @@ int drv_iim42351_buffer_read(acc_sample_t *buf, size_t max, size_t *count);
 /* Desliga a FIFO */
 int drv_iim42351_buffer_stop(void);
 
+/*
+ * Liga a deteccao de queda livre (APEX do sensor). Cada queda gera o
+ * evento ACC_EVENT_FREEFALL com duracao e altura estimada, pelo pino de
+ * interrupcao do devicetree (INT1, ou INT2 se so ele existir).
+ * O acelerometro passa a LP, 500 Hz, +-16 g (secao 8.5); enquanto a
+ * deteccao estiver ligada, config e buffer_start retornam -EBUSY.
+ * cfg volta com os valores aplicados. Leva ~50 ms.
+ * Retorna 0, -ENOTSUP (sem pino de interrupcao), -EALREADY, -EBUSY
+ * (FIFO ligada), -ENODEV, -EINVAL ou erro do SPI.
+ */
+int drv_iim42351_freefall_enable(acc_freefall_config_t *cfg);
+
+/* Desliga a deteccao de queda livre (o acelerometro segue ligado) */
+int drv_iim42351_freefall_disable(void);
+
 #endif /* DRV_IIM42351_H_ */
