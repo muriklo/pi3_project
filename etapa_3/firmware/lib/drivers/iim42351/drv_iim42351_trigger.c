@@ -14,10 +14,12 @@
 #define DT_DRV_COMPAT invensense_iim42351
 
 #include <errno.h>
+#include <stdint.h>
 
 #include <zephyr/devicetree.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/sys/byteorder.h>
 #include <zephyr/sys/util.h>
 
 #include "drv_iim42351_bus.h"
@@ -41,28 +43,56 @@ static void on_int_pin(void *user)
     k_work_submit(&irq_work);
 }
 
-static void notify(acc_event_type_t type)
+static void notify(const acc_event_t *evt)
 {
-    const acc_event_t evt = { .type = type };
-
     if (event_cb != NULL) {
-        event_cb(&evt);
+        event_cb(evt);
     }
+}
+
+/* FF_DUR (APEX_DATA0 = LSB, APEX_DATA1 = MSB) em amostras do DMP (8.5, 14.19) */
+static void notify_freefall(void)
+{
+    uint8_t data[2];
+    acc_event_t evt = { .type = ACC_EVENT_FREEFALL };
+    uint64_t samples;
+
+    if (iim42351_reg_read(IIM42351_REG_APEX_DATA0, data, sizeof(data)) != 0) {
+        return;
+    }
+
+    samples = sys_get_le16(data);
+
+    /* t = n / ODR;  d = g * t^2 / 2 = 981 cm/s^2 * n^2 / (2 * ODR^2) */
+    evt.duration_ms = (uint16_t)((samples * 1000U) / IIM42351_FF_DMP_ODR_HZ);
+    evt.height_cm = (uint16_t)((981U * samples * samples +
+                                IIM42351_FF_DMP_ODR_HZ * IIM42351_FF_DMP_ODR_HZ) /
+                               (2U * IIM42351_FF_DMP_ODR_HZ * IIM42351_FF_DMP_ODR_HZ));
+
+    notify(&evt);
 }
 
 static void irq_work_handler(struct k_work *work)
 {
     uint8_t status;
+    uint8_t status3;
 
     ARG_UNUSED(work);
 
-    /* Ler o INT_STATUS limpa os bits e solta o pino (14.15) */
-    if (iim42351_reg_read(IIM42351_REG_INT_STATUS, &status, 1) != 0) {
+    /* Ler os status limpa os bits e solta o pino (14.15, 14.26) */
+    if (iim42351_reg_read(IIM42351_REG_INT_STATUS, &status, 1) != 0 ||
+        iim42351_reg_read(IIM42351_REG_INT_STATUS3, &status3, 1) != 0) {
         return;
     }
 
+    if (status3 & IIM42351_FF_DET_INT) {
+        notify_freefall();
+    }
+
     if (status & IIM42351_FIFO_THS_INT) {
-        notify(ACC_EVENT_FIFO_WATERMARK);
+        const acc_event_t evt = { .type = ACC_EVENT_FIFO_WATERMARK };
+
+        notify(&evt);
     }
 }
 
