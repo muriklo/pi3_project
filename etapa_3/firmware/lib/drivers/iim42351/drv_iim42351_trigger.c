@@ -4,6 +4,11 @@
  * Como no exemplo icm42605: a interrupcao do pino so agenda trabalho; o
  * SPI (ler o status) fica fora da ISR, na workqueue do sistema. Os pinos
  * do sensor sao latched: o status lido limpa o pino (INT_CONFIG0 padrao).
+ *
+ * Cada evento prefere um pino e usa o outro se so ele existir:
+ *   - queda livre: INT1 (pino exclusivo; o INT2 pode virar FSYNC/CLKIN);
+ *   - watermark da FIFO: INT2.
+ * Com um pino so, os dois eventos o dividem.
  */
 
 #define DT_DRV_COMPAT invensense_iim42351
@@ -105,6 +110,23 @@ int iim42351_trigger_init(acc_event_cb_t cb)
             hal_gpio_is_present(&int2) ? "ligado" : "ausente");
 
     return 0;
+}
+
+int iim42351_trigger_freefall_route(uint16_t *reg, uint8_t *bit)
+{
+    if (hal_gpio_is_present(&int1)) {
+        *reg = IIM42351_REG_INT_SOURCE6;
+        *bit = IIM42351_FREEFALL_DET_INT1_EN;
+        return 0;
+    }
+
+    if (hal_gpio_is_present(&int2)) {
+        *reg = IIM42351_REG_INT_SOURCE7;
+        *bit = IIM42351_FREEFALL_DET_INT2_EN;
+        return 0;
+    }
+
+    return -ENOTSUP;
 }
 
 int iim42351_trigger_fifo_route(uint16_t *reg, uint8_t *bit)
