@@ -19,6 +19,9 @@
 
 LOG_MODULE_DECLARE(iim42351, CONFIG_SYSCARE_IIM42351_LOG_LEVEL);
 
+/* O DMP ja rodou desde o ultimo soft reset? (a memoria dele so e resetada na 1a vez, 8.5) */
+static bool dmp_started;
+
 static int check_who_am_i(void)
 {
     uint8_t id;
@@ -66,6 +69,7 @@ static int soft_reset(void)
         return -EIO;
     }
 
+    dmp_started = false;
     LOG_DBG("Soft reset concluido");
 
     return 0;
@@ -305,4 +309,124 @@ int iim42351_setup_fifo_stop(uint16_t int_src_reg, uint8_t int_src_bit)
     }
 
     return accel_resume(mode);
+}
+
+/* =========================================================
+ * Queda livre (APEX, secao 8.5)
+ * ========================================================= */
+
+/* Acelerometro como a 8.5 pede: 500 Hz, media de 1 amostra, LP; +-16 g para nao saturar no impacto */
+static int freefall_accel(void)
+{
+    uint8_t mode;
+    int err;
+
+    err = accel_pause(&mode);
+    if (err) {
+        return err;
+    }
+
+    err = iim42351_reg_update(IIM42351_REG_ACCEL_CONFIG0,
+                              IIM42351_ACCEL_FS_SEL | IIM42351_ACCEL_ODR,
+                              FIELD_PREP(IIM42351_ACCEL_FS_SEL, IIM42351_ACCEL_FS_SEL_16G) |
+                              FIELD_PREP(IIM42351_ACCEL_ODR, IIM42351_ACCEL_ODR_500HZ));
+    if (err) {
+        return err;
+    }
+
+    /* ACCEL_FILT_CONFIG: os bits 3:0 sao reservados, por isso a mascara */
+    err = iim42351_reg_update(IIM42351_REG_ACCEL_FILT_CONFIG, IIM42351_ACCEL_UI_FILT_BW,
+                              FIELD_PREP(IIM42351_ACCEL_UI_FILT_BW,
+                                         IIM42351_ACCEL_UI_FILT_BW_LP_AVG_1X));
+    if (err) {
+        return err;
+    }
+
+    /*
+     * DMP a 500 Hz e sem power save: com DMP_POWER_SAVE = 1 (reset) o
+     * APEX so roda depois de um Wake on Motion (8.2). O DMP_ODR so muda
+     * com os recursos do APEX desligados (8.1).
+     */
+    err = iim42351_reg_update(IIM42351_REG_APEX_CONFIG0,
+                              IIM42351_DMP_POWER_SAVE | IIM42351_TAP_ENABLE |
+                              IIM42351_PED_ENABLE | IIM42351_TILT_ENABLE |
+                              IIM42351_FF_ENABLE | IIM42351_DMP_ODR,
+                              FIELD_PREP(IIM42351_DMP_ODR, IIM42351_DMP_ODR_500HZ));
+    if (err) {
+        return err;
+    }
+
+    return accel_resume(IIM42351_ACCEL_MODE_LP);
+}
+
+int iim42351_setup_freefall_enable(const struct iim42351_ff_codes *codes,
+                                   uint16_t int_src_reg, uint8_t int_src_bit)
+{
+    int err;
+
+    err = freefall_accel();
+    if (err) {
+        return err;
+    }
+
+    /* Limiares (banco 4); tempos e histereses ficam no padrao do reset */
+    err = iim42351_reg_update(IIM42351_REG_APEX_CONFIG5, IIM42351_LOWG_PEAK_TH_SEL,
+                              FIELD_PREP(IIM42351_LOWG_PEAK_TH_SEL, codes->lowg_peak));
+    if (err) {
+        return err;
+    }
+
+    err = iim42351_reg_update(IIM42351_REG_APEX_CONFIG6, IIM42351_HIGHG_PEAK_TH_SEL,
+                              FIELD_PREP(IIM42351_HIGHG_PEAK_TH_SEL, codes->highg_peak));
+    if (err) {
+        return err;
+    }
+
+    err = iim42351_reg_write(IIM42351_REG_APEX_CONFIG10,
+                             FIELD_PREP(IIM42351_FF_MIN_DURATION_CM, codes->min_cm) |
+                             FIELD_PREP(IIM42351_FF_MAX_DURATION_CM, codes->max_cm) |
+                             FIELD_PREP(IIM42351_FF_DEBOUNCE_DURATION, codes->debounce));
+    if (err) {
+        return err;
+    }
+
+    /* Memoria do DMP: so na primeira vez depois do reset; depois 1 ms */
+    if (!dmp_started) {
+        err = iim42351_reg_write(IIM42351_REG_SIGNAL_PATH_RESET, IIM42351_DMP_MEM_RESET_EN);
+        if (err) {
+            return err;
+        }
+        k_msleep(1);
+        dmp_started = true;
+    }
+
+    err = iim42351_reg_write(IIM42351_REG_SIGNAL_PATH_RESET, IIM42351_DMP_INIT_EN);
+    if (err) {
+        return err;
+    }
+
+    /* Rota da interrupcao: INT_SOURCE6 (INT1) ou INT_SOURCE7 (INT2) */
+    err = iim42351_reg_update(int_src_reg, int_src_bit, int_src_bit);
+    if (err) {
+        return err;
+    }
+
+    k_msleep(50);
+
+    /* Queda livre e pedometro dividem a saida: o pedometro fica desligado */
+    return iim42351_reg_update(IIM42351_REG_APEX_CONFIG0,
+                               IIM42351_PED_ENABLE | IIM42351_FF_ENABLE,
+                               IIM42351_FF_ENABLE);
+}
+
+int iim42351_setup_freefall_disable(uint16_t int_src_reg, uint8_t int_src_bit)
+{
+    int err;
+
+    err = iim42351_reg_update(IIM42351_REG_APEX_CONFIG0, IIM42351_FF_ENABLE, 0);
+    if (err) {
+        return err;
+    }
+
+    return iim42351_reg_update(int_src_reg, int_src_bit, 0);
 }
