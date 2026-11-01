@@ -44,4 +44,15 @@ int srv_accelerometer_buffer_read(acc_sample_t *buf, size_t max, size_t *count);
 /* Desliga a leitura em buffer */
 int srv_accelerometer_buffer_stop(void);
 
+/*
+ * Liga a deteccao de queda livre: cada queda gera o evento
+ * ACC_EVENT_FREEFALL (duracao e altura) no callback do init. cfg volta
+ * com os valores aplicados. Enquanto estiver ligada, a configuracao do
+ * acelerometro fica fixa (config e buffer_start retornam -EBUSY).
+ */
+int srv_accelerometer_freefall_enable(acc_freefall_config_t *cfg);
+
+/* Desliga a deteccao de queda livre */
+int srv_accelerometer_freefall_disable(void);
+
 #endif /* SRV_ACCELEROMETER_H_ */
