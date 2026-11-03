@@ -1,0 +1,91 @@
+# SysCare - binding do acelerometro IIM-42351
+#
+# Baseado em zephyr/dts/bindings/sensor/invensense,icm42605.yaml
+# (Copyright (c) 2020 TDK Invensense, SPDX-License-Identifier: Apache-2.0).
+#
+# Diferencas em relacao ao ICM-42605:
+#   - compatible proprio: o mapa de registradores e outro, e o driver do
+#     Zephyr para o ICM-42605 nao deve assumir este chip;
+#   - sem giroscopio (gyro-hz e gyro-fs removidos);
+#   - int-gpios (obrigatorio) virou int1-gpios e int2-gpios (opcionais);
+#   - novos: accel-mode, vdd-supply e vddio-supply.
+
+description: |
+  IIM-42351 - acelerometro de 3 eixos da TDK InvenSense, ligado por SPI.
+  Usado pelo driver proprio do SysCare (drivers/iim42351), nao pelo
+  subsistema de sensores do Zephyr.
+
+compatible: "invensense,iim42351"
+
+include: [sensor-device.yaml, spi-device.yaml]
+
+properties:
+  int1-gpios:
+    type: phandle-array
+    description: |
+      Pino INT1 do sensor: eventos do APEX (queda livre).
+      O sensor e configurado como push-pull, ativo alto.
+      Opcional: sem ele o driver nao gera eventos de queda.
+
+  int2-gpios:
+    type: phandle-array
+    description: |
+      Pino INT2 do sensor: watermark da FIFO.
+      O sensor e configurado como push-pull, ativo alto.
+      Opcional: sem ele a FIFO e lida por polling.
+
+  vdd-supply:
+    type: phandle
+    description: |
+      Regulador que alimenta o VDD do sensor.
+      Opcional: sem ele o driver assume alimentacao fixa.
+
+  vddio-supply:
+    type: phandle
+    description: |
+      Regulador que alimenta o VDDIO do sensor.
+      Opcional: sem ele o driver assume alimentacao fixa.
+
+  accel-hz:
+    type: int
+    default: 100
+    description: |
+      ODR inicial do acelerometro (Hz).
+      Mapeia no campo ACCEL_ODR do registrador ACCEL_CONFIG0.
+      1, 3, 6 e 12 representam 1,5625, 3,125, 6,25 e 12,5 Hz.
+    enum:
+      - 1
+      - 3
+      - 6
+      - 12
+      - 25
+      - 50
+      - 100
+      - 200
+      - 500
+      - 1000
+      - 2000
+      - 4000
+      - 8000
+
+  accel-fs:
+    type: int
+    default: 16
+    description: |
+      Fundo de escala inicial do acelerometro (g).
+      O indice no enum e o codigo do campo ACCEL_FS_SEL do ACCEL_CONFIG0
+      (16 g -> 0, 8 g -> 1, 4 g -> 2, 2 g -> 3).
+    enum:
+      - 16
+      - 8
+      - 4
+      - 2
+
+  accel-mode:
+    type: string
+    default: "low-noise"
+    description: |
+      Modo inicial do acelerometro (campo ACCEL_MODE do PWR_MGMT0).
+    enum:
+      - "low-noise"
+      - "low-power"

@@ -1,0 +1,81 @@
+/*
+ * SysCare - Overlay do devicetree para a XIAO nRF52840
+ *
+ * Unico lugar da pinagem e da alimentacao do acelerometro.
+ * Pode ser editado pelo editor visual do nRF Connect.
+ *
+ * Sinais usam o conector da placa (xiao_d): <&xiao_d 2 ...> = pino D2.
+ * A alimentacao usa &gpio0/&gpio1 direto, porque o conector so repassa
+ * os 6 bits baixos das flags e apagaria o NRF_GPIO_DRIVE_H0H1.
+ */
+
+#include <zephyr/dt-bindings/gpio/nordic-nrf-gpio.h>
+
+/* =========================================================
+ * Alimentacao do acelerometro
+ *
+ * Mesmo padrao que a XIAO Sense usa para o IMU dela.
+ * regulator-boot-on: ligados no boot, antes do SPI
+ * (ver CONFIG_REGULATOR_FIXED_INIT_PRIORITY no prj.conf).
+ * ========================================================= */
+
+/ {
+	acc_vdd: acc-vdd {
+		compatible = "regulator-fixed";
+		regulator-name = "ACC_VDD";
+		enable-gpios = <&gpio1 11 (GPIO_ACTIVE_HIGH | NRF_GPIO_DRIVE_H0H1)>;	/* D6 */
+		regulator-boot-on;
+		startup-delay-us = <3000>;
+	};
+
+	acc_vddio: acc-vddio {
+		compatible = "regulator-fixed";
+		regulator-name = "ACC_VDDIO";
+		enable-gpios = <&gpio0 29 (GPIO_ACTIVE_HIGH | NRF_GPIO_DRIVE_H0H1)>;	/* D3 */
+		regulator-boot-on;
+		startup-delay-us = <3000>;
+	};
+};
+
+/* =========================================================
+ * Perifericos da placa que ocupam pinos do acelerometro
+ * ========================================================= */
+
+&uart0 {
+	status = "disabled";	/* P1.11 (D6) = ACC_VDD; o console e USB CDC */
+};
+
+&i2c1 {
+	status = "disabled";	/* P0.04 (D4) = ACC_INT2 */
+};
+
+/* =========================================================
+ * Acelerometro no barramento SPI (spi2 = xiao_spi)
+ *
+ * SCK/MOSI/MISO: pinos padrao da placa (D8/D10/D9).
+ * ========================================================= */
+
+&xiao_spi {
+	cs-gpios = <&xiao_d 0 GPIO_ACTIVE_LOW>;		/* D0 */
+
+	accel: iim42351@0 {
+		compatible = "invensense,iim42351";
+		reg = <0>;				/* indice no cs-gpios */
+		spi-max-frequency = <1000000>;		/* 1 MHz com fios; ate 8 MHz no spi2 */
+		spi-cpol;				/* modo 3 */
+		spi-cpha;
+
+		int1-gpios = <&xiao_d 2 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;	/* D2 */
+		/*
+		 * INT2 sem fio no momento: sem esta propriedade, o watermark da
+		 * FIFO vai para o INT1. Descomentar quando o INT2 for ligado.
+		 */
+		/* int2-gpios = <&xiao_d 4 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>; */	/* D4 */
+
+		vdd-supply = <&acc_vdd>;
+		vddio-supply = <&acc_vddio>;
+
+		accel-hz = <100>;
+		accel-fs = <4>;
+	};
+};

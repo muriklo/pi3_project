@@ -1,0 +1,32 @@
+# SysCare - driver do acelerometro IIM-42351
+
+menuconfig SYSCARE_IIM42351
+	bool "Driver do acelerometro IIM-42351"
+	default y
+	depends on DT_HAS_INVENSENSE_IIM42351_ENABLED
+	select SYSCARE_HAL_SPI
+	select REGULATOR if $(dt_compat_any_has_prop,$(DT_COMPAT_INVENSENSE_IIM42351),vdd-supply)
+	select REGULATOR if $(dt_compat_any_has_prop,$(DT_COMPAT_INVENSENSE_IIM42351),vddio-supply)
+	help
+	  Driver proprio do SysCare para o acelerometro IIM-42351 (SPI).
+	  E habilitado automaticamente quando o devicetree tem um no com
+	  compatible "invensense,iim42351" e status "okay".
+
+if SYSCARE_IIM42351
+
+config SYSCARE_IIM42351_TRIGGER
+	bool "Interrupcoes do sensor (INT1/INT2)"
+	default y
+	depends on $(dt_compat_any_has_prop,$(DT_COMPAT_INVENSENSE_IIM42351),int1-gpios) || \
+		   $(dt_compat_any_has_prop,$(DT_COMPAT_INVENSENSE_IIM42351),int2-gpios)
+	select SYSCARE_HAL_GPIO
+	help
+	  Usa os pinos int1-gpios/int2-gpios do devicetree. O watermark da
+	  FIFO vai para o INT2 se ele existir, senao para o INT1. Sem
+	  nenhum pino, a FIFO e lida por polling.
+
+module = SYSCARE_IIM42351
+module-str = iim42351
+source "subsys/logging/Kconfig.template.log_config"
+
+endif # SYSCARE_IIM42351
