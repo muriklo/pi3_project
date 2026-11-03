@@ -1,0 +1,4 @@
+syscare-pi3.chilecentral.cloudapp.azure.com {
+	encode gzip
+	reverse_proxy 127.0.0.1:8000
+}

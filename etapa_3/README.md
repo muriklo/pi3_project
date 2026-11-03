@@ -1,6 +1,6 @@
 # Etapa 3
 
-A etapa 3 corresponde ao desenvolvimento do produto: a fabricação das primeiras peças físicas da Pulseira SysCare e a primeira integração entre a pulseira, o aplicativo e o servidor. Nesta etapa, a placa de circuito impresso foi fabricada, a carcaça foi impressa em 3D, o *firmware* passou a transmitir o protocolo SysCare a partir da pulseira real e o sistema ganhou o aviso remoto por *push*. Este documento resume cada frente; o detalhamento está nos documentos indicados ao final de cada seção.
+A etapa 3 corresponde ao desenvolvimento do produto: a fabricação das primeiras peças físicas da Pulseira SysCare e a primeira integração entre a pulseira, o aplicativo e o servidor. Nesta etapa, a placa de circuito impresso foi fabricada, a carcaça foi impressa em 3D, o *firmware* passou a transmitir o protocolo SysCare a partir da pulseira real, o sistema ganhou o aviso remoto por *push* e a API passou a rodar na nuvem. Este documento resume cada frente; o detalhamento está nos documentos indicados ao final de cada seção.
 
 ---
 
@@ -22,7 +22,7 @@ A placa de circuito impresso (PCI) foi produzida a partir do esquemático da Eta
 
 O *firmware* da pulseira é desenvolvido para a XIAO nRF52840 [1], sobre o Zephyr RTOS e o nRF Connect SDK [2]. A estratégia adotada é validar cada módulo isoladamente antes de integrá-los: primeiro o anúncio BLE, depois a comunicação com o acelerômetro IIM-42351 [3] e, por fim, a aplicação integrada.
 
-O módulo de anúncio BLE já transmite o pacote de 14 bytes do protocolo SysCare [4]. O anúncio é iniciado uma única vez e atualizado a cada evento, sem interromper a transmissão. Como o acelerômetro ainda está em teste, os eventos são simulados: um *heartbeat* a cada 10 s e uma queda a cada 60 s, com a bateria decrescendo para exercitar o aplicativo. Nessa versão de testes, os quatro bytes finais, que o protocolo reserva à assinatura HMAC [5], foram ocupados por um identificador de queda. Como o servidor confere essa assinatura, as quedas são recusadas, ponto a ser resolvido na integração. O *firmware* de referência do anúncio, revisado nesta etapa, já calcula a assinatura e serve de base para isso.
+O módulo de anúncio BLE já transmite o pacote de 14 bytes do protocolo SysCare [4]. O anúncio é iniciado uma única vez e atualizado a cada evento, sem interromper a transmissão. Como o acelerômetro ainda está em teste, os eventos são simulados: um *heartbeat* a cada 10 s e uma queda a cada 60 s. Nessa versão de testes, os quatro bytes finais, que o protocolo reserva à assinatura HMAC [5], foram ocupados por um identificador de queda. Como o servidor confere essa assinatura, as quedas são recusadas, ponto a ser resolvido na integração. O *firmware* de referência do anúncio, revisado nesta etapa, já calcula a assinatura e serve de base para isso.
 
 > 📁 **Documentação do *Firmware*:** [Firmware](./firmware/README.md) · **Protocolo BLE:** [ble_payload.md](./software/api/docs/ble_payload.md)
 
@@ -30,11 +30,13 @@ O módulo de anúncio BLE já transmite o pacote de 14 bytes do protocolo SysCar
 
 ## Desenvolvimento de *Software*
 
-O código do aplicativo e da API foi trazido da Etapa 2 para esta etapa, e o sistema ganhou o aviso remoto por *push*, pelo Firebase Cloud Messaging [6]. Até então, o alerta chegava aos responsáveis pela sirene do celular que ouviu a pulseira e pelo SMS enviado por esse celular. Com o *push*, a API notifica os celulares de todos os responsáveis vinculados à pulseira, mesmo longe dela, e o aplicativo toca a mesma sirene do alarme local. A mensagem identifica o anúncio de origem, para que o celular que já ouviu a pulseira não alarme duas vezes.
+O código do aplicativo e da API foi trazido da Etapa 2 para esta etapa, e o sistema ganhou o aviso remoto por *push*, pelo Firebase Cloud Messaging [6]. Até então, o alerta chegava pela sirene e pelo SMS do celular que ouviu a pulseira. Com o *push*, a API notifica os celulares de todos os responsáveis vinculados à pulseira, mesmo longe dela, e o aplicativo toca a mesma sirene do alarme local. A mensagem identifica o anúncio de origem, para que o celular que já ouviu a pulseira não alarme duas vezes.
 
 A integração com a pulseira real também exigiu ajustes. O aplicativo passou a procurar explicitamente o anúncio BLE legado, formato usado pela pulseira [7], e o *firmware* de referência do anúncio foi corrigido para atualizar os dados transmitidos e calcular a assinatura com a interface criptográfica da versão atual do nRF Connect SDK.
 
-> 📁 **Documentação de *Software*:** [Software](./software/README.md) · [Aplicativo](./software/app/README.md) · [API](./software/api/README.md)
+Por fim, a API foi publicada em uma máquina virtual do Azure, obtida pelo programa para estudantes [8], com HTTPS e endereço fixo. Assim, os alertas chegam ao servidor e o *push* sai para os responsáveis de qualquer lugar, e não só da rede local.
+
+> 📁 **Documentação de *Software*:** [Software](./software/README.md) · [Aplicativo](./software/app/README.md) · [API](./software/api/README.md) · [Servidor na nuvem](./software/api/docs/servidor_nuvem.md)
 
 ---
 
@@ -65,6 +67,7 @@ As validações desta etapa estão resumidas na Tabela 1.
 | ***Firmware*** | Anúncio com eventos simulados, conferido no console da placa | Pacote transmitido e atualizado a cada evento |
 | **Integração** | Pulseira, celular Android e responsável, em 22/10/2026 | Alarme no celular e SMS ao responsável; queda recusada pela API por falta de assinatura |
 | ***Push*** | Alerta assinado gerado pelo *script* de simulação da API | Alerta recebido no celular do responsável, com a sirene |
+| **Servidor** | API na nuvem: acesso por HTTPS e reinício da máquina | Respondeu por HTTPS e voltou sozinha em cerca de 18 s |
 | **Automatizados** | 47 testes do aplicativo e 27 da API | Todos aprovados |
 
 </div>
@@ -73,7 +76,7 @@ As validações desta etapa estão resumidas na Tabela 1.
   <p>Tabela 1 - Testes realizados na Etapa 3</p>
 </div>
 
-No teste de integração, apresentado na Figura 3, o celular que ouviu a pulseira exibiu a queda simulada com o impacto e a bateria transmitidos, tocou a sirene e enviou o SMS, recebido pelo responsável com o link do mapa. Em seguida, a API recusou o evento, porque a versão de testes do *firmware* não assina o anúncio, e o aplicativo desligou a sirene e informou a recusa. É o comportamento esperado: sem a assinatura, o servidor não distingue a pulseira de um rádio que imite o anúncio. A cadeia completa, da pulseira ao *push*, será validada quando o *firmware* integrado passar a assinar os anúncios.
+No teste de integração, apresentado na Figura 3, o celular que ouviu a pulseira exibiu a queda simulada, tocou a sirene e enviou o SMS, recebido pelo responsável com o link do mapa. Em seguida, a API recusou o evento, porque a versão de testes do *firmware* não assina o anúncio, e o aplicativo desligou a sirene e informou a recusa. É o comportamento esperado: sem a assinatura, o servidor não distingue a pulseira de um rádio que imite o anúncio. A cadeia completa, da pulseira ao *push*, será validada quando o *firmware* integrado passar a assinar os anúncios.
 
 <div align="center">
   <img src="./img/teste_ble_e_aplicativo.png" alt="Teste de integração entre a pulseira, o aplicativo e o responsável" width="60%">
@@ -99,3 +102,5 @@ No teste de integração, apresentado na Figura 3, o celular que ouviu a pulseir
 - [6] [GOOGLE. Firebase Cloud Messaging - Documentation](https://firebase.google.com/docs/cloud-messaging)
 
 - [7] [ANDROID DEVELOPERS. ScanSettings.Builder - setLegacy](https://developer.android.com/reference/android/bluetooth/le/ScanSettings.Builder)
+
+- [8] [MICROSOFT. Azure for Students](https://azure.microsoft.com/en-us/free/students)
