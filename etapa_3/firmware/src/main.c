@@ -1,15 +1,18 @@
 
 /*
- * SysCare - BLE Advertising por evento simulado
+ * SysCare - firmware integrado: acelerometro + advertising BLE
  * XIAO nRF52840 / Zephyr / NCS 3.4.0
  *
- * A cada 10 segundos:
- *   1. Simula um evento do acelerometro
+ * A cada evento:
+ *   1. Queda livre detectada pelo acelerometro (IIM-42351), ou
+ *      heartbeat depois de 10 segundos sem queda
  *   2. Monta o payload SysCare
  *   3. Atualiza os dados do advertising BLE
  *   4. Continua transmitindo sem parar o advertising
  *
- * O advertising e iniciado uma unica vez.
+ * O advertising e iniciado uma unica vez. O acelerometro vem do modulo
+ * lib/ (servico srv_accelerometer); se ele falhar, o firmware segue so
+ * com os heartbeats.
  *
  * HMAC temporariamente desativado.
  */
@@ -26,6 +29,8 @@
 
 #include <zephyr/bluetooth/bluetooth.h>
 #include <zephyr/bluetooth/hci.h>
+
+#include "srv_accelerometer.h"
 
 /* =========================================================
  * Protocolo SysCare
@@ -54,10 +59,11 @@
  */
 
 /* =========================================================
- * Parametros do teste
+ * Parametros
  * ========================================================= */
 
-#define SIMULATED_EVENT_PERIOD   K_SECONDS(10)
+/* Sem queda, um heartbeat a cada 10 segundos */
+#define HEARTBEAT_PERIOD         K_SECONDS(10)
 
 /*
  * Intervalo de advertising do teste:
@@ -255,6 +261,57 @@ static const struct bt_data ad[] = {
 };
 
 /* =========================================================
+ * Acelerometro
+ * ========================================================= */
+
+/*
+ * Deteccao de queda livre, com os parametros validados no acc_validation:
+ * inicio abaixo de 500 mg, impacto acima de 3 g, quedas de 13 cm a ~2 m
+ * e 1 s de debounce depois do impacto.
+ */
+
+static acc_freefall_config_t freefall_cfg = {
+    .lowg_mg = 500,
+    .highg_mg = 3000,
+    .min_height_cm = 13,
+    .max_height_cm = 201,
+    .debounce_ms = 1000,
+};
+
+/* Eventos do acelerometro: o callback roda na workqueue do sistema */
+K_MSGQ_DEFINE(acc_event_q, sizeof(acc_event_t), 8, 4);
+
+static void on_acc_event(const acc_event_t *evt)
+{
+    (void)k_msgq_put(&acc_event_q, evt, K_NO_WAIT);
+}
+
+static int accelerometer_start(void)
+{
+    int err;
+
+    err = srv_accelerometer_init(on_acc_event);
+
+    if (err) {
+        printk("Falha ao inicializar o acelerometro: %d\n", err);
+        return err;
+    }
+
+    err = srv_accelerometer_freefall_enable(&freefall_cfg);
+
+    if (err) {
+        printk("Falha ao ligar a deteccao de queda: %d\n", err);
+        return err;
+    }
+
+    printk("Deteccao de queda ligada (%u a %u cm).\n",
+           freefall_cfg.min_height_cm,
+           freefall_cfg.max_height_cm);
+
+    return 0;
+}
+
+/* =========================================================
  * Main
  * ========================================================= */
 
@@ -271,15 +328,15 @@ int main(void)
      * Mantem o mesmo valor enquanto nao houver uma nova
      * queda detectada.
      *
-     * Neste teste, fall_id e incrementado a cada evento
-     * FALL simulado.
+     * fall_id e incrementado a cada queda detectada
+     * pelo acelerometro.
      */
 
     uint16_t fall_id = 0;
 
     printk("\n");
     printk("=================================\n");
-    printk("       SysCare BLE Teste\n");
+    printk("        SysCare Firmware\n");
     printk("=================================\n");
 
     /* Inicializa o Bluetooth uma unica vez */
@@ -291,9 +348,8 @@ int main(void)
     }
 
     printk("Bluetooth inicializado!\n");
-    printk("Advertising por evento simulado.\n");
-    printk("Periodo entre eventos: 10 segundos.\n");
-    printk("Teste: 5 heartbeats + 1 queda.\n");
+    printk("Advertising por evento do acelerometro.\n");
+    printk("Heartbeat a cada 10 segundos sem queda.\n");
     printk("Advertising permanecera ativo continuamente.\n");
 
     /*
@@ -344,41 +400,62 @@ int main(void)
 
     printk("Advertising iniciado com sucesso!\n");
 
+    /*
+     * Liga o acelerometro depois do advertising: se ele
+     * falhar, a pulseira continua mandando heartbeats.
+     */
+
+    (void)accelerometer_start();
+
     while (1) {
 
+        acc_event_t acc_evt;
+        bool fall_detected = false;
+
         /*
-         * Aguarda 10 segundos.
-         * Simula a chegada de um novo evento do sistema.
+         * Aguarda uma queda por ate 10 segundos.
+         * Sem queda nesse tempo, o evento e um heartbeat.
          */
 
         printk("\nAguardando proximo evento...\n");
-        k_sleep(SIMULATED_EVENT_PERIOD);
+
+        if (k_msgq_get(&acc_event_q, &acc_evt, HEARTBEAT_PERIOD) == 0) {
+
+            /* So a queda vira mensagem; outros eventos sao ignorados */
+            if (acc_evt.type != ACC_EVENT_FREEFALL) {
+                continue;
+            }
+
+            fall_detected = true;
+        }
 
         /* Incrementa a sequencia de mensagens */
         seq++;
 
-        /*
-         * A cada 6 mensagens:
-         *   - 5 heartbeats normais
-         *   - 1 evento de queda simulada
-         */
-
         uint8_t event;
 
-        if ((seq % 6) == 0) {
+        if (fall_detected) {
 
-            /* Simula a deteccao de uma nova queda */
+            /* Queda detectada pelo acelerometro */
             event = SYSCARE_EVT_FALL;
 
             /* Novo ID para esta queda */
             fall_id++;
 
-            /* Simula um valor de impacto */
+            /*
+             * O sensor nao mede a intensidade do impacto, so
+             * a duracao da queda (e dela a altura). Mantem o
+             * valor fixo da simulacao (15,0 g) para o app se
+             * comportar como no teste anterior.
+             */
             impact_dg = 150;
 
             printk("\n");
             printk("=================================\n");
-            printk("QUEDA SIMULADA!\n");
+            printk("QUEDA DETECTADA!\n");
+            printk("Duracao: %u ms, altura estimada: ~%u cm\n",
+                   (unsigned int)acc_evt.duration_ms,
+                   (unsigned int)acc_evt.height_cm);
             printk("Sequencia: %u\n", (unsigned int)seq);
             printk("ID da queda: %u\n", (unsigned int)fall_id);
             printk("=================================\n");
