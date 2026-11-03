@@ -88,7 +88,14 @@ Após feito o código, foi feito um teste em conjunto com o aplicativo, que iden
 
 Esta etapa é dedicada ao desenvolvimento e à validação da comunicação com o acelerômetro **TDK IIM-42351**, componente utilizado para obter informações de movimento da pulseira.
 
+**(Botar mais coisas aqui)**
 
+
+Na Figura XX pode ser visto um dos testes feitos e o resultado via terminal, sendo identificado a queda e reportada.
+<div align="center">
+  <img src="../img/registro_quedas_terminal.png" alt="" width="55%">
+  <p>Figura XX - Registro de quedas via terminal</p>
+</div>
 
 
 ### 3.3. Firmware integrado
