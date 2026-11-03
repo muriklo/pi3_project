@@ -1,0 +1,8 @@
+/*
+ * SysCare - firmware integrado: overlay do devicetree para a XIAO nRF52840
+ *
+ * A pinagem e a alimentacao do acelerometro ficam no modulo lib/,
+ * compartilhadas com o app de validacao (acc_validation).
+ */
+
+#include <syscare/iim42351_xiao.dtsi>
