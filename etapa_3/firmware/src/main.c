@@ -14,7 +14,10 @@
  * lib/ (servico srv_accelerometer); se ele falhar, o firmware segue so
  * com os heartbeats.
  *
- * HMAC temporariamente desativado.
+ * Os bytes 10..13 levam o HMAC-SHA256 truncado dos bytes 0..9, com a
+ * chave gerada pela API no cadastro da pulseira (src/chave_pulseira.h,
+ * fora do git). Sem a assinatura, a API recusa a queda (401) e nao avisa
+ * os responsaveis. Contrato: etapa_3/software/api/docs/ble_payload.md.
  */
 
 #include <zephyr/types.h>
@@ -29,6 +32,9 @@
 
 #include <zephyr/bluetooth/bluetooth.h>
 #include <zephyr/bluetooth/hci.h>
+#include <zephyr/settings/settings.h>
+
+#include <psa/crypto.h>
 
 #include "srv_accelerometer.h"
 
@@ -89,6 +95,115 @@ static const uint8_t device_ble_id[4] = {
     0x01, 0x02, 0x03, 0x04
 };
 
+/*
+ * Chave do HMAC: a que o app mostra (e a API guarda) no cadastro da
+ * pulseira. Fica em src/chave_pulseira.h, que nao vai para o git, no
+ * formato:
+ *   #define SYSCARE_CHAVE_PULSEIRA { 0x.., ... 16 bytes ... }
+ * Sem o arquivo, compila com a chave de teste 00..0F, que a API recusa.
+ */
+#if __has_include("chave_pulseira.h")
+#include "chave_pulseira.h"
+#else
+#warning "src/chave_pulseira.h ausente: usando a chave de teste 00..0F"
+#define SYSCARE_CHAVE_PULSEIRA { \
+    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, \
+    0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F }
+#endif
+
+static const uint8_t shared_secret[16] = SYSCARE_CHAVE_PULSEIRA;
+
+static psa_key_id_t hmac_key;
+
+/* =========================================================
+ * Numero de sequencia
+ * ========================================================= */
+
+/*
+ * Pelo contrato, o seq so avanca em evento (queda); o heartbeat repete o
+ * valor atual. Ele fica gravado na flash: se zerasse a cada reinicio, o
+ * app e a API tratariam as quedas seguintes como repeticao de um anuncio
+ * antigo e nao alarmariam.
+ *
+ * Sem valor gravado (primeira gravacao do firmware), comeca em 1000, a
+ * frente dos numeros usados nos testes anteriores.
+ */
+#define SEQ_INICIAL 1000
+
+static uint16_t seq = SEQ_INICIAL;
+
+static int seq_set(const char *name, size_t len,
+                   settings_read_cb read_cb, void *cb_arg)
+{
+    if (settings_name_steq(name, "seq", NULL) && len == sizeof(seq)) {
+        return read_cb(cb_arg, &seq, sizeof(seq)) == sizeof(seq) ? 0 : -EIO;
+    }
+
+    return -ENOENT;
+}
+
+SETTINGS_STATIC_HANDLER_DEFINE(syscare, "syscare", NULL, seq_set, NULL, NULL);
+
+static void seq_load(void)
+{
+    int err = settings_subsys_init();
+
+    if (!err) {
+        err = settings_load_subtree("syscare");
+    }
+
+    if (err) {
+        printk("Falha ao ler o seq da flash (%d): usando %u\n",
+               err, (unsigned int)seq);
+        return;
+    }
+
+    printk("Seq atual: %u\n", (unsigned int)seq);
+}
+
+static void seq_save(void)
+{
+    int err = settings_save_one("syscare/seq", &seq, sizeof(seq));
+
+    if (err) {
+        printk("Falha ao gravar o seq na flash: %d\n", err);
+    }
+}
+
+/* =========================================================
+ * Criptografia
+ * ========================================================= */
+
+static int syscare_crypto_init(void)
+{
+    psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
+    psa_status_t status;
+
+    status = psa_crypto_init();
+
+    if (status != PSA_SUCCESS) {
+        printk("Falha no psa_crypto_init: %d\n", status);
+        return -EIO;
+    }
+
+    /* Chave HMAC de 128 bits, so para assinar */
+    psa_set_key_usage_flags(&attr, PSA_KEY_USAGE_SIGN_MESSAGE);
+    psa_set_key_algorithm(&attr, PSA_ALG_HMAC(PSA_ALG_SHA_256));
+    psa_set_key_type(&attr, PSA_KEY_TYPE_HMAC);
+    psa_set_key_bits(&attr, 8 * sizeof(shared_secret));
+
+    status = psa_import_key(&attr, shared_secret, sizeof(shared_secret), &hmac_key);
+
+    psa_reset_key_attributes(&attr);
+
+    if (status != PSA_SUCCESS) {
+        printk("Falha no psa_import_key: %d\n", status);
+        return -EIO;
+    }
+
+    return 0;
+}
+
 /* =========================================================
  * Buffers
  * ========================================================= */
@@ -108,12 +223,11 @@ static const uint8_t device_ble_id[4] = {
  * [6..7]    Sequencia (little-endian)
  * [8]       Bateria
  * [9]       Impacto
- * [10..11]  ID de queda (16 bits, little-endian)
- * [12..13]  Reservados para uso futuro
+ * [10..13]  HMAC-SHA256 dos bytes 0..9, truncado em 4 bytes
  *
- * O servidor deve utilizar o ID da pulseira junto com
- * o ID da queda para identificar retransmissoes do
- * mesmo evento e evitar disparos duplicados de SMS.
+ * O app e o servidor usam o ID da pulseira junto com a
+ * sequencia para identificar retransmissoes do mesmo
+ * evento e evitar alarmes e SMS duplicados.
  */
 
 static uint8_t adv_payload[14];
@@ -136,9 +250,12 @@ static int syscare_build_payload(
                                 uint8_t event,
                                 uint16_t seq,
                                 uint8_t batt,
-                                uint8_t impact_dg,
-                                uint16_t fall_id)
+                                uint8_t impact_dg)
 {
+    uint8_t mac[32];
+    size_t mac_len;
+    psa_status_t status;
+
     memset(adv_payload, 0, sizeof(adv_payload));
 
     // Byte 0: versao do protocolo=
@@ -163,24 +280,26 @@ static int syscare_build_payload(
     adv_payload[9] = impact_dg;
 
     /*
-     * Bytes 10 e 11: ID da queda (16 bits).
-     *
-     * O ID deve ser incrementado somente quando uma
-     * nova queda for detectada.
-     *
-     * Retransmissoes referentes a mesma queda devem
-     * utilizar o mesmo ID.
+     * Bytes 10 a 13: os 4 primeiros bytes do HMAC-SHA256 dos
+     * bytes 0..9. Sem a assinatura, o pacote nao vai ao ar.
      */
 
-    adv_payload[10] = (uint8_t)(fall_id & 0xFF);
-    adv_payload[11] = (uint8_t)((fall_id >> 8) & 0xFF);
+    status = psa_mac_compute(
+        hmac_key,
+        PSA_ALG_HMAC(PSA_ALG_SHA_256),
+        adv_payload,
+        10,
+        mac,
+        sizeof(mac),
+        &mac_len
+    );
 
-    /*
-     * Bytes 12 e 13: reservados para uso futuro.
-     */
+    if (status != PSA_SUCCESS) {
+        printk("Falha no HMAC: %d\n", status);
+        return -EIO;
+    }
 
-    adv_payload[12] = 0x00;
-    adv_payload[13] = 0x00;
+    memcpy(&adv_payload[10], mac, 4);
 
     return 0;
 }
@@ -319,20 +438,8 @@ int main(void)
 {
     int err;
 
-    uint16_t seq = 0;
     uint8_t batt = 100;
     uint8_t impact_dg = 0;
-
-    /*
-     * ID da queda:
-     * Mantem o mesmo valor enquanto nao houver uma nova
-     * queda detectada.
-     *
-     * fall_id e incrementado a cada queda detectada
-     * pelo acelerometro.
-     */
-
-    uint16_t fall_id = 0;
 
     printk("\n");
     printk("=================================\n");
@@ -352,6 +459,16 @@ int main(void)
     printk("Heartbeat a cada 10 segundos sem queda.\n");
     printk("Advertising permanecera ativo continuamente.\n");
 
+    /* Sem a chave importada nao ha como assinar: nao anuncia */
+    err = syscare_crypto_init();
+
+    if (err) {
+        return 0;
+    }
+
+    /* Retoma a sequencia de onde parou antes de desligar */
+    seq_load();
+
     /*
      * Monta o payload inicial antes de iniciar o advertising,
      * garantindo que os dados estejam preparados.
@@ -361,8 +478,7 @@ int main(void)
         SYSCARE_EVT_HEARTBEAT,
         seq,
         batt,
-        impact_dg,
-        fall_id
+        impact_dg
     );
 
     if (err) {
@@ -429,9 +545,6 @@ int main(void)
             fall_detected = true;
         }
 
-        /* Incrementa a sequencia de mensagens */
-        seq++;
-
         uint8_t event;
 
         if (fall_detected) {
@@ -439,8 +552,9 @@ int main(void)
             /* Queda detectada pelo acelerometro */
             event = SYSCARE_EVT_FALL;
 
-            /* Novo ID para esta queda */
-            fall_id++;
+            /* Novo evento: avanca a sequencia e guarda na flash */
+            seq++;
+            seq_save();
 
             /*
              * O sensor nao mede a intensidade do impacto, so
@@ -457,12 +571,11 @@ int main(void)
                    (unsigned int)acc_evt.duration_ms,
                    (unsigned int)acc_evt.height_cm);
             printk("Sequencia: %u\n", (unsigned int)seq);
-            printk("ID da queda: %u\n", (unsigned int)fall_id);
             printk("=================================\n");
 
         } else {
 
-            /* Evento normal: heartbeat */
+            /* Evento normal: heartbeat, repete o seq do ultimo evento */
             event = SYSCARE_EVT_HEARTBEAT;
             impact_dg = 0;
 
@@ -480,8 +593,7 @@ int main(void)
             event,
             seq,
             batt,
-            impact_dg,
-            fall_id
+            impact_dg
         );
 
         if (err) {
