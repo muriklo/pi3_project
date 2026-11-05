@@ -1,1 +1,3 @@
 build*/
+# Chave da pulseira: segredo, fica so na maquina de quem grava a pulseira
+src/chave_pulseira.h
