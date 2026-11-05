@@ -1,12 +1,12 @@
 # Etapa 3
 
-A etapa 3 corresponde ao desenvolvimento do produto: a fabricação das primeiras peças físicas da Pulseira SysCare e a primeira integração entre a pulseira, o aplicativo e o servidor. Nesta etapa, a placa de circuito impresso foi fabricada, a carcaça foi impressa em 3D, o *firmware* passou a transmitir o protocolo SysCare a partir da pulseira real, o sistema ganhou o aviso remoto por *push* e a API passou a rodar na nuvem. Este documento resume cada frente; o detalhamento está nos documentos indicados ao final de cada seção.
+A etapa 3 corresponde ao desenvolvimento do produto: a fabricação das primeiras peças físicas da Pulseira SysCare e a primeira integração entre a pulseira, o aplicativo e o servidor. Nesta etapa, a placa de circuito impresso foi fabricada, a carcaça foi impressa em 3D, a pulseira passou a detectar a queda pelo acelerômetro e a anunciá-la pelo protocolo SysCare, o sistema ganhou o aviso remoto por *push* e a API passou a rodar na nuvem. Este documento resume cada frente; o detalhamento está nos documentos indicados ao final de cada seção.
 
 ---
 
 ## Desenvolvimento de *Hardware*
 
-A placa de circuito impresso (PCI) foi produzida a partir do esquemático da Etapa 2, pelo processo de transferência do desenho e corrosão do cobre. O *layout* foi impresso e transferido para a placa; a corrosão removeu o cobre das regiões não protegidas, formando as trilhas; e o lixamento ajustou o tamanho e os cortes laterais da placa para o encaixe na carcaça, como mostra a Figura 1. As próximas atividades são a inspeção das trilhas, o teste de continuidade elétrica e a montagem dos componentes.
+A placa de circuito impresso (PCI) foi produzida a partir do esquemático da Etapa 2, pelo processo de transferência do desenho e corrosão do cobre. O *layout* foi transferido para a placa, a corrosão formou as trilhas e o lixamento ajustou o formato para o encaixe na carcaça (Figura 1). As próximas atividades são a inspeção das trilhas, o teste de continuidade elétrica e a montagem dos componentes.
 
 <div align="center">
   <img src="./img/corroido_pcb.png" alt="Placa de circuito impresso após a corrosão" width="40%">
@@ -22,7 +22,7 @@ A placa de circuito impresso (PCI) foi produzida a partir do esquemático da Eta
 
 O *firmware* da pulseira é desenvolvido para a XIAO nRF52840 [1], sobre o Zephyr RTOS e o nRF Connect SDK [2]. A estratégia adotada é validar cada módulo isoladamente antes de integrá-los: primeiro o anúncio BLE, depois a comunicação com o acelerômetro IIM-42351 [3] e, por fim, a aplicação integrada.
 
-O módulo de anúncio BLE já transmite o pacote de 14 bytes do protocolo SysCare [4]. O anúncio é iniciado uma única vez e atualizado a cada evento, sem interromper a transmissão. Como o acelerômetro ainda está em teste, os eventos são simulados: um *heartbeat* a cada 10 s e uma queda a cada 60 s. Nessa versão de testes, os quatro bytes finais, que o protocolo reserva à assinatura HMAC [5], foram ocupados por um identificador de queda. Como o servidor confere essa assinatura, as quedas são recusadas, ponto a ser resolvido na integração. O *firmware* de referência do anúncio, revisado nesta etapa, já calcula a assinatura e serve de base para isso.
+O *firmware* integrado já detecta a queda pelo próprio acelerômetro: o recurso de queda livre do IIM-42351 [3] identifica quedas de 13 cm a cerca de 2 m, seguidas de impacto acima de 3 g. Sem queda, a pulseira envia um *heartbeat* a cada 10 s. O pacote de 14 bytes do protocolo SysCare [4] é atualizado a cada evento, sem interromper a transmissão, e os quatro últimos bytes levam a assinatura HMAC [5], calculada com a chave gerada no cadastro da pulseira. O número de sequência só avança nas quedas e fica gravado na memória da placa, para que um reinício não faça o aplicativo e o servidor tomarem uma queda nova pela repetição de um anúncio antigo. O campo de impacto ainda leva um valor fixo, porque o sensor mede a duração da queda, e não a intensidade do impacto.
 
 > 📁 **Documentação do *Firmware*:** [Firmware](./firmware/README.md) · **Protocolo BLE:** [ble_payload.md](./software/api/docs/ble_payload.md)
 
@@ -30,9 +30,8 @@ O módulo de anúncio BLE já transmite o pacote de 14 bytes do protocolo SysCar
 
 ## Desenvolvimento de *Software*
 
-O código do aplicativo e da API foi trazido da Etapa 2 para esta etapa, e o sistema ganhou o aviso remoto por *push*, pelo Firebase Cloud Messaging [6]. Até então, o alerta chegava pela sirene e pelo SMS do celular que ouviu a pulseira. Com o *push*, a API notifica os celulares de todos os responsáveis vinculados à pulseira, mesmo longe dela, e o aplicativo toca a mesma sirene do alarme local. A mensagem identifica o anúncio de origem, para que o celular que já ouviu a pulseira não alarme duas vezes.
-
-A integração com a pulseira real também exigiu ajustes. O aplicativo passou a procurar explicitamente o anúncio BLE legado, formato usado pela pulseira [7], e o *firmware* de referência do anúncio foi corrigido para atualizar os dados transmitidos e calcular a assinatura com a interface criptográfica da versão atual do nRF Connect SDK.
+O código do aplicativo e da API foi trazido da Etapa 2 para esta etapa, e o sistema ganhou o aviso remoto por *push*, pelo Firebase Cloud Messaging [6]. Até então, o alerta chegava pela sirene e pelo SMS do celular que ouviu a pulseira. Com o *push*, a API notifica os celulares de todos os responsáveis vinculados à pulseira, mesmo longe dela, e o aplicativo toca a mesma sirene do alarme local.
+A integração com a pulseira real exigiu ajustes: o aplicativo passou a procurar explicitamente o anúncio BLE legado, formato usado pela pulseira [7], e o *firmware* de referência passou a calcular a assinatura com a interface criptográfica atual do nRF Connect SDK.
 
 Por fim, a API foi publicada em uma máquina virtual do Azure, obtida pelo programa para estudantes [8], com HTTPS e endereço fixo. Assim, os alertas chegam ao servidor e o *push* sai para os responsáveis de qualquer lugar, e não só da rede local.
 
@@ -42,8 +41,7 @@ Por fim, a API foi publicada em uma máquina virtual do Azure, obtida pelo progr
 
 ## Desenvolvimento mecânico
 
-A carcaça projetada na Etapa 2 foi fabricada por impressão 3D em ABS, com o filamento e o processo disponíveis no IFSC, como mostra a Figura 2. A peça permitiu verificar fisicamente as dimensões externas, a região reservada à placa, à bateria e ao acelerômetro, e os elementos de fixação da pulseira de 18 mm. A impressão 3D mantém a possibilidade de ajustar a geometria rapidamente durante a montagem dos componentes.
-
+A carcaça projetada na Etapa 2 foi fabricada por impressão 3D em ABS, com o filamento e o processo disponíveis no IFSC, como mostra a Figura 2. A peça permitiu verificar fisicamente as dimensões externas, a região reservada à placa, à bateria e ao acelerômetro, e os elementos de fixação da pulseira de 18 mm.
 <div align="center">
   <img src="./img/mecanica_estrutura_3D.png" alt="Carcaça da Pulseira SysCare impressa em 3D" width="40%">
   <img src="./img/mecanica_perfil_pulseira.png" alt="Carcaça montada com a pulseira de 18 mm" width="40%">
@@ -64,9 +62,9 @@ As validações desta etapa estão resumidas na Tabela 1.
 |---|---|---|
 | **Mecânica** | Impressão da carcaça e montagem com a pulseira | Geometria e fixação verificadas fisicamente |
 | ***Hardware*** | Fabricação da PCI | Trilhas formadas; continuidade e montagem pendentes |
-| ***Firmware*** | Anúncio com eventos simulados, conferido no console da placa | Pacote transmitido e atualizado a cada evento |
-| **Integração** | Pulseira, celular Android e responsável, em 22/10/2026 | Alarme no celular e SMS ao responsável; queda recusada pela API por falta de assinatura |
-| ***Push*** | Alerta assinado gerado pelo *script* de simulação da API | Alerta recebido no celular do responsável, com a sirene |
+| ***Firmware*** | Detecção de queda livre e anúncio assinado | Quedas detectadas e aceitas pelo servidor |
+| **Integração** | Pulseira sem assinatura, celular e responsável, em 22/10/2026 | Alarme e SMS ao responsável; queda recusada pela API |
+| **Cadeia completa** | Queda real com o *firmware* assinado, em 04/11/2026 | Queda aceita, *push* entregue e atendimento confirmado por um responsável em outra rede |
 | **Servidor** | API na nuvem: acesso por HTTPS e reinício da máquina | Respondeu por HTTPS e voltou sozinha em cerca de 18 s |
 | **Automatizados** | 47 testes do aplicativo e 27 da API | Todos aprovados |
 
@@ -76,11 +74,18 @@ As validações desta etapa estão resumidas na Tabela 1.
   <p>Tabela 1 - Testes realizados na Etapa 3</p>
 </div>
 
-No teste de integração, apresentado na Figura 3, o celular que ouviu a pulseira exibiu a queda simulada, tocou a sirene e enviou o SMS, recebido pelo responsável com o link do mapa. Em seguida, a API recusou o evento, porque a versão de testes do *firmware* não assina o anúncio, e o aplicativo desligou a sirene e informou a recusa. É o comportamento esperado: sem a assinatura, o servidor não distingue a pulseira de um rádio que imite o anúncio. A cadeia completa, da pulseira ao *push*, será validada quando o *firmware* integrado passar a assinar os anúncios.
+No primeiro teste de integração, em 22/10 (Figura 3), o celular que ouviu a pulseira tocou a sirene e enviou o SMS ao responsável, mas a API recusou a queda, porque aquela versão do *firmware* não assinava o anúncio; sem a assinatura, o servidor não distingue a pulseira de um rádio que a imite.
 
 <div align="center">
   <img src="./img/teste_ble_e_aplicativo.png" alt="Teste de integração entre a pulseira, o aplicativo e o responsável" width="60%">
-  <p>Figura 3 - Teste de integração: à direita, o alarme no celular que ouviu a pulseira; à esquerda, o SMS recebido pelo responsável</p>
+  <p>Figura 3 - Teste de 22/10/2026: à direita, o alarme no celular que ouviu a pulseira; à esquerda, o SMS recebido pelo responsável</p>
+</div>
+
+Em 04/11, com o *firmware* integrado assinando os anúncios, a cadeia completa funcionou (Figura 4): a queda detectada pelo acelerômetro foi aceita pelo servidor na nuvem, o *push* chegou aos responsáveis e um deles, em outra rede, confirmou o atendimento em menos de 30 s. Os quiques da pulseira no chão geraram três alertas para a mesma queda, ponto a ser tratado na próxima etapa.
+
+<div align="center">
+  <img src="./img/teste_pulseira_push.jpg" alt="Tela de alerta da queda detectada pela pulseira" width="35%">
+  <p>Figura 4 - Teste de 04/11/2026: alerta da queda detectada pelo acelerômetro, com impacto, bateria e opções de atendimento (<a href="./img/teste_pulseira_push.mp4">vídeo</a>)</p>
 </div>
 
 ## Referências (links/datasheets/livros)

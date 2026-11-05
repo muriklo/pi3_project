@@ -42,7 +42,7 @@ As plataformas que publicam a aplicação a partir do repositório são as mais 
   <p>Tabela 2 - Opções de hospedagem avaliadas</p>
 </div>
 
-O Azure for Students foi escolhido por não exigir cartão, bastando o e-mail acadêmico do IFSC, e por cobrir o período restante do projeto.
+O Azure for Students foi escolhido por não exigir cartão e cobrir o restante do projeto.
 
 ## 3. Implantação
 
@@ -71,11 +71,11 @@ A organização dos serviços, apresentada na Figura 1, segue a recomendação d
   <p>Figura 1 - Organização do servidor na nuvem e caminho do alerta até o responsável</p>
 </div>
 
-A chave do Firebase e o arquivo de configuração ficam no servidor, legíveis apenas pelo usuário da API, e não vão para o repositório. A chave que assina as sessões dos usuários foi gerada no próprio servidor. O banco de testes foi copiado para a máquina, preservando as contas, a pulseira de testes com a sua chave e o registro de *push* dos celulares.
+A chave do Firebase e o arquivo de configuração ficam no servidor, legíveis apenas pelo usuário da API, e não vão para o repositório. A chave que assina as sessões dos usuários foi gerada no próprio servidor. O banco de testes foi copiado para a máquina, com as contas e as pulseiras.
 
 ## 4. Testes
 
-Os testes da Tabela 4 foram feitos do computador de desenvolvimento.
+Os testes da Tabela 4 foram feitos do computador de desenvolvimento, exceto o último, feito com a pulseira em 04/11/2026.
 
 <div align="center">
 
@@ -87,6 +87,7 @@ Os testes da Tabela 4 foram feitos do computador de desenvolvimento.
 | **Login com credenciais inválidas** | Recusado, confirmando o caminho completo até a API |
 | **Tempo de resposta** | Cerca de 230 ms por requisição, incluindo a abertura da conexão segura |
 | **Reinício da máquina** | API e HTTPS de volta em cerca de 18 s, sem intervenção |
+| **Pulseira e aplicativos** | Queda aceita e *push* confirmado por um responsável em outra rede em menos de 30 s |
 
 </div>
 
@@ -98,8 +99,8 @@ Os testes da Tabela 4 foram feitos do computador de desenvolvimento.
 
 A máquina custa US$ 0,0132 por hora no preço de tabela, cerca de US$ 10 por mês descontados do crédito de estudante, ou nada, se estiver coberta pelas horas gratuitas da oferta. Como a assinatura não tem cartão, quando o crédito acaba a máquina é desligada, sem cobrança.
 
-- **Aplicativo:** testar o aplicativo com o servidor. O endereço digitado precisa terminar com a porta 443, porque o aplicativo assume a porta 8000 quando ela falta; essa regra será ajustada.
-- **Cópia de segurança:** copiar o banco diariamente para fora da máquina, já que hoje ele existe apenas no disco dela.
+- **Aplicativo:** aceitar o endereço do servidor sem a porta 443; hoje o aplicativo assume a porta 8000 quando ela falta, e a porta precisa ser digitada.
+- **Cópia de segurança:** copiar o banco diariamente para fora da máquina, onde hoje está a única cópia.
 - **Acesso administrativo:** restringir a porta do SSH, hoje aberta à internet, embora só aceite chave.
 
 ## Referências (links/datasheets/livros)
