@@ -24,7 +24,13 @@ O *firmware* da pulseira é desenvolvido para a XIAO nRF52840 [1], sobre o Zephy
 
 O *firmware* integrado já detecta a queda pelo próprio acelerômetro: o recurso de queda livre do IIM-42351 [3] identifica quedas de 13 cm a cerca de 2 m, seguidas de impacto acima de 3 g. Sem queda, a pulseira envia um *heartbeat* a cada 10 s. O pacote de 14 bytes do protocolo SysCare [4] é atualizado a cada evento, sem interromper a transmissão, e os quatro últimos bytes levam a assinatura HMAC [5], calculada com a chave gerada no cadastro da pulseira. O número de sequência só avança nas quedas e fica gravado na memória da placa, para que um reinício não faça o aplicativo e o servidor tomarem uma queda nova pela repetição de um anúncio antigo. O campo de impacto ainda leva um valor fixo, porque o sensor mede a duração da queda, e não a intensidade do impacto.
 
-> 📁 **Documentação do *Firmware*:** [Firmware](./firmware/README.md) · **Protocolo BLE:** [ble_payload.md](./software/api/docs/ble_payload.md)
+<div align="center">
+  <img src="./img/registro_quedas_terminal.png" alt="Placa de circuito impresso após a corrosão" width="70%">
+  <p>Figura 2 - Testes de quedas livres registradas no terminal</p>
+</div>
+
+> 📁 **Documentação do *Firmware*:** [Firmware](./firmware/README.md)
+
 
 ---
 
@@ -41,11 +47,11 @@ Por fim, a API foi publicada em uma máquina virtual do Azure, obtida pelo progr
 
 ## Desenvolvimento mecânico
 
-A carcaça projetada na Etapa 2 foi fabricada por impressão 3D em ABS, com o filamento e o processo disponíveis no IFSC, como mostra a Figura 2. A peça permitiu verificar fisicamente as dimensões externas, a região reservada à placa, à bateria e ao acelerômetro, e os elementos de fixação da pulseira de 18 mm.
+A carcaça projetada na Etapa 2 foi fabricada por impressão 3D em ABS, com o filamento e o processo disponíveis no IFSC, como mostra a Figura 3. A peça permitiu verificar fisicamente as dimensões externas, a região reservada à placa, à bateria e ao acelerômetro, e os elementos de fixação da pulseira de 18 mm.
 <div align="center">
   <img src="./img/mecanica_estrutura_3D.png" alt="Carcaça da Pulseira SysCare impressa em 3D" width="40%">
   <img src="./img/mecanica_perfil_pulseira.png" alt="Carcaça montada com a pulseira de 18 mm" width="40%">
-  <p>Figura 2 - Carcaça impressa em 3D e montagem com a pulseira</p>
+  <p>Figura 3 - Carcaça impressa em 3D e montagem com a pulseira</p>
 </div>
 
 > 📁 **Documentação de Mecânica:** fabricação e montagem do *case* em [Mecânica](./mechanics/README.md)
@@ -74,18 +80,23 @@ As validações desta etapa estão resumidas na Tabela 1.
   <p>Tabela 1 - Testes realizados na Etapa 3</p>
 </div>
 
-No primeiro teste de integração, em 22/10 (Figura 3), o celular que ouviu a pulseira tocou a sirene e enviou o SMS ao responsável, mas a API recusou a queda, porque aquela versão do *firmware* não assinava o anúncio; sem a assinatura, o servidor não distingue a pulseira de um rádio que a imite.
+No primeiro teste de integração, em 22/10 (Figura 4), o celular que ouviu a pulseira tocou a sirene e enviou o SMS ao responsável, mas a API recusou a queda, porque aquela versão do *firmware* não assinava o anúncio; sem a assinatura, o servidor não distingue a pulseira de um rádio que a imite.
 
-<div align="center">
-  <img src="./img/teste_ble_e_aplicativo.png" alt="Teste de integração entre a pulseira, o aplicativo e o responsável" width="60%">
-  <p>Figura 3 - Teste de 22/10/2026: à direita, o alarme no celular que ouviu a pulseira; à esquerda, o SMS recebido pelo responsável</p>
-</div>
 
-Em 04/11, com o *firmware* integrado assinando os anúncios, a cadeia completa funcionou (Figura 4): a queda detectada pelo acelerômetro foi aceita pelo servidor na nuvem, o *push* chegou aos responsáveis e um deles, em outra rede, confirmou o atendimento em menos de 30 s. Os quiques da pulseira no chão geraram três alertas para a mesma queda, ponto a ser tratado na próxima etapa.
+
+Em 04/11, com o *firmware* integrado assinando os anúncios, a cadeia completa funcionou (Figura 5): a queda detectada pelo acelerômetro foi aceita pelo servidor na nuvem, o *push* chegou aos responsáveis e um deles, em outra rede, confirmou o atendimento em menos de 30 s. Os quiques da pulseira no chão geraram três alertas para a mesma queda, ponto a ser tratado na próxima etapa.
 
 <div align="center">
   <img src="./img/teste_pulseira_push.jpg" alt="Tela de alerta da queda detectada pela pulseira" width="35%">
-  <p>Figura 4 - Teste de 04/11/2026: alerta da queda detectada pelo acelerômetro, com impacto, bateria e opções de atendimento (<a href="./img/teste_pulseira_push.mp4">vídeo</a>)</p>
+  <p>Figura 5 - Teste de 04/11/2026: alerta da queda detectada pelo acelerômetro, com impacto, bateria e opções de atendimento (<a href="./img/teste_pulseira_push.mp4">vídeo</a>)</p>
+</div>
+
+
+Em 05/11, foi realizada a montagem do protótipo inicial da pulseira, seguida de testes de funcionamento. O Gif 1 mostra um desses testes: a queda é detectada pelo acelerômetro, a pulseira transmite o alerta por BLE, o aplicativo recebe a mensagem e o responsável é notificado por SMS. O resultado confirmou o funcionamento correto do protótipo completo.
+
+<div align="center">
+  <img src="./img/teste_queda.gif" alt="Teste de integração entre a pulseira, o aplicativo e o responsável" width="80%">
+  <p>Gif 1 - Teste de funcionamento do protótipo completo</p>
 </div>
 
 ## Referências (links/datasheets/livros)

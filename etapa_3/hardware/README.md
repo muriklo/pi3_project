@@ -23,7 +23,7 @@ Esta etapa é importante para organizar os componentes e definir as trilhas de c
 
 Após o desenvolvimento do layout, foram realizados os procedimentos necessários para transferir o desenho para a placa e preparar o circuito impresso.
 
-### 3.1. Impressão do layout
+### 3.1 Impressão do layout
 
 A impressão corresponde à etapa de preparação do desenho que será transferido para a placa de circuito impresso.
 
@@ -32,7 +32,7 @@ A impressão corresponde à etapa de preparação do desenho que será transferi
   <p>Figura 2 - Impressão utilizada no processo de fabricação da PCB</p>
 </div>
 
-### 3.2. Corrosão do cobre
+### 3.2 Corrosão do cobre
 
 Nesta etapa, o processo de corrosão é utilizado para remover o cobre das regiões não protegidas pelo desenho do circuito, formando as trilhas e as áreas condutoras definidas no layout.
 
@@ -42,7 +42,7 @@ Nesta etapa, o processo de corrosão é utilizado para remover o cobre das regi�
 </div>
 
 
-### 3.3. Resultado após a corrosão
+### 3.3 Resultado após a corrosão
 
 Após o processo de corrosão, a placa apresenta as trilhas de cobre correspondentes ao desenho transferido para a PCB.
 
@@ -52,7 +52,7 @@ Após o processo de corrosão, a placa apresenta as trilhas de cobre corresponde
 </div>
 
 
-### 3.4. Lixamento da placa
+### 3.4 Lixamento da placa
 
 O lixamento foi realizado para preparar o tamanho correto e cortes laterais para o encaixe com a parte mecânica.
 
@@ -61,7 +61,20 @@ O lixamento foi realizado para preparar o tamanho correto e cortes laterais para
   <p>Figura 5 - Adequação da placa por lixamento</p>
 </div>
 
-## 4. 
+## 3.5 Soldagem dos componentes
 
+Após o lixamento foi feito também a soldagem dos componentes. Primeiramente para os testes iniciais foram soldados apenas o nRF52840, o acelerômetro e a bateria.
 
+<div align="center">
+  <img src="../img/soldagem.png" alt="" width="55%">
+  <p>Figura 6 - Soldagem dos componentes na PCI</p>
+</div>
 
+## 3.6 Monstagem do primeiro protótipo
+
+Após a soldagem, chegou-se ao seguinte resultado para o primeiro protótipo.
+
+<div align="center">
+  <img src="../img/prototipo.png" alt="" width="55%">
+  <p>Figura 7 - Primeiro protótipo da pulseira SysCare</p>
+</div>
