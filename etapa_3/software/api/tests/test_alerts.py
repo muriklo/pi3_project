@@ -22,6 +22,7 @@ os.environ["SYSCARE_REQUIRE_HMAC"] = "true"
 os.environ["SYSCARE_FCM_CREDENTIALS_FILE"] = ""
 
 from app.ble import EVENT_CODES, decode_payload  # noqa: E402
+from app.config import get_settings  # noqa: E402
 from app.database import Base, engine  # noqa: E402
 from app.main import app  # noqa: E402
 
@@ -147,6 +148,35 @@ def test_assinatura_invalida_e_rejeitada(client, setup):
     r = client.post(
         "/v1/alerts",
         json={"ble_id": BLE_ID, "raw_payload": forjado},
+        headers=setup["headers"],
+    )
+    assert r.status_code == 401
+
+
+def test_sem_exigir_hmac_aceita_firmware_que_nao_assina(client, setup, monkeypatch):
+    """Firmware integrado: bytes 10..11 com o ID da queda, 12..13 zerados.
+
+    Com SYSCARE_REQUIRE_HMAC=false o alerta precisa entrar e notificar; antes ele
+    era recusado com 401 e o push nunca saia.
+    """
+    def anuncio_do_firmware(seq: int, fall_id: int = 1) -> str:
+        dados = build_raw_payload(setup["secret"], seq=seq)[:20]  # bytes 0..9
+        return dados + bytes([fall_id & 0xFF, fall_id >> 8, 0, 0]).hex()
+
+    monkeypatch.setattr(get_settings(), "require_hmac", False)
+    r = client.post(
+        "/v1/alerts",
+        json={"ble_id": BLE_ID, "raw_payload": anuncio_do_firmware(40)},
+        headers=setup["headers"],
+    )
+    assert r.status_code == 201, r.text
+    assert r.json()["notified"] == 1
+
+    # Exigindo HMAC, o mesmo tipo de anuncio continua barrado.
+    monkeypatch.setattr(get_settings(), "require_hmac", True)
+    r = client.post(
+        "/v1/alerts",
+        json={"ble_id": BLE_ID, "raw_payload": anuncio_do_firmware(41)},
         headers=setup["headers"],
     )
     assert r.status_code == 401

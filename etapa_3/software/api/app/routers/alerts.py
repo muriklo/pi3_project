@@ -97,12 +97,22 @@ def _check_signature(device: Device, data: dict) -> None:
         battery_pct=data.get("battery_pct") or 0,
         impact_dg=round((data.get("impact_g") or 0) * 10),
     )
-    if not verify_device_signature(device.shared_secret, payload, signature):
-        logger.error("HMAC invalido para a pulseira %s.", device.ble_id)
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Assinatura da pulseira invalida.",
+    if verify_device_signature(device.shared_secret, payload, signature):
+        return
+    if not settings.require_hmac:
+        # O raw_payload sempre traz os bytes 10..13, entao "sem assinatura" nunca
+        # aparece por ele: um firmware que ainda nao assina chega aqui com um
+        # HMAC que nao confere. Sem SYSCARE_REQUIRE_HMAC, recusar seria mais
+        # rigido do que aceitar o mesmo evento em campos soltos sem assinatura.
+        logger.warning(
+            "Alerta com HMAC invalido aceito (device=%s, modo dev).", device.ble_id
         )
+        return
+    logger.error("HMAC invalido para a pulseira %s.", device.ble_id)
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Assinatura da pulseira invalida.",
+    )
 
 
 def _check_replay(device: Device, seq: int) -> None:
