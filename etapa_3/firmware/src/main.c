@@ -120,7 +120,7 @@ static psa_key_id_t hmac_key;
  * ========================================================= */
 
 /*
- * Pelo contrato, o seq so avanca em evento (queda); o heartbeat repete o
+ * Pelo contrato, o seq só avança em evento (queda); o heartbeat repete o
  * valor atual. Ele fica gravado na flash: se zerasse a cada reinicio, o
  * app e a API tratariam as quedas seguintes como repeticao de um anuncio
  * antigo e nao alarmariam.
@@ -144,27 +144,21 @@ static int seq_set(const char *name, size_t len,
 
 SETTINGS_STATIC_HANDLER_DEFINE(syscare, "syscare", NULL, seq_set, NULL, NULL);
 
-static void seq_load(void)
-{
+static void seq_load(void){
     int err = settings_subsys_init();
-
     if (!err) {
         err = settings_load_subtree("syscare");
     }
-
     if (err) {
         printk("Falha ao ler o seq da flash (%d): usando %u\n",
                err, (unsigned int)seq);
         return;
     }
-
     printk("Seq atual: %u\n", (unsigned int)seq);
 }
 
-static void seq_save(void)
-{
+static void seq_save(void){
     int err = settings_save_one("syscare/seq", &seq, sizeof(seq));
-
     if (err) {
         printk("Falha ao gravar o seq na flash: %d\n", err);
     }
@@ -174,14 +168,13 @@ static void seq_save(void)
  * Criptografia
  * ========================================================= */
 
-static int syscare_crypto_init(void)
-{
+static int syscare_crypto_init(void){
     psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
     psa_status_t status;
 
     status = psa_crypto_init();
 
-    if (status != PSA_SUCCESS) {
+    if (status != PSA_SUCCESS){
         printk("Falha no psa_crypto_init: %d\n", status);
         return -EIO;
     }
@@ -196,7 +189,7 @@ static int syscare_crypto_init(void)
 
     psa_reset_key_attributes(&attr);
 
-    if (status != PSA_SUCCESS) {
+    if (status != PSA_SUCCESS){
         printk("Falha no psa_import_key: %d\n", status);
         return -EIO;
     }

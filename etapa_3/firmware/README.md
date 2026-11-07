@@ -43,16 +43,15 @@ Esta etapa tem como objetivo validar a inicialização do Bluetooth, a transmiss
 
 O payload possui 14 bytes, organizados da seguinte forma:
 
-| Bytes | Campo | Descrição |
+| Campo | Bytes | Descrição |
 |---|---|---|
-| `[0]` | Versão | Versão do protocolo (`0x01`). |
-| `[1..4]` | ID da pulseira | Identificador de 32 bits do dispositivo. |
-| `[5]` | Evento | Tipo de evento transmitido. |
-| `[6..7]` | Sequência | Contador de mensagens de 16 bits. |
-| `[8]` | Bateria | Valor do nível de bateria. |
-| `[9]` | Impacto | Valor associado à intensidade do impacto. |
-| `[10..11]` | ID da queda | Identificador de 16 bits da ocorrência. |
-| `[12..13]` | Reservado | Espaço para futuras extensões. |
+| `Versão `| [0] | Identificação da versão do protocolo |
+| `ID da pulseira` | [1..4] | Identificador do dispositivo |
+| `Evento` | [5] | Tipo de evento transmitido |
+| `Sequência` | [6..7] | Identificador sequencial da queda |
+| `Bateria` | [8] | Informação da bateria |
+| `Impacto` | [9] | Informação de impacto |
+| `Assinatura HMAC` | [10..13] | Assinatura de autenticação |
 
 Os campos de 16 bits são transmitidos em little-endian.
 
@@ -130,6 +129,9 @@ O teste consistiu em soltar a placa de alturas conhecidas sobre uma almofada, pa
 
 A Figura XX mostra o registro do terminal. Foram detectadas 5 quedas livres, e o contador de quedas detectadas foi atualizado a cada evento.
 
+
+<div align="center">
+
 | Queda | Duração (ms) | Altura estimada (cm) |
 |---|---|---|
 | 1 | 256 | ~32 |
@@ -138,9 +140,15 @@ A Figura XX mostra o registro do terminal. Foram detectadas 5 quedas livres, e o
 | 4 | 162 | ~13 |
 | 5 | 192 | ~18 |
 
+<p>Tabela 1 - Resultados dos dados de queda</p>
+
+</div>
+
 <div align="center">
-  <img src="../img/registro_quedas_terminal.png" alt="" width="55%">
-  <p>Figura XX - Quedas livres registradas no terminal</p>
+  <img src="../img/registro_quedas_terminal.png" alt="Registro de quedas no terminal" width="70%">
+  <img src="../img/teste_terminal_acelerometro_dados.png" alt="Dados do acelerômetro durante os testes" width="70%">
+
+  <p>Figura 2 - Testes de detecção de queda livre e leitura dos dados do acelerômetro</p>
 </div>
 
 As alturas estimadas foram comparadas com as alturas reais de **[X, Y, Z cm]**, com erro de **[X]**. O módulo mostrou-se capaz de detectar a queda e medir sua duração, sendo o próximo passo integrá-lo ao advertising BLE, de modo que cada detecção gere um evento de queda no protocolo SysCare em vez de um evento simulado.

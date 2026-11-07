@@ -72,7 +72,7 @@ Após o lixamento foi feito também a soldagem dos componentes. Primeiramente pa
 
 ## 3.6 Monstagem do primeiro protótipo
 
-Após a soldagem, chegou-se ao seguinte resultado para o primeiro protótipo.
+Após a soldagem, chegou-se ao seguinte resultado para o primeiro protótipo. A Figura 7 portanto apresenta a montagem do protótipo integrada com a parte mecânica da pulseira.
 
 <div align="center">
   <img src="../img/prototipo.png" alt="" width="55%">
