@@ -4,7 +4,7 @@ Nesta etapa, foi realizada a fabricação da estrutura mecânica desenvolvida na
 
 A carcaça foi produzida por meio de impressão 3D utilizando ABS, conforme definido na Etapa 2. A escolha do material foi mantida devido às características mecânicas consideradas no desenvolvimento do protótipo, além da disponibilidade do filamento e do processo de fabricação no IFSC. A utilização da impressão 3D também permite realizar alterações na geometria da estrutura de forma rápida, caso sejam identificadas necessidades de ajuste durante a montagem e integração dos componentes.
 
-A Figura 1 a estrutura principal impressa com ABS, enquanto a Figura 2 apresenta a montagem das partes que compõem o case da juntamente com a pulseira.
+A Figura 1 apresenta a estrutura principal impressa em ABS, enquanto a Figura 2 apresenta a montagem das partes que compõem o case, juntamente com a pulseira.
 
 
 <div align="center">
@@ -12,6 +12,8 @@ A Figura 1 a estrutura principal impressa com ABS, enquanto a Figura 2 apresenta
 <img src="../img/mecanica_estrutura_3D.png" alt="Case da Pulseira SysCare produzido por impressão 3D" width="55%">
 
 <p>Figura 1 - Estrutura do case da Pulseira SysCare produzida por impressão 3D.</p>
+
+</div>
 
 
 
