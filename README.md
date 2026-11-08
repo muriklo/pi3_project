@@ -27,7 +27,7 @@ Este projeto deve implementar:
 ## Visão geral
 
 <div align="center">
-  <img src="./etapa_1/img/diagrama_de_blocos.png" alt="Figura 3" width="85%">
+  <img src="./etapa_1/img/diagrama_de_blocos.png" alt="Diagrama de blocos do sistema" width="85%">
   <p>Figura 1 - Diagrama de blocos do sistema</p>
 </div>
 
@@ -35,6 +35,11 @@ O sistema funciona em fluxo contínuo iniciando no Dispositivo Vestível (Camada
 
 ## Protótipo
 
-**(Adicionar aqui uma foto do protótipo com UM parágrafo de explicação.)**
+O primeiro protótipo da Pulseira SysCare, apresentado na Figura 2, reúne na carcaça impressa em 3D a placa de circuito impresso com o microcontrolador XIAO nRF52840 e o acelerômetro IIM-42351. A queda detectada pelo acelerômetro é anunciada por BLE com assinatura; o celular que recebe o anúncio toca o alarme e repassa o alerta ao servidor na nuvem, que avisa os responsáveis por *push*, além do SMS enviado pelo próprio celular. O desenvolvimento e os testes do protótipo estão descritos na [Etapa 3](./etapa_3/README.md).
+
+<div align="center">
+  <img src="./etapa_3/img/prototipo.png" alt="Primeiro protótipo da Pulseira SysCare" width="40%">
+  <p>Figura 2 - Primeiro protótipo da Pulseira SysCare</p>
+</div>
 
 
