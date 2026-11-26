@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- O som so e referenciado pelo nome (canal de notificacao e push da API);
+     sem isto o encolhimento de recursos do release o removeria. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@raw/sirene" />
