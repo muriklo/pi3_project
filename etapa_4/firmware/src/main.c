@@ -115,6 +115,10 @@ static const struct bt_le_adv_param adv_alert = BT_LE_ADV_PARAM_INIT(
  * Identificacao da pulseira
  * ========================================================= */
 
+/*
+ * ID da pulseira: fixo por enquanto (valor de teste). Precisa bater com
+ * o ID cadastrado na API junto com a chave abaixo.
+ */
 static const uint8_t device_ble_id[4] = {
     0x01, 0x02, 0x03, 0x04
 };
@@ -275,7 +279,7 @@ static int syscare_build_payload(
 
     memset(adv_payload, 0, sizeof(adv_payload));
 
-    // Byte 0: versao do protocolo=
+    // Byte 0: versao do protocolo
     adv_payload[0] = SYSCARE_PROTO_VER;
 
     // Bytes 1 a 4: identificador da pulseira
@@ -322,19 +326,8 @@ static int syscare_build_payload(
 }
 
 /* =========================================================
- * Impressao do payload (so para imprimir na tela)
+ * Impressao do payload (so para depuracao)
  * ========================================================= */
-
-// static void syscare_print_payload(void)
-// {
-//     printk("Payload SysCare:");
-
-//     for (size_t i = 0; i < sizeof(adv_payload); i++) {
-//         printk(" %02X", adv_payload[i]);
-//     }
-
-//     printk("\n");
-// }
 
 LOG_MODULE_REGISTER(syscare, LOG_LEVEL_INF);
 
@@ -668,7 +661,10 @@ int main(void)
             printk("Sequencia: %u\n", (unsigned int)seq);
         }
 
-        /* Simula uma pequena reducao da bateria */
+        /*
+         * Bateria simulada: o firmware ainda nao le a tensao real,
+         * so desconta 1% por ciclo.
+         */
         if (batt > 0) {
             batt--;
         }
@@ -721,48 +717,3 @@ int main(void)
 
     return 0;
 }
-
-
-
-// testes feitos:
-
-//  * Payload SysCare: 14 bytes
-//  *
-//  * [0]       Versao
-//  * [1..4]    ID da pulseira
-//  * [5]       Evento:
-//  *             0x00 teste
-//  *             0x01 queda
-//  *             0x02 botao de panico
-//  *             0x03 imobilidade
-//  *             0x04 bateria baixa
-//  *             0x05 heartbeat
-//  * [6..7]    Sequencia (little-endian)
-//  * [8]       Bateria
-//  * [9]       Impacto
-//  * [10..11]  ID de queda (16 bits, little-endian)
-//  * [12..13]  Reservados para uso futuro
-
-
-// --> 05 no quinto espaço indica a queda
-// Heartbeat normal.
-// Sequencia: 9
-// Payload SysCare: 01 01 02 03 04 05 09 00 5B 00 01 00 00 00
-// Atualizando advertising BLE...
-// Advertising atualizado com sucesso!
-// Transmissao continua ativa.
-
-// Aguardando proximo evento...
-
-// --> 01 no quinto espaço indica a queda
-// =================================
-// QUEDA SIMULADA!
-// Sequencia: 12
-// ID da queda: 2
-// =================================
-// Payload SysCare: 01 01 02 03 04 01 0C 00 58 96 02 00 00 00
-// Atualizando advertising BLE...
-// Advertising atualizado com sucesso!
-// Transmissao continua ativa.
-
-// Aguardando proximo evento...
