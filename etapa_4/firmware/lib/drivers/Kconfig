@@ -1,0 +1,3 @@
+# SysCare - drivers de dispositivos
+
+rsource "iim42351/Kconfig"
