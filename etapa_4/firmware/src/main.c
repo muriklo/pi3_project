@@ -10,9 +10,13 @@
  *   3. Atualiza os dados do advertising BLE
  *   4. Continua transmitindo sem parar o advertising
  *
- * O advertising e iniciado uma unica vez. O acelerometro vem do modulo
- * lib/ (servico srv_accelerometer); se ele falhar, o firmware segue so
- * com os heartbeats.
+ * O advertising anuncia a cada 2 s em repouso e a cada 100 ms nos 30 s
+ * depois de uma queda; so a troca de intervalo o reinicia. O acelerometro
+ * vem do modulo lib/ (servico srv_accelerometer); se ele falhar, o
+ * firmware segue so com os heartbeats.
+ *
+ * Para medir a autonomia, compile com o baixo_consumo.conf, que desliga
+ * USB, console e logs.
  *
  * Os bytes 10..13 levam o HMAC-SHA256 truncado dos bytes 0..9, com a
  * chave gerada pela API no cadastro da pulseira (src/chave_pulseira.h,
@@ -26,6 +30,8 @@
 #include <string.h>
 
 #include <zephyr/kernel.h>
+#include <zephyr/devicetree.h>
+#include <zephyr/pm/device.h>
 #include <zephyr/sys/printk.h>
 #include <zephyr/sys/util.h>
 #include <zephyr/logging/log.h>
@@ -72,20 +78,38 @@
 #define HEARTBEAT_PERIOD         K_SECONDS(10)
 
 /*
- * Intervalo de advertising do teste:
- * 0x00A0 = 100 ms
- * 0x00B0 = 110 ms
+ * Intervalos de advertising do protocolo (ble_payload.md, secao 5).
  *
- * Usamos um intervalo curto para permitir varias
- * transmissoes enquanto o advertising estiver ativo.
+ * O radio e o maior consumidor da pulseira: anunciar a cada 100 ms o
+ * tempo todo gasta cerca de 20 vezes mais que a cada 2 s. Por isso o
+ * intervalo curto fica so para a emergencia.
+ *
+ * Repouso: 0x0C80 = 3200 * 0,625 ms = 2000 ms (ate 2050 ms)
+ * Queda:   0x00A0 =  160 * 0,625 ms =  100 ms (ate  110 ms)
  */
 
-#define ADV_TEST \
-    BT_LE_ADV_PARAM( \
-        BT_LE_ADV_OPT_USE_IDENTITY, \
-        0x00A0, \
-        0x00B0, \
-        NULL)
+/*
+ * Estruturas fixas, e nao BT_LE_ADV_PARAM(): aquela macro cria um valor
+ * temporario, e o ponteiro para ele nao vale fora do bloco onde surgiu.
+ */
+static const struct bt_le_adv_param adv_idle = BT_LE_ADV_PARAM_INIT(
+    BT_LE_ADV_OPT_USE_IDENTITY,
+    0x0C80,
+    0x0CD0,
+    NULL);
+
+static const struct bt_le_adv_param adv_alert = BT_LE_ADV_PARAM_INIT(
+    BT_LE_ADV_OPT_USE_IDENTITY,
+    0x00A0,
+    0x00B0,
+    NULL);
+
+/*
+ * Depois de uma queda, o anuncio da queda fica no ar a cada 100 ms por
+ * este tempo (sem ser trocado pelo heartbeat), para os celulares por
+ * perto terem varias chances de ouvir. Depois volta ao repouso.
+ */
+#define EMERGENCY_DURATION_MS    (30 * MSEC_PER_SEC)
 
 /* =========================================================
  * Identificacao da pulseira
@@ -424,6 +448,47 @@ static int accelerometer_start(void)
 }
 
 /* =========================================================
+ * Consumo
+ * ========================================================= */
+
+/*
+ * A XIAO nRF52840 tem uma flash externa (P25Q16H, 2 MB) que o firmware
+ * nao usa: o seq fica na flash interna. Acordada, ela fica em standby e
+ * consome continuamente; em deep power-down, quase nada. O driver acorda
+ * o chip no boot para identifica-lo, entao e preciso mandar dormir.
+ */
+static void external_flash_sleep(void)
+{
+#if DT_NODE_HAS_STATUS_OKAY(DT_NODELABEL(p25q16h))
+    const struct device *flash = DEVICE_DT_GET(DT_NODELABEL(p25q16h));
+    int err;
+
+    if (!device_is_ready(flash)) {
+        printk("Flash externa indisponivel\n");
+        return;
+    }
+
+    err = pm_device_action_run(flash, PM_DEVICE_ACTION_SUSPEND);
+
+    if (err && err != -EALREADY) {
+        printk("Falha ao adormecer a flash externa: %d\n", err);
+    }
+#endif
+}
+
+/* Trocar o intervalo exige parar e reiniciar o advertising */
+static int adv_set_interval(const struct bt_le_adv_param *param)
+{
+    int err = bt_le_adv_stop();
+
+    if (err) {
+        return err;
+    }
+
+    return bt_le_adv_start(param, ad, ARRAY_SIZE(ad), NULL, 0);
+}
+
+/* =========================================================
  * Main
  * ========================================================= */
 
@@ -439,6 +504,9 @@ int main(void)
     printk("        SysCare Firmware\n");
     printk("=================================\n");
 
+    /* A flash externa nao e usada: dorme ja no boot */
+    external_flash_sleep();
+
     /* Inicializa o Bluetooth uma unica vez */
     err = bt_enable(NULL);
 
@@ -450,7 +518,7 @@ int main(void)
     printk("Bluetooth inicializado!\n");
     printk("Advertising por evento do acelerometro.\n");
     printk("Heartbeat a cada 10 segundos sem queda.\n");
-    printk("Advertising permanecera ativo continuamente.\n");
+    printk("Advertising a cada 2 s; 100 ms por 30 s apos uma queda.\n");
 
     /* Sem a chave importada nao ha como assinar: nao anuncia */
     err = syscare_crypto_init();
@@ -486,16 +554,16 @@ int main(void)
     syscare_print_payload();
 
     /*
-     * Inicia o advertising somente uma vez.
+     * Inicia o advertising em repouso (2 s).
      *
-     * Depois disso, os dados serao atualizados com
-     * bt_le_adv_update_data(), sem parar a transmissao.
+     * Os dados sao atualizados com bt_le_adv_update_data(), sem
+     * parar a transmissao; so a troca de intervalo reinicia.
      */
 
     printk("Iniciando advertising BLE...\n");
 
     err = bt_le_adv_start(
-        ADV_TEST,
+        &adv_idle,
         ad,
         ARRAY_SIZE(ad),
         NULL,
@@ -516,19 +584,31 @@ int main(void)
 
     (void)accelerometer_start();
 
+    /* Fim da janela de emergencia (k_uptime), ou 0 em repouso */
+    int64_t emergency_end = 0;
+
     while (1) {
 
         acc_event_t acc_evt;
         bool fall_detected = false;
+        const struct bt_le_adv_param *new_interval = NULL;
 
         /*
-         * Aguarda uma queda por ate 10 segundos.
-         * Sem queda nesse tempo, o evento e um heartbeat.
+         * Em repouso, aguarda uma queda por ate 10 segundos; sem queda,
+         * o evento e um heartbeat. Na emergencia, aguarda ate o fim da
+         * janela, para o anuncio da queda nao ser trocado pelo heartbeat.
          */
+        k_timeout_t wait = HEARTBEAT_PERIOD;
+
+        if (emergency_end) {
+            int64_t left = emergency_end - k_uptime_get();
+
+            wait = K_MSEC(MAX(left, 0));
+        }
 
         printk("\nAguardando proximo evento...\n");
 
-        if (k_msgq_get(&acc_event_q, &acc_evt, HEARTBEAT_PERIOD) == 0) {
+        if (k_msgq_get(&acc_event_q, &acc_evt, wait) == 0) {
 
             /* So a queda vira mensagem; outros eventos sao ignorados */
             if (acc_evt.type != ACC_EVENT_FREEFALL) {
@@ -549,6 +629,12 @@ int main(void)
             seq++;
             seq_save();
 
+            /* Anuncia a cada 100 ms ate o fim da janela de emergencia */
+            if (!emergency_end) {
+                new_interval = &adv_alert;
+            }
+            emergency_end = k_uptime_get() + EMERGENCY_DURATION_MS;
+
             /*
              * O sensor nao mede a intensidade do impacto, so
              * a duracao da queda (e dela a altura). Mantem o
@@ -567,6 +653,12 @@ int main(void)
             printk("=================================\n");
 
         } else {
+
+            /* Fim da emergencia: volta ao anuncio de repouso */
+            if (emergency_end) {
+                emergency_end = 0;
+                new_interval = &adv_idle;
+            }
 
             /* Evento normal: heartbeat, repete o seq do ultimo evento */
             event = SYSCARE_EVT_HEARTBEAT;
@@ -601,18 +693,22 @@ int main(void)
         syscare_print_payload();
 
         /*
-         * Atualiza os dados do advertising BLE.
-         * A transmissao permanece ativa.
+         * Atualiza os dados do advertising BLE. Na troca de intervalo,
+         * o reinicio ja publica os dados novos.
          */
 
         printk("Atualizando advertising BLE...\n");
 
-        err = bt_le_adv_update_data(
-            ad,
-            ARRAY_SIZE(ad),
-            NULL,
-            0
-        );
+        if (new_interval) {
+            err = adv_set_interval(new_interval);
+        } else {
+            err = bt_le_adv_update_data(
+                ad,
+                ARRAY_SIZE(ad),
+                NULL,
+                0
+            );
+        }
 
         if (err) {
             printk("Falha ao atualizar advertising: %d\n", err);

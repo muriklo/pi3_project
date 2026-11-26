@@ -147,7 +147,7 @@ A integração é baseada em interrupção, o que dispensa a leitura contínua d
 2. O nRF52840 recebe a interrupção e apenas agenda um trabalho na fila de trabalhos do sistema (work queue), mantendo a rotina de interrupção curta.
 3. Fora da interrupção, o firmware lê o status do sensor, confirma a queda e obtém a duração e a altura estimada.
 4. A aplicação monta o payload com o evento **Queda (`0x01`)**, avança o número de sequência, grava-o na memória flash e calcula a assinatura com a chave gerada no cadastro da pulseira. O campo de impacto ainda leva um valor fixo de 15,0 g, porque o sensor mede a duração da queda, e não a intensidade do impacto.
-5. O payload é publicado sem reiniciar o advertising. Sem queda, a pulseira envia um heartbeat a cada 10 s.
+5. O payload é publicado sem reiniciar o advertising. Sem queda, a pulseira envia um heartbeat a cada 10 s e anuncia a cada 2 s. Depois de uma queda, anuncia a cada 100 ms por 30 s, mantendo no ar o anúncio da queda, e então volta ao repouso.
 
 O número de sequência identifica cada ocorrência: o aplicativo e o servidor reconhecem as retransmissões da mesma queda e alarmam uma única vez. Como fica gravado na flash, ele continua válido depois de um reinício da pulseira. A assinatura impede que outro rádio imite a pulseira e dispare um alerta falso.
 
@@ -167,12 +167,33 @@ Em 05/11/2026, com o protótipo da pulseira montado, o teste foi repetido: a que
   <p>Gif 1 - Teste de funcionamento do protótipo completo</p>
 </div>
 
-### 4.3. Próximos passos
+### 4.3. Consumo
 
+Para estimar a autonomia real da pulseira, o firmware foi revisado para manter ligados apenas os consumidores necessários à sua função, conforme a Tabela 6.
+
+<div align="center">
+
+| Consumidor | Situação |
+|---|---|
+| Rádio (advertising) | A cada 2 s em repouso e a cada 100 ms só nos 30 s após uma queda, como prevê o protocolo; antes, anunciava a cada 100 ms o tempo todo |
+| Flash externa da XIAO (P25Q16H) | Posta em modo de baixo consumo (*deep power-down*) no início, pois não é usada: o número de sequência fica na flash interna |
+| UART | Já desligada no devicetree, porque o seu pino alimenta o acelerômetro |
+| USB, console e logs | Desligados no build de baixo consumo e mantidos no de desenvolvimento, para depuração |
+| Regulador e relógio | A placa já usa o conversor DC/DC e o cristal de 32 kHz, as opções de menor consumo |
+| Acelerômetro | Mantido, pois é o detector de queda. A queda livre roda a 500 Hz, com o processador interno do sensor sem economia de energia, como pede a seção 8.5 do datasheet [2]; é o principal ponto a avaliar nas medições |
+
+<p>Tabela 6 - Consumidores revisados no firmware</p>
+</div>
+
+O mesmo código gera dois builds. O de desenvolvimento mantém o console pela USB e os logs. O de baixo consumo soma o arquivo `baixo_consumo.conf` à configuração (no nRF Connect for VS Code, em *Extra Kconfig fragments*) e retira a pilha USB, o console, os logs e as mensagens de inicialização. A gravação continua pelo bootloader UF2. Para medir, a pulseira deve ser alimentada pela bateria, com a USB desconectada, e a corrente deve ser medida em série com a bateria, por exemplo com o Power Profiler Kit II; com a USB ligada, o carregador e o regulador da placa entram na medida.
+
+### 4.4. Próximos passos
+
+- Medir a corrente com o build de baixo consumo e estimar a autonomia.
+- Avaliar um modo de menor consumo para a detecção de queda no acelerômetro, revalidando as quedas.
 - Ignorar novas quedas por alguns segundos depois de uma detecção, para que os quiques não gerem alertas repetidos.
 - Medir a intensidade real do impacto e ler o nível real da bateria.
 - Implementar os eventos de botão de pânico, imobilidade e bateria baixa, que já têm códigos reservados no protocolo.
-- Anunciar a cada 2 s em repouso e a cada 100 ms só na emergência, como prevê o protocolo, para reduzir o consumo.
 
 ## Referências (links/datasheets/livros)
 
